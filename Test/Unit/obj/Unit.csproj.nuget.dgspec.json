@@ -1,0 +1,170 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/zills/Desktop/Code/ActionCache/Test/Unit/Unit.csproj": {}
+  },
+  "projects": {
+    "/Users/zills/Desktop/Code/ActionCache/Source/ActionCache.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/zills/Desktop/Code/ActionCache/Source/ActionCache.csproj",
+        "projectName": "ActionCache",
+        "projectPath": "/Users/zills/Desktop/Code/ActionCache/Source/ActionCache.csproj",
+        "packagesPath": "/Users/zills/.nuget/packages/",
+        "outputPath": "/Users/zills/Desktop/Code/ActionCache/Source/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/zills/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Mvc": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/zills/Desktop/Code/ActionCache/Test/Unit/Unit.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/zills/Desktop/Code/ActionCache/Test/Unit/Unit.csproj",
+        "projectName": "Unit",
+        "projectPath": "/Users/zills/Desktop/Code/ActionCache/Test/Unit/Unit.csproj",
+        "packagesPath": "/Users/zills/.nuget/packages/",
+        "outputPath": "/Users/zills/Desktop/Code/ActionCache/Test/Unit/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/zills/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/zills/Desktop/Code/ActionCache/Source/ActionCache.csproj": {
+                "projectPath": "/Users/zills/Desktop/Code/ActionCache/Source/ActionCache.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Caching.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.6.0, )"
+            },
+            "NUnit": {
+              "target": "Package",
+              "version": "[3.13.3, )"
+            },
+            "NUnit.Analyzers": {
+              "target": "Package",
+              "version": "[3.6.1, )"
+            },
+            "NUnit3TestAdapter": {
+              "target": "Package",
+              "version": "[4.2.1, )"
+            },
+            "coverlet.collector": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+/Users/zills/Desktop/Code/ActionCache/Source/bin/Debug/net8.0/ActionCache.deps.json
+/Users/zills/Desktop/Code/ActionCache/Source/bin/Debug/net8.0/ActionCache.dll
+/Users/zills/Desktop/Code/ActionCache/Source/bin/Debug/net8.0/ActionCache.pdb
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.csproj.AssemblyReference.cache
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.GeneratedMSBuildEditorConfig.editorconfig
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.AssemblyInfoInputs.cache
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.AssemblyInfo.cs
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.csproj.CoreCompileInputs.cache
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.dll
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/refint/ActionCache.dll
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ActionCache.pdb
+/Users/zills/Desktop/Code/ActionCache/Source/obj/Debug/net8.0/ref/ActionCache.dll
