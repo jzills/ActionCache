@@ -19,7 +19,7 @@ public static class IServiceCollectionExtensions
 
         return services
             .AddStackExchangeRedisCache(configureOptions)
-            .AddScoped<RedisActionCacheFactory>()
+            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
             .AddSingleton<IConnectionMultiplexer>( _ => ConnectionMultiplexer.Connect(options.Configuration));
     }
 }

@@ -11,21 +11,16 @@ public class MemoryCacheExpirationTokens
     {
         if (!string.IsNullOrWhiteSpace(key))
         {
-            var cacheEntry = Cache.GetOrCreate(key, entry =>
+            if (!Cache.TryGetValue(key, out cancellationTokenSource!))
             {
-                var _cancellationTokenSource = new CancellationTokenSource();
-                entry.Value = _cancellationTokenSource;
-                entry.AddExpirationToken(new CancellationChangeToken(_cancellationTokenSource.Token));
-                return entry;
-            });
+                cancellationTokenSource = new CancellationTokenSource();
+                var options = new MemoryCacheEntryOptions { Size = 1 };
+                options.AddExpirationToken(new CancellationChangeToken(cancellationTokenSource.Token));
 
-            var isSuccessful = 
-                cacheEntry is not null && 
-                cacheEntry.Value is not null;
-
-            cancellationTokenSource = (CancellationTokenSource)(cacheEntry?.Value ?? default!);
+                Cache.Set(key, cancellationTokenSource, options);
+            }
             
-            return isSuccessful;
+            return true;
         }
         else
         {

@@ -15,6 +15,6 @@ public static class IServiceCollectionExtensions
             .AddMemoryCache(configureOptions)
             // .AddSingleton<ConcurrentDictionaryExpirationTokens>()
             .AddScoped<MemoryCacheExpirationTokens>()
-            .AddScoped<MemoryActionCacheFactory>();
+            .AddScoped<IActionCacheFactory, MemoryActionCacheFactory>();
     } 
 }

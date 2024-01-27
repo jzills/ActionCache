@@ -28,7 +28,7 @@ public class MemoryActionCache : IActionCache
 
     public Task SetAsync<TValue>(string key, TValue? value)
     {
-        var options = new MemoryCacheEntryOptions();
+        var options = new MemoryCacheEntryOptions { Size = 1 };
         options.ExpirationTokens.Add(
             new CancellationChangeToken(CancellationTokenSource.Token));
         
