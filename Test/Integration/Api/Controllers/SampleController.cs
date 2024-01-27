@@ -6,7 +6,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ActionCacheFilterFactory(Namespace = "Test")]
+[ActionCache(Namespace = "Test")]
 public class SampleController : ControllerBase
 {
     [HttpGet]
@@ -21,7 +21,7 @@ public class SampleController : ControllerBase
 
     [HttpPost]
     [Route("/")]
-    [ActionCacheEvictionFilterFactory(Namespace = "Test")]
+    [ActionCacheEviction(Namespace = "Test")]
     public IActionResult Post()
     {
         return Ok("Ok!");

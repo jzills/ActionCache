@@ -1,5 +1,8 @@
+using ActionCache.Redis;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using StackExchange.Redis;
 
 namespace ActionCache.Extensions;
 
@@ -18,7 +21,10 @@ public static class IServiceCollectionExtensions
         // ArgumentNullException.ThrowIfNullOrWhiteSpace(options.Namespace);
 
         return services
-            .AddSingleton<MemoryCacheExpirationTokens>();
+            .AddSingleton<MemoryCacheExpirationTokens>()
+            .AddScoped<IActionCacheProvider, ActionCacheProvider>()
+            .AddScoped<RedisActionCacheFactory>()
+            .AddSingleton<IConnectionMultiplexer>( _ => ConnectionMultiplexer.Connect("127.0.0.1:6379"));
 
             // TODO: Move to ActionCacheFactory
             // Create objects in the FilterFactory

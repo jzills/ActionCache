@@ -7,10 +7,12 @@ public class MemoryActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
     protected readonly MemoryCacheExpirationTokens ExpirationTokens;
+    
     public MemoryActionCacheFactory(
         IMemoryCache memoryCache,
         MemoryCacheExpirationTokens expirationTokens
     ) => (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
+
     public IActionCache? Create(string @namespace)
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var cancellationTokenSource))
