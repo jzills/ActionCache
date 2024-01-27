@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ActionCache;
-using ActionCache.Filters;
+using ActionCache.Attributes;
 
 namespace Api.Controllers;
 

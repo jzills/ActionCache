@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ActionCache.Enums;
 using ActionCache.Redis;
+using ActionCache.Memory;
 
 namespace ActionCache;
 

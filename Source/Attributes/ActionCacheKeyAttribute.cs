@@ -1,4 +1,4 @@
-namespace ActionCache;
+namespace ActionCache.Attributes;
 
 [AttributeUsage(AttributeTargets.Parameter)]
 public class ActionCacheKeyAttribute : Attribute

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace ActionCache.Extensions;
+namespace ActionCache.Memory;
 
 public class MemoryCacheExpirationTokens
 {

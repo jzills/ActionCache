@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 
-namespace ActionCache;
+namespace ActionCache.Memory;
 
 public class MemoryActionCache : IActionCache
 {

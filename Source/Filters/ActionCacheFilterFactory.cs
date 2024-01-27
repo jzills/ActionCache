@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ActionCache.Filters;
 using ActionCache.Enums;
 
-namespace ActionCache;
+namespace ActionCache.Filters;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class ActionCacheFilterFactory : Attribute, IFilterFactory
