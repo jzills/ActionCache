@@ -1,3 +1,4 @@
+using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 
@@ -5,12 +6,12 @@ namespace ActionCache.Memory;
 
 public class MemoryActionCache : IActionCache
 {
-    protected readonly string Namespace;
+    protected readonly Namespace Namespace;
     protected readonly IMemoryCache Cache;
     protected readonly CancellationTokenSource CancellationTokenSource;
 
     public MemoryActionCache(
-        string @namespace,
+        Namespace @namespace,
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource
     ) 
@@ -22,7 +23,7 @@ public class MemoryActionCache : IActionCache
 
     public Task<TValue?> GetAsync<TValue>(string key)
     {
-        return Task.FromResult(Cache.Get<TValue?>($"{Namespace}:{key}"));
+        return Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
     }
 
     public Task SetAsync<TValue>(string key, TValue? value)
@@ -31,14 +32,14 @@ public class MemoryActionCache : IActionCache
         options.ExpirationTokens.Add(
             new CancellationChangeToken(CancellationTokenSource.Token));
         
-        Cache.Set<TValue?>($"{Namespace}:{key}", value, options);
+        Cache.Set<TValue?>(Namespace.Create(key), value, options);
 
         return Task.CompletedTask;
     }
 
     public Task RemoveAsync(string key)
     {
-        Cache.Remove($"{Namespace}:{key}");
+        Cache.Remove(Namespace.Create(key));
         return Task.CompletedTask;
     }
 

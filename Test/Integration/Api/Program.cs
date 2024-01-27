@@ -1,10 +1,10 @@
-using ActionCache.Extensions;
+using ActionCache.Memory.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
-builder.Services.AddActionCache(options => options.Namespace = "");
+builder.Services.AddActionCacheMemory(options => options.SizeLimit = long.MaxValue);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

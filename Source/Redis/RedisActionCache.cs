@@ -1,15 +1,16 @@
 using System.Text.Json;
 using StackExchange.Redis;
+using ActionCache.Utilities;
 
 namespace ActionCache.Redis;
 
 public class RedisActionCache : IActionCache
 {
-    protected readonly string Namespace;
+    protected readonly Namespace Namespace;
     protected readonly IDatabase Cache;
 
     public RedisActionCache(
-        string @namespace,
+        Namespace @namespace,
         IDatabase cache
     ) 
     {
@@ -19,7 +20,7 @@ public class RedisActionCache : IActionCache
 
     public Task<TValue?> GetAsync<TValue>(string key)
     {
-        var jsonValue = Cache.StringGet($"{Namespace}:{key}");
+        var jsonValue = Cache.StringGet(Namespace.Create(key));
         if (!string.IsNullOrWhiteSpace(jsonValue))
         {
             var value = JsonSerializer.Deserialize<TValue>(jsonValue!);
@@ -33,7 +34,7 @@ public class RedisActionCache : IActionCache
 
     public Task RemoveAsync(string key)
     {
-        return Cache.KeyDeleteAsync($"{Namespace}:{key}");
+        return Cache.KeyDeleteAsync(Namespace.Create(key));
     }
 
     public Task RemoveAsync()
@@ -44,6 +45,6 @@ public class RedisActionCache : IActionCache
 
     public Task SetAsync<TValue>(string key, TValue? value)
     {
-        return Cache.StringSetAsync($"{Namespace}:{key}", JsonSerializer.Serialize(value));
+        return Cache.StringSetAsync(Namespace.Create(key), JsonSerializer.Serialize(value));
     }
 }
