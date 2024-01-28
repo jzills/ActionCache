@@ -1,6 +1,8 @@
 using System.Text.Json;
 using StackExchange.Redis;
 using ActionCache.Utilities;
+using ActionCache.Redis.Extensions;
+using System.Reflection;
 
 namespace ActionCache.Redis;
 
@@ -37,10 +39,23 @@ public class RedisActionCache : IActionCache
         return Cache.KeyDeleteAsync(Namespace.Create(key));
     }
 
-    public Task RemoveAsync()
+    public async Task RemoveAsync()
     {
-        //Cache.ScriptEvaluateAsync();
-        throw new NotImplementedException();
+        var assembly = Assembly.GetExecutingAssembly();
+        if (assembly.TryGetResourceAsText("UnlinkNamespace.lua", out var script))
+        {
+            await Cache.ScriptEvaluateAsync(script, null, new[] 
+            { 
+                new RedisValue($"{Namespace.@namespace}:*") 
+            });
+        }
+        else
+        {
+            // TODO: Use IConnectionMultiplexer to get all servers,
+            // iterate through servers + scan keys and remove 
+            // namespaces as fallback
+            // REF: https://stackexchange.github.io/StackExchange.Redis/KeysScan.html 
+        }
     }
 
     public Task SetAsync<TValue>(string key, TValue? value)
