@@ -5,8 +5,8 @@ namespace ActionCache.Filters;
 
 public class ActionCacheEvictionFilter : IAsyncActionFilter
 {
-    private IActionCache _cache;
-    public ActionCacheEvictionFilter(IActionCache cache) => _cache = cache;
+    private IActionCache[] _caches;
+    public ActionCacheEvictionFilter(params IActionCache[] caches) => _caches = caches;
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var actionExecutedContext = await next();
@@ -14,7 +14,8 @@ public class ActionCacheEvictionFilter : IAsyncActionFilter
         {
             if (actionExecutedContext.Result is OkObjectResult objectResult)
             {
-                await _cache.RemoveAsync();
+                var cacheTasks = _caches.Select(cache => cache.RemoveAsync());
+                await Task.WhenAll(cacheTasks);
             }
         }
     }

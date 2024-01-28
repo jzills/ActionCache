@@ -1,8 +1,8 @@
 using System.Text.Json;
+using System.Reflection;
 using StackExchange.Redis;
 using ActionCache.Utilities;
 using ActionCache.Redis.Extensions;
-using System.Reflection;
 
 namespace ActionCache.Redis;
 
@@ -34,10 +34,8 @@ public class RedisActionCache : IActionCache
         }
     }
 
-    public Task RemoveAsync(string key)
-    {
-        return Cache.KeyDeleteAsync(Namespace.Create(key));
-    }
+    public Task RemoveAsync(string key) =>
+        Cache.KeyDeleteAsync(Namespace.Create(key));
 
     public async Task RemoveAsync()
     {
@@ -58,8 +56,8 @@ public class RedisActionCache : IActionCache
         }
     }
 
-    public Task SetAsync<TValue>(string key, TValue? value)
-    {
-        return Cache.StringSetAsync(Namespace.Create(key), JsonSerializer.Serialize(value));
-    }
+    public Task SetAsync<TValue>(string key, TValue? value) =>
+        Cache.StringSetAsync(
+            Namespace.Create(key), 
+            JsonSerializer.Serialize(value));
 }

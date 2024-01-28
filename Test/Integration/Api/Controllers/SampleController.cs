@@ -5,7 +5,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ActionCache(Namespace = "Test")]
+[ActionCache(Namespace = "Namespace1")]
 public class SampleController : ControllerBase
 {
     [HttpGet]
@@ -20,7 +20,7 @@ public class SampleController : ControllerBase
 
     [HttpPost]
     [Route("/")]
-    [ActionCacheEviction(Namespace = "Test")]
+    [ActionCacheEviction(Namespaces = "Namespace1, Namespace2")]
     public IActionResult Post()
     {
         return Ok("Ok!");
