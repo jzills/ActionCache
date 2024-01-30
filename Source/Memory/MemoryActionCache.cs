@@ -21,12 +21,10 @@ public class MemoryActionCache : IActionCache
         CancellationTokenSource = cancellationTokenSource;
     }
 
-    public Task<TValue?> GetAsync<TValue>(string key)
-    {
-        return Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
-    }
+    public Task<TValue?> GetAsync<TValue>(string key) =>
+        Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
 
-    public Task SetAsync<TValue>(string key, TValue? value)
+    public Task<bool> SetAsync<TValue>(string key, TValue? value)
     {
         var options = new MemoryCacheEntryOptions { Size = 1 };
         options.ExpirationTokens.Add(
@@ -34,18 +32,18 @@ public class MemoryActionCache : IActionCache
         
         Cache.Set<TValue?>(Namespace.Create(key), value, options);
 
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
-    public Task RemoveAsync(string key)
+    public Task<bool> RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
-    public Task RemoveAsync()
+    public Task<bool> RemoveAsync()
     {
         CancellationTokenSource.Cancel();
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 }
