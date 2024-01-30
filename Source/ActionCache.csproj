@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Redis/Scripts/UnlinkNamespace.lua" />
+    <EmbeddedResource Include="Redis/Scripts/UnlinkNamespaceWithKeySet.lua" />
+    <EmbeddedResource Include="Redis/Scripts/SetJsonWithKeySet.lua" />
   </ItemGroup>
 
   <ItemGroup>
