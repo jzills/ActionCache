@@ -29,7 +29,7 @@ public class ActionCacheFilter : IAsyncActionFilter
             {
                 if (actionExecutedContext.Result is OkObjectResult objectResult)
                 {
-                    await _cache.SetAsync<object>(key, objectResult.Value);
+                    await _cache.SetAsync(key, objectResult.Value);
                 }
             }
         }

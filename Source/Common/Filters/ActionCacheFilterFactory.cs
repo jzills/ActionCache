@@ -1,3 +1,4 @@
+using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,11 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
 
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create(Namespace);
+
+        if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
+        {
+            //new ActionCacheFilter(new ActionCacheFilter(cache))
+        }
 
         ArgumentNullException.ThrowIfNull(cache, nameof(cache));
 

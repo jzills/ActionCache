@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Caching.Memory;
-using ActionCache.Utilities;
 
 namespace ActionCache.Memory;
 
@@ -17,7 +16,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var cancellationTokenSource))
         {
-            return new MemoryActionCache(new Namespace(@namespace), MemoryCache, cancellationTokenSource);
+            return new MemoryActionCache(@namespace, MemoryCache, cancellationTokenSource);
         }
         else
         {

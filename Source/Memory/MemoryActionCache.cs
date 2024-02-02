@@ -1,6 +1,6 @@
-using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
+using ActionCache.Utilities;
 
 namespace ActionCache.Memory;
 
@@ -21,29 +21,25 @@ public class MemoryActionCache : IActionCache
         CancellationTokenSource = cancellationTokenSource;
     }
 
+    public MemoryCacheEntryOptions EntryOptions => 
+        new MemoryCacheEntryOptions { Size = 1 }
+            .AddExpirationToken(
+                new CancellationChangeToken(CancellationTokenSource.Token));
+
     public Task<TValue?> GetAsync<TValue>(string key) =>
         Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
 
-    public Task<bool> SetAsync<TValue>(string key, TValue? value)
+    public Task SetAsync<TValue>(string key, TValue? value)
     {
-        var options = new MemoryCacheEntryOptions { Size = 1 };
-        options.ExpirationTokens.Add(
-            new CancellationChangeToken(CancellationTokenSource.Token));
-        
-        Cache.Set<TValue?>(Namespace.Create(key), value, options);
-
-        return Task.FromResult(true);
+        Cache.Set<TValue?>(Namespace.Create(key), value, EntryOptions);
+        return Task.CompletedTask;
     }
 
-    public Task<bool> RemoveAsync(string key)
+    public Task RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
-        return Task.FromResult(true);
+        return Task.CompletedTask;
     }
 
-    public Task<bool> RemoveAsync()
-    {
-        CancellationTokenSource.Cancel();
-        return Task.FromResult(true);
-    }
+    public Task RemoveAsync() => CancellationTokenSource.CancelAsync();
 }

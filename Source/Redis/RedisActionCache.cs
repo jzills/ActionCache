@@ -1,65 +1,76 @@
-using System.Text.Json;
 using System.Reflection;
+using System.Text.Json;
 using StackExchange.Redis;
-using ActionCache.Utilities;
 using ActionCache.Redis.Extensions;
 
 namespace ActionCache.Redis;
 
 public class RedisActionCache : IActionCache
 {
-    protected readonly Namespace Namespace;
+    protected readonly RedisNamespace Namespace;
     protected readonly IDatabase Cache;
 
     public RedisActionCache(
-        Namespace @namespace,
+        RedisNamespace @namespace, 
         IDatabase cache
-    ) 
+    )
     {
         Namespace = @namespace;
         Cache = cache;
     }
 
-    public Task<TValue?> GetAsync<TValue>(string key)
+    public Assembly Assembly => CacheType.Assembly;
+    public Type CacheType => typeof(RedisActionCache);
+
+    public async Task RemoveAsync(string key)
     {
-        var jsonValue = Cache.StringGet(Namespace.Create(key));
-        if (!string.IsNullOrWhiteSpace(jsonValue))
+        var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
+        if (isSuccessful)
         {
-            var value = JsonSerializer.Deserialize<TValue>(jsonValue!);
-            return Task.FromResult(value);
-        }
-        else
-        {
-            return Task.FromResult<TValue?>(default);
+            await Cache.SetRemoveAsync(Namespace, key);
         }
     }
 
-    public virtual Task<bool> RemoveAsync(string key) =>
-        Cache.KeyDeleteAsync(Namespace.Create(key));
-
-    public virtual async Task<bool> RemoveAsync()
+    public async Task RemoveAsync()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        if (assembly.TryGetResourceAsText("UnlinkNamespace.lua", out var script))
+        if (Assembly.TryGetResourceAsText("UnlinkNamespaceWithKeySet.lua", out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, null, new[] 
-            { 
-                new RedisValue($"{Namespace}:*") 
-            });
+            await Cache.ScriptEvaluateAsync(script, new RedisKey[1] { Namespace }, null, CommandFlags.FireAndForget);
+        }
+    }
+
+    public async Task SetAsync<TValue>(string key, TValue? value)
+    {
+        RedisValue redisValue = JsonSerializer.Serialize(value);
+
+        if (Assembly.TryGetResourceAsText("SetJsonWithKeySet.lua", out var script))
+        {
+            await Cache.ScriptEvaluateAsync(script, 
+                new[] { Namespace, (RedisKey)key }, 
+                new[] { redisValue }, 
+                CommandFlags.FireAndForget
+            );
         }
         else
         {
-            // TODO: Use IConnectionMultiplexer to get all servers,
-            // iterate through servers + scan keys and remove 
-            // namespaces as fallback
-            // REF: https://stackexchange.github.io/StackExchange.Redis/KeysScan.html 
+            var isSuccessful = await Cache.StringSetAsync(Namespace.Create(key), redisValue);
+            if (isSuccessful)
+            {
+                await Cache.SetAddAsync(Namespace, key, CommandFlags.FireAndForget);
+            }
         }
-
-        return true;
     }
 
-    public virtual Task<bool> SetAsync<TValue>(string key, TValue? value) =>
-        Cache.StringSetAsync(
-            Namespace.Create(key), 
-            JsonSerializer.Serialize(value));
+    public async Task<TValue?> GetAsync<TValue>(string key)
+    {
+        var value = await Cache.StringGetAsync(Namespace.Create(key));
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            return JsonSerializer.Deserialize<TValue>(value!);
+        }
+        else
+        {
+            return default;
+        }
+    }
 }
