@@ -5,18 +5,18 @@ namespace ActionCache.Memory;
 public class MemoryActionCacheFactory : IActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
-    protected readonly MemoryCacheExpirationTokens ExpirationTokens;
+    protected readonly IExpirationTokenSources ExpirationTokens;
     
     public MemoryActionCacheFactory(
         IMemoryCache memoryCache,
-        MemoryCacheExpirationTokens expirationTokens
-    ) => (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
+        IExpirationTokenSources expirationTokens) => 
+            (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
 
     public IActionCache? Create(string @namespace)
     {
-        if (ExpirationTokens.TryGetOrAdd(@namespace, out var cancellationTokenSource))
+        if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {
-            return new MemoryActionCache(@namespace, MemoryCache, cancellationTokenSource);
+            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource);
         }
         else
         {

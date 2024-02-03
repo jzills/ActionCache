@@ -2,12 +2,12 @@ using System.Collections.Concurrent;
 
 namespace ActionCache.Memory;
 
-public class ConcurrentDictionaryExpirationTokens
+public class ExpirationTokenSourcesBackup : IExpirationTokenSources
 {
     protected ConcurrentDictionary<string, CancellationTokenSource> Tokens = new();
     public bool TryGetOrAdd(string key, out CancellationTokenSource cancellationTokenSource)
     {
-        if (!string.IsNullOrWhiteSpace(key))
+        try
         {
             cancellationTokenSource = Tokens.GetOrAdd(key, new CancellationTokenSource());
 
@@ -23,10 +23,10 @@ public class ConcurrentDictionaryExpirationTokens
 
             return true;
         }
-        else
+        catch (OverflowException)
         {
             cancellationTokenSource = default!;
-            return false; 
+            return false;
         }
     }
 }

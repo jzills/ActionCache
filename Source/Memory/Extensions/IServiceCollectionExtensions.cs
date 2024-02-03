@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
-using ActionCache.Memory;
 
 namespace ActionCache.Memory.Extensions;
 
@@ -13,8 +12,12 @@ public static class IServiceCollectionExtensions
     {
         return services
             .AddMemoryCache(configureOptions)
-            // .AddSingleton<ConcurrentDictionaryExpirationTokens>()
-            .AddScoped<MemoryCacheExpirationTokens>()
+            .AddScoped<IExpirationTokenSources, ExpirationTokenSourcesValidated>(serviceProvider =>
+            {
+                var cache = serviceProvider.GetRequiredService<IMemoryCache>();
+                return new ExpirationTokenSourcesValidated(
+                    new ExpirationTokenSources(cache));
+            })
             .AddScoped<IActionCacheFactory, MemoryActionCacheFactory>();
     } 
 }

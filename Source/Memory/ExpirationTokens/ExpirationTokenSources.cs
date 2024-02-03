@@ -3,10 +3,10 @@ using Microsoft.Extensions.Primitives;
 
 namespace ActionCache.Memory;
 
-public class MemoryCacheExpirationTokens
+public class ExpirationTokenSources : IExpirationTokenSources
 {
     protected readonly IMemoryCache Cache;
-    public MemoryCacheExpirationTokens(IMemoryCache cache) => Cache = cache;
+    public ExpirationTokenSources(IMemoryCache cache) => Cache = cache;
 
     public MemoryCacheEntryOptions EntryOptions(CancellationTokenSource source) => 
             new MemoryCacheEntryOptions { Size = 1 }
@@ -15,19 +15,11 @@ public class MemoryCacheExpirationTokens
 
     public bool TryGetOrAdd(string key, out CancellationTokenSource cancellationTokenSource)
     {
-        if (!string.IsNullOrWhiteSpace(key))
+        if (!Cache.TryGetValue(key, out cancellationTokenSource!))
         {
-            if (!Cache.TryGetValue(key, out cancellationTokenSource!))
-            {
-                Cache.Set(key, cancellationTokenSource, EntryOptions(cancellationTokenSource));
-            }
-            
-            return true;
+            Cache.Set(key, cancellationTokenSource, EntryOptions(cancellationTokenSource));
         }
-        else
-        {
-            cancellationTokenSource = default!;
-            return false; 
-        }
+        
+        return true;
     }
 }
