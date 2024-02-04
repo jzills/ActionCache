@@ -34,15 +34,23 @@ public static class AssemblyExtensions
 
     private static bool TryReadResourceStream(this Assembly source, string name, out string resource)
     {
-        var resourceName = source.GetResourceName(name);
-        if (!string.IsNullOrWhiteSpace(resourceName))
+        try
         {
-            using var stream = source.GetManifestResourceStream(resourceName);
-            using var reader = new StreamReader(stream!);
-            resource = reader.ReadToEnd();
-            return true;
+            var resourceName = source.GetResourceName(name);
+            if (!string.IsNullOrWhiteSpace(resourceName))
+            {
+                using var stream = source.GetManifestResourceStream(resourceName);
+                using var reader = new StreamReader(stream!);
+                resource = reader.ReadToEnd();
+                return true;
+            }
+            else
+            {
+                resource = default!;
+                return false;
+            }
         }
-        else
+        catch (Exception)
         {
             resource = default!;
             return false;

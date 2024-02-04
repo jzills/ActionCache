@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
-using ActionCache.Redis;
 
 namespace ActionCache.Redis.Extensions;
 
@@ -20,6 +19,6 @@ public static class IServiceCollectionExtensions
         return services
             .AddStackExchangeRedisCache(configureOptions)
             .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
-            .AddSingleton<IConnectionMultiplexer>( _ => ConnectionMultiplexer.Connect(options.Configuration));
+            .AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(options.Configuration));
     }
 }

@@ -6,7 +6,7 @@ namespace ActionCache.Common.Extensions;
 
 internal static class ActionExecutingContextExtensions
 {
-    public static bool TryGetKeyAttributes(
+    internal static bool TryGetKeyAttributes(
         this ActionExecutingContext context, 
         out Dictionary<string, ActionCacheKeyAttribute> attributes
     )
@@ -29,7 +29,7 @@ internal static class ActionExecutingContextExtensions
         return attributes.Count > 0;
     }
 
-    public static bool TryGetKey(this ActionExecutingContext context, out string key) 
+    internal static bool TryGetKey(this ActionExecutingContext context, out string key) 
     {
         if (context.TryGetKeyAttributes(out var attributes) && 
             context.ActionArguments.Any())
