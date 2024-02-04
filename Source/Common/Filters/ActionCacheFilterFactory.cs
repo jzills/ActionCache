@@ -1,6 +1,5 @@
-using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
+using ActionCache.Common.Extensions;
 
 namespace ActionCache.Filters;
 
@@ -14,16 +13,17 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
 
-        var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create(Namespace);
-
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
-            //new ActionCacheFilter(new ActionCacheFilter(cache))
+            return new ActionCacheFilter(
+                new ActionCacheAggregate(caches));
         }
-
-        ArgumentNullException.ThrowIfNull(cache, nameof(cache));
-
-        return new ActionCacheFilter(cache);
+        else
+        {
+            // TODO: Test this...not sure what happens
+            // when you return default or null from
+            // IFilterFactory
+            return default!;
+        }
     }
 }
