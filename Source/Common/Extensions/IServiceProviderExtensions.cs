@@ -13,11 +13,29 @@ internal static class IServiceProviderExtensions
 
     internal static bool TryGetActionCaches(
         this IServiceProvider serviceProvider, 
-        string @namespace,
+        string namespaces,
         out IEnumerable<IActionCache> caches
     )
     {
-        caches = serviceProvider.GetActionCaches(@namespace)!;
-        return caches?.Any(cache => cache is null) ?? false;
+        if (namespaces.Contains(","))
+        {
+            caches = GetNamespaces(namespaces)
+                .SelectMany(@namespace => 
+                    serviceProvider.GetActionCaches(@namespace)!)!;
+
+            return EnsureAllCachesExist(caches);
+        }
+        else
+        {
+            caches = serviceProvider.GetActionCaches(@namespaces)!;
+            return EnsureAllCachesExist(caches);
+        }
     }
+
+    private static IEnumerable<string> GetNamespaces(string namespaces) =>
+        namespaces.Split(",").Select(@namespace => @namespace.Trim());
+
+    private static bool EnsureAllCachesExist(IEnumerable<IActionCache?>? caches) =>
+        (caches?.Any() ?? false) && 
+         caches.All(cache => cache is not null);
 }

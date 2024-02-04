@@ -1,3 +1,4 @@
+using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,20 +13,17 @@ public class ActionCacheEvictionFilterFactory : Attribute, IFilterFactory
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(Namespaces, nameof(Namespaces));
 
-        var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-
-        List<IActionCache> caches = new List<IActionCache>();
-        if (Namespaces.Contains(","))
+        if (serviceProvider.TryGetActionCaches(Namespaces, out var caches))
         {
-            var @namespaces = Namespaces.Split(",").Select(@namespace => @namespace.Trim());
-            var @namespaceCaches = @namespaces.Select(@namespace => cacheFactory.Create(@namespace));
-            caches.AddRange(@namespaceCaches!);
+            return new ActionCacheEvictionFilter(
+                new ActionCacheAggregate(caches));
         }
         else
         {
-            caches.Add(cacheFactory.Create(Namespaces)!);
+            // TODO: Test this...not sure what happens
+            // when you return default or null from
+            // IFilterFactory
+            return default!;
         }
-
-        return new ActionCacheEvictionFilter(caches.ToArray());
     }
 }
