@@ -22,7 +22,7 @@ public class RedisActionCache : IActionCache
     public Assembly Assembly => CacheType.Assembly;
     public Type CacheType => typeof(RedisActionCache);
 
-    public async Task RemoveAsync(string key)
+    public virtual async Task RemoveAsync(string key)
     {
         var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
         if (isSuccessful)
@@ -31,7 +31,7 @@ public class RedisActionCache : IActionCache
         }
     }
 
-    public async Task RemoveAsync()
+    public virtual async Task RemoveAsync()
     {
         if (Assembly.TryGetResourceAsText("UnlinkNamespaceWithKeySet.lua", out var script))
         {
@@ -39,7 +39,7 @@ public class RedisActionCache : IActionCache
         }
     }
 
-    public async Task SetAsync<TValue>(string key, TValue? value)
+    public virtual async Task SetAsync<TValue>(string key, TValue? value)
     {
         RedisValue redisValue = JsonSerializer.Serialize(value);
 

@@ -17,6 +17,7 @@ public class ExpirationTokenSources : IExpirationTokenSources
     {
         if (!Cache.TryGetValue(key, out cancellationTokenSource!))
         {
+            cancellationTokenSource ??= new CancellationTokenSource();
             Cache.Set(key, cancellationTokenSource, EntryOptions(cancellationTokenSource));
         }
         
