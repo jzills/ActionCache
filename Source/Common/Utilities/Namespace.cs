@@ -1,6 +1,3 @@
-using System.Text;
-using StackExchange.Redis;
-
 namespace ActionCache.Utilities;
 
 public record class Namespace(string Value)

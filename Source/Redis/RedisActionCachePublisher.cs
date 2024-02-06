@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ActionCache.Utilities;
 using StackExchange.Redis;
 
 namespace ActionCache.Redis;
@@ -16,7 +17,7 @@ public class RedisActionCachePublisher : RedisActionCache
     {
         await base.SetAsync<TValue>(key, value);
         
-        var message = new RedisChannelMessage<TValue>(Namespace, key, value);
+        var message = new RedisChannelMessage(Namespace, key, value);
         await PublishMessageAsync(message);
     }
 

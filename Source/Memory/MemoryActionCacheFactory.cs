@@ -12,6 +12,8 @@ public class MemoryActionCacheFactory : IActionCacheFactory
         IExpirationTokenSources expirationTokens) => 
             (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
 
+    public CacheProvider Provider => CacheProvider.Memory;
+
     public IActionCache? Create(string @namespace)
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))

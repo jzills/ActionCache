@@ -8,7 +8,7 @@ internal static class IServiceProviderExtensions
         this IServiceProvider serviceProvider, 
         string @namespace
     ) => serviceProvider
-            .GetRequiredService<IEnumerable<IActionCacheFactory>>()
+            .GetActionCacheFactories()
             .Select(factory => factory.Create(@namespace));
 
     internal static bool TryGetActionCaches(
@@ -32,8 +32,27 @@ internal static class IServiceProviderExtensions
         }
     }
 
+    internal static bool TryGetActionCacheFactory(
+        this IServiceProvider serviceProvider,
+        CacheProvider cacheProvider,
+        out IActionCacheFactory cacheFactory
+    )
+    {
+        cacheFactory = serviceProvider
+            .GetActionCacheFactories()
+            .FirstOrDefault(cacheFactory => 
+                cacheFactory.Provider == cacheProvider)!;
+
+        return cacheFactory is not null;
+    }
+
+    internal static IEnumerable<IActionCacheFactory> GetActionCacheFactories(
+        this IServiceProvider serviceProvider
+    ) => serviceProvider.GetRequiredService<IEnumerable<IActionCacheFactory>>();
+
     private static IEnumerable<string> GetNamespaces(string namespaces) =>
-        namespaces.Split(",").Select(@namespace => @namespace.Trim());
+        namespaces.Split(",").Select(@namespace => 
+            @namespace.Trim());
 
     private static bool EnsureAllCachesExist(IEnumerable<IActionCache?>? caches) =>
         (caches?.Any() ?? false) && 

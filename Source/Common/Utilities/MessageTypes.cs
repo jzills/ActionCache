@@ -1,4 +1,4 @@
-namespace ActionCache.Redis;
+namespace ActionCache.Utilities;
 
 public enum MessageTypes
 {
