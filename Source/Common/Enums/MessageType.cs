@@ -1,6 +1,6 @@
 namespace ActionCache.Utilities;
 
-public enum MessageTypes
+public enum MessageType
 {
     Set,
     RemoveByKey,

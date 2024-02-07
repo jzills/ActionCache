@@ -25,5 +25,9 @@ public class ActionCacheFilter : IAsyncActionFilter
                 await _cache.SetAsync(key, value);
             }
         }
+        else
+        {
+            await next();
+        }
     }  
 }

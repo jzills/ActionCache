@@ -6,5 +6,5 @@ public record class RedisChannelMessage(
     string Namespace, 
     string? Key = null,
     object? Value = null,
-    MessageTypes Type = MessageTypes.Set
+    MessageType Type = MessageType.Set
 );

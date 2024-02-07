@@ -51,9 +51,9 @@ public class RedisHostedService : IHostedService
     private Task HandleMessageAsync(RedisChannelMessage message, IActionCache cache) =>
         message.Type switch
         {
-            MessageTypes.Set                => cache.SetAsync   (message.Key!, message.Value),
-            MessageTypes.RemoveByKey        => cache.RemoveAsync(message.Key!),
-            MessageTypes.RemoveByNamespace  => cache.RemoveAsync(),
+            MessageType.Set                => cache.SetAsync   (message.Key!, message.Value),
+            MessageType.RemoveByKey        => cache.RemoveAsync(message.Key!),
+            MessageType.RemoveByNamespace  => cache.RemoveAsync(),
             _                               => Task.CompletedTask
         };
 
