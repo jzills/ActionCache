@@ -19,15 +19,21 @@ public class RedisActionCache : IActionCache
         Cache = cache;
     }
 
-    public Assembly Assembly => CacheType.Assembly;
-    public Type CacheType => typeof(RedisActionCache);
+    public Assembly Assembly => typeof(RedisActionCache).Assembly;
 
     public virtual async Task RemoveAsync(string key)
     {
-        var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
-        if (isSuccessful)
+        if (Assembly.TryGetResourceAsText("UnlinkKeyWithKeySet.lua", out var script))
         {
-            await Cache.SetRemoveAsync(Namespace, key);
+            await Cache.ScriptEvaluateAsync(script, [Namespace, key], null, CommandFlags.FireAndForget);
+        }
+        else
+        {
+            var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
+            if (isSuccessful)
+            {
+                await Cache.SetRemoveAsync(Namespace, key);
+            }
         }
     }
 
@@ -35,7 +41,7 @@ public class RedisActionCache : IActionCache
     {
         if (Assembly.TryGetResourceAsText("UnlinkNamespaceWithKeySet.lua", out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, new RedisKey[1] { Namespace }, null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [Namespace], null, CommandFlags.FireAndForget);
         }
     }
 
@@ -46,8 +52,8 @@ public class RedisActionCache : IActionCache
         if (Assembly.TryGetResourceAsText("SetJsonWithKeySet.lua", out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
-                new[] { Namespace, (RedisKey)key }, 
-                new[] { redisValue }, 
+                [Namespace, (RedisKey)key], 
+                [redisValue], 
                 CommandFlags.FireAndForget
             );
         }

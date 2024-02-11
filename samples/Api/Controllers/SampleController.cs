@@ -11,10 +11,10 @@ public class SampleController : ControllerBase
 {
     [HttpPost]
     [Route("/")]
+    [ActionCacheRehydration(Namespace = "Namespace1")]
     public IActionResult Post(
         [ActionCacheKey(Order = 1)]int id, 
-        [ActionCacheKey(Order = 2)]DateTime date,
-        [ActionCacheKey(Order = 3)][FromBody] SampleModel model
+        [ActionCacheKey(Order = 2)]DateTime date
     )
     {
         return Ok("Hooray!");

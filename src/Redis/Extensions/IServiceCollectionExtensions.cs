@@ -15,7 +15,7 @@ public static class IServiceCollectionExtensions
         var options = new RedisCacheOptions();
         configureOptions.Invoke(options);
 
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(options.Configuration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Configuration);
 
         return services
             .AddStackExchangeRedisCache(configureOptions)
