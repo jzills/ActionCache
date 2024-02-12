@@ -6,12 +6,20 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ActionCache(Namespace = "Namespace1")]
+// [ActionCache(Namespace = "Namespace1")]
 public class SampleController : ControllerBase
 {
-    [HttpPost]
+    [HttpPut]
     [Route("/")]
     [ActionCacheRehydration(Namespace = "Namespace1")]
+    public IActionResult Put()
+    {
+        return Ok("My result!");
+    }
+
+    [HttpPost]
+    [Route("/")]
+    [ActionCache(Namespace = "Namespace1")]
     public IActionResult Post(
         [ActionCacheKey(Order = 1)]int id, 
         [ActionCacheKey(Order = 2)]DateTime date

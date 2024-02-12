@@ -1,42 +1,53 @@
-using System.Reflection;
-using ActionCache.Attributes;
-using ActionCache.Common.Extensions;
-using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using ActionCache.Common.Extensions.Internal;
 
 namespace ActionCache.Filters;
 
-public class ActionCacheRehydrationFilter : IAsyncActionFilter
+public class ActionCacheRehydrationFilter : IAsyncResultFilter
 {
     private readonly IActionCache _cache;
     private readonly IActionDescriptorCollectionProvider _descriptorProvider;
+    private readonly IServiceProvider _serviceProvider;
     public ActionCacheRehydrationFilter(
         IActionCache cache,
-        IActionDescriptorCollectionProvider descriptorProvider
-    ) => (_cache, _descriptorProvider) = (cache, descriptorProvider);
-    
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        IActionDescriptorCollectionProvider descriptorProvider,
+        IServiceProvider serviceProvider
+    )
     {
-        await next();
-
-        var controllerActionDescriptors = _descriptorProvider.ActionDescriptors.Items
-            .OfType<ControllerActionDescriptor>()
-            .Where(descriptor => descriptor.MethodInfo
-                .GetCustomAttribute<ActionCacheAttribute>()?.Namespace.Contains("Namespace1") ?? false);
-
-        foreach (var descriptor in controllerActionDescriptors)
+        _cache = cache;
+        _descriptorProvider = descriptorProvider;
+        _serviceProvider = serviceProvider;
+    }
+    
+    public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+    {
+        if (_descriptorProvider.ActionDescriptors.TryGetControllerActionDescriptors("Namespace1", out var descriptors))
         {
-            var controller = context.HttpContext.RequestServices.GetRequiredService(descriptor.ControllerTypeInfo);
-            var methodInfo = controller.GetType().GetMethod(descriptor.ActionName);
-            var result = methodInfo.Invoke(controller, [ 99, DateTime.Now ]);
-            if (result is OkObjectResult okObjectResult)
+            foreach (var descriptor in descriptors)
             {
-                var value = okObjectResult.Value;
+                var controller = _serviceProvider.GetRequiredService(descriptor.ControllerTypeInfo);
+                var methodInfo = controller.GetType().GetMethod(descriptor.ActionName);
+                if (methodInfo is not null)
+                {
+                    // TODO: In order to get the parameters for each
+                    // rehydration action, the route values will need to be stored
+                    // in the cache as well
+                    var result = methodInfo.Invoke(controller, [ 99, DateTime.Now ]);
+                    if (result is OkObjectResult okObjectResult)
+                    {
+                        // Get keys from namespace set in Redis
+                        // TODO: Implement same structure as above for MemoryCache..
+                        //       since MemoryCache implementation uses cancellationToken, however
+                        //       to support rehydration, we need to know all keys in the namespace set
+                        //await _cache.SetAsync("", okObjectResult.Value);
+                    }
+                }
             }
         }
-    }  
+
+        await next();
+    }
 }

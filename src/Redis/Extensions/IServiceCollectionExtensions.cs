@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
 using ActionCache.Hosting;
+using ActionCache.Common.Extensions.Internal;
 
 namespace ActionCache.Redis.Extensions;
 
@@ -18,6 +19,7 @@ public static class IServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Configuration);
 
         return services
+            .AddControllerInfo()
             .AddStackExchangeRedisCache(configureOptions)
             .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
             .AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(options.Configuration))
