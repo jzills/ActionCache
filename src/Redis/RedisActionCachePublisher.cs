@@ -15,7 +15,7 @@ public class RedisActionCachePublisher : RedisActionCache
 
     public override async Task SetAsync<TValue>(string key, TValue? value) where TValue : default
     {
-        await base.SetAsync<TValue>(key, value);
+        await base.SetAsync(key, value);
         await PublishMessageAsync(
             new RedisChannelMessage(Namespace, key, value));
     }

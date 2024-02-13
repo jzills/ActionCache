@@ -1,49 +1,39 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Utilities;
 
 namespace ActionCache.Filters;
 
 public class ActionCacheRehydrationFilter : IAsyncResultFilter
 {
-    private readonly IActionCache _cache;
-    private readonly IActionDescriptorCollectionProvider _descriptorProvider;
-    private readonly IServiceProvider _serviceProvider;
+    protected readonly IActionCache Cache;
+    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+
     public ActionCacheRehydrationFilter(
         IActionCache cache,
-        IActionDescriptorCollectionProvider descriptorProvider,
-        IServiceProvider serviceProvider
+        ActionCacheDescriptorProvider descriptorProvider
     )
     {
-        _cache = cache;
-        _descriptorProvider = descriptorProvider;
-        _serviceProvider = serviceProvider;
+        Cache = cache;
+        DescriptorProvider = descriptorProvider;
     }
     
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        if (_descriptorProvider.ActionDescriptors.TryGetControllerActionDescriptors("Namespace1", out var descriptors))
+        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo("Namespace1");
+        if (descriptorCollection.MethodInfoCollection.Any())
         {
-            foreach (var descriptor in descriptors)
+            foreach (var (route, methodInfo) in descriptorCollection.MethodInfoCollection)
             {
-                var controller = _serviceProvider.GetRequiredService(descriptor.ControllerTypeInfo);
-                var methodInfo = controller.GetType().GetMethod(descriptor.ActionName);
-                if (methodInfo is not null)
+                var controller = descriptorCollection.ControllerCollection[route];
+                var result = methodInfo.Invoke(controller, [ 99, DateTime.Now ]);
+                if (result is OkObjectResult okObjectResult)
                 {
-                    // TODO: In order to get the parameters for each
-                    // rehydration action, the route values will need to be stored
-                    // in the cache as well
-                    var result = methodInfo.Invoke(controller, [ 99, DateTime.Now ]);
-                    if (result is OkObjectResult okObjectResult)
-                    {
-                        // Get keys from namespace set in Redis
-                        // TODO: Implement same structure as above for MemoryCache..
-                        //       since MemoryCache implementation uses cancellationToken, however
-                        //       to support rehydration, we need to know all keys in the namespace set
-                        //await _cache.SetAsync("", okObjectResult.Value);
-                    }
+                    // Get keys from namespace set in Redis
+                    // TODO: Implement same structure as above for MemoryCache..
+                    //       since MemoryCache implementation uses cancellationToken, however
+                    //       to support rehydration, we need to know all keys in the namespace set
+                    await Cache.SetAsync("", okObjectResult.Value);
                 }
             }
         }

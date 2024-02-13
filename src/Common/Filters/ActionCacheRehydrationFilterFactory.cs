@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ActionCache.Common.Extensions;
+using ActionCache.Common.Utilities;
 
 namespace ActionCache.Filters;
 
@@ -19,8 +19,7 @@ public class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
         {
             return new ActionCacheRehydrationFilter(
                 new ActionCacheAggregate(caches),
-                serviceProvider.GetRequiredService<IActionDescriptorCollectionProvider>(),
-                serviceProvider);
+                serviceProvider.GetRequiredService<ActionCacheDescriptorProvider>());
         }
         else
         {

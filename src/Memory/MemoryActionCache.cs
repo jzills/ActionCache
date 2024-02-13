@@ -31,7 +31,7 @@ public class MemoryActionCache : IActionCache
 
     public Task SetAsync<TValue>(string key, TValue? value)
     {
-        Cache.Set<TValue?>(Namespace.Create(key), value, EntryOptions);
+        Cache.Set(Namespace.Create(key), value, EntryOptions);
         return Task.CompletedTask;
     }
 

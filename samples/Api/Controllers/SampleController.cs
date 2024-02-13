@@ -5,6 +5,7 @@ using Api.Models;
 namespace Api.Controllers;
 
 [ApiController]
+// [Area("MyArea")]
 [Route("[controller]")]
 // [ActionCache(Namespace = "Namespace1")]
 public class SampleController : ControllerBase
