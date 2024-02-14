@@ -14,11 +14,11 @@ public class RedisHostedService : IHostedService
     protected readonly IServiceProvider ServiceProvider;
 
     public RedisHostedService(
-        IConnectionMultiplexer mult,
+        IConnectionMultiplexer connectionMultiplexer,
         IServiceProvider serviceProvider
     )
     {
-        Subcriber = mult.GetSubscriber();
+        Subcriber = connectionMultiplexer.GetSubscriber();
         ServiceProvider = serviceProvider;
     }
 

@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc;
 using ActionCache.Common.Extensions.Internal;
 
 namespace ActionCache.Common.Utilities;
@@ -10,7 +9,7 @@ namespace ActionCache.Common.Utilities;
 public class ActionCacheRehydrationDescriptor
 {
     public Dictionary<string, MethodInfo> MethodInfoCollection = new();
-    public Dictionary<string, Controller> ControllerCollection = new();
+    public Dictionary<string, object> ControllerCollection = new();
 }
 
 public class ActionCacheDescriptorProvider
@@ -36,7 +35,7 @@ public class ActionCacheDescriptorProvider
             var methodInfoKeyBuilder = new StringBuilder();
             foreach (var controllerActionDescriptor in controllerActionDescriptors)
             {
-                var controller = (Controller)ServiceProvider.GetRequiredService(controllerActionDescriptor.ControllerTypeInfo);
+                var controller = ServiceProvider.GetRequiredService(controllerActionDescriptor.ControllerTypeInfo);
                 var methodInfo = controller.GetType().GetMethod(controllerActionDescriptor.ActionName);
                 if (methodInfo is not null)
                 {

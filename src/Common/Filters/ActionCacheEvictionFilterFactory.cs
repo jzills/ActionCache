@@ -11,7 +11,7 @@ public class ActionCacheEvictionFilterFactory : Attribute, IFilterFactory
     
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(Namespaces, nameof(Namespaces));
+        ArgumentException.ThrowIfNullOrWhiteSpace(Namespaces, nameof(Namespaces));
 
         if (serviceProvider.TryGetActionCaches(Namespaces, out var caches))
         {

@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using ActionCache.Common;
 using ActionCache.Common.Extensions;
 
 namespace ActionCache.Filters;
@@ -11,12 +13,13 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
 
     public virtual IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
+        ArgumentException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
 
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
             return new ActionCacheFilter(
-                new ActionCacheAggregate(caches));
+                new ActionCacheAggregate(caches),
+                serviceProvider.GetRequiredService<IActionCacheRehydrator>());
         }
         else
         {

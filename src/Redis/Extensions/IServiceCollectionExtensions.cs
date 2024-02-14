@@ -3,6 +3,8 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
 using ActionCache.Hosting;
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common;
+using ActionCache.Common.Utilities;
 
 namespace ActionCache.Redis.Extensions;
 
@@ -21,7 +23,9 @@ public static class IServiceCollectionExtensions
         return services
             .AddControllerInfo()
             .AddStackExchangeRedisCache(configureOptions)
+            .AddScoped<ActionCacheDescriptorProvider>()
             .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
+            .AddScoped<IActionCacheRehydrator, RedisActionCacheRehydrator>()
             .AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(options.Configuration))
             .AddHostedService<RedisHostedService>();
     }

@@ -1,41 +1,29 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using ActionCache.Common.Utilities;
+using ActionCache.Common;
 
 namespace ActionCache.Filters;
 
 public class ActionCacheRehydrationFilter : IAsyncResultFilter
 {
     protected readonly IActionCache Cache;
-    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+    protected readonly IActionCacheRehydrator Rehydrator;
 
     public ActionCacheRehydrationFilter(
         IActionCache cache,
-        ActionCacheDescriptorProvider descriptorProvider
+        IActionCacheRehydrator rehydrator
     )
     {
         Cache = cache;
-        DescriptorProvider = descriptorProvider;
+        Rehydrator = rehydrator;
     }
     
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo("Namespace1");
-        if (descriptorCollection.MethodInfoCollection.Any())
+        var rehydrationResults = await Rehydrator.GetRehydrationResultsAsync("Namespace1");
+        if (rehydrationResults.Any())
         {
-            foreach (var (route, methodInfo) in descriptorCollection.MethodInfoCollection)
-            {
-                var controller = descriptorCollection.ControllerCollection[route];
-                var result = methodInfo.Invoke(controller, [ 99, DateTime.Now ]);
-                if (result is OkObjectResult okObjectResult)
-                {
-                    // Get keys from namespace set in Redis
-                    // TODO: Implement same structure as above for MemoryCache..
-                    //       since MemoryCache implementation uses cancellationToken, however
-                    //       to support rehydration, we need to know all keys in the namespace set
-                    await Cache.SetAsync("", okObjectResult.Value);
-                }
-            }
+            await Task.WhenAll(rehydrationResults
+                .Select(result => Cache.SetAsync(result.Key, result.Value)));
         }
 
         await next();
