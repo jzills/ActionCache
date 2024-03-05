@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,57 +5,47 @@ using ActionCache.Common.Extensions.Internal;
 
 namespace ActionCache.Common.Utilities;
 
-public class ActionCacheRehydrationDescriptor
-{
-    public Dictionary<string, MethodInfo> MethodInfoCollection = new();
-    public Dictionary<string, object> ControllerCollection = new();
-}
-
 public class ActionCacheDescriptorProvider
 {
     protected readonly IServiceProvider ServiceProvider;
-    protected readonly IActionDescriptorCollectionProvider DescriptorCollectionProvider;
+    protected readonly ActionDescriptorCollection ActionDescriptors;
+    protected readonly StringBuilder KeyBuilder;
 
     public ActionCacheDescriptorProvider(
         IServiceProvider serviceProvider,
-        IActionDescriptorCollectionProvider descriptorCollectionProvider
+        IActionDescriptorCollectionProvider descriptorProvider
     )
     {
         ServiceProvider = serviceProvider;
-        DescriptorCollectionProvider = descriptorCollectionProvider;
+        ActionDescriptors = descriptorProvider.ActionDescriptors;
+        KeyBuilder = new();
     }
 
     public ActionCacheRehydrationDescriptor GetControllerActionMethodInfo(string @namespace)
     {
-        var descriptorCollection = new ActionCacheRehydrationDescriptor();
-        if (DescriptorCollectionProvider.ActionDescriptors
-                .TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))
+        var descriptors = new ActionCacheRehydrationDescriptor();
+        if (ActionDescriptors.TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))
         {
-            var methodInfoKeyBuilder = new StringBuilder();
-            foreach (var controllerActionDescriptor in controllerActionDescriptors)
+            foreach (var (areaName, controllerName, actionName, controllerTypeInfo) in controllerActionDescriptors)
             {
-                var controller = ServiceProvider.GetRequiredService(controllerActionDescriptor.ControllerTypeInfo);
-                var methodInfo = controller.GetType().GetMethod(controllerActionDescriptor.ActionName);
+                var controller = ServiceProvider.GetRequiredService(controllerTypeInfo);
+                var methodInfo = controller.GetType().GetMethod(actionName);
                 if (methodInfo is not null)
                 {
-                    if (controllerActionDescriptor.RouteValues.TryGetValue("area", out var area))
-                    {
-                        methodInfoKeyBuilder.Append($"{area}:");
-                    }
-
-                    methodInfoKeyBuilder.AppendJoin(':', 
-                        controllerActionDescriptor.ControllerName, 
-                        controllerActionDescriptor.ActionName
-                    );
-
-                    var rehydrationDescriptorKey = methodInfoKeyBuilder.ToString();
-                    descriptorCollection.MethodInfoCollection.Add(rehydrationDescriptorKey, methodInfo);
-                    descriptorCollection.ControllerCollection.Add(rehydrationDescriptorKey, controller);
-                    methodInfoKeyBuilder.Clear();
+                    var key = CreateKey(areaName, controllerName, actionName);
+                    descriptors.MethodInfos.Add(key, methodInfo);
+                    descriptors.Controllers.Add(key, controller);
                 }
             }
         }
 
-        return descriptorCollection;
+        return descriptors;
+    }
+
+    private string CreateKey(string? areaName, string controllerName, string actionName)
+    {
+        var key = KeyBuilder.AppendJoinNonNull(':', areaName, controllerName, actionName).ToString();
+        KeyBuilder.Clear();
+        return key;
     }
 }

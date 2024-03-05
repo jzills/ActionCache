@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using ActionCache.Common.Extensions;
-using ActionCache.Common.Utilities;
 using ActionCache.Common;
 
 namespace ActionCache.Filters;
