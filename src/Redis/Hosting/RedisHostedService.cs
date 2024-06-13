@@ -22,12 +22,10 @@ public class RedisHostedService : IHostedService
         ServiceProvider = serviceProvider;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
+    public async Task StartAsync(CancellationToken cancellationToken) =>
         await Subcriber.SubscribeAsync(
             RedisChannel.Literal(RedisActionCacheChannels.Main),
             GetChannelHandler());
-    }
 
     public Action<RedisChannel, RedisValue> GetChannelHandler() => async (channel, value) => {
         if (!string.IsNullOrWhiteSpace(value))
@@ -54,12 +52,10 @@ public class RedisHostedService : IHostedService
             MessageType.Set                => cache.SetAsync   (message.Key!, message.Value),
             MessageType.RemoveByKey        => cache.RemoveAsync(message.Key!),
             MessageType.RemoveByNamespace  => cache.RemoveAsync(),
-            _                               => Task.CompletedTask
+            _                              => Task.CompletedTask
         };
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
+    public async Task StopAsync(CancellationToken cancellationToken) =>
         await Subcriber.UnsubscribeAsync(
             RedisChannel.Literal(RedisActionCacheChannels.Main));
-    }
 }

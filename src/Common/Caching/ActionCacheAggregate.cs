@@ -27,7 +27,7 @@ public class ActionCacheAggregate : IActionCache
         WhenAllAggregate(cache => cache.RemoveAsync());
 
     public Task SetAsync<TValue>(string key, TValue? value) =>
-        WhenAllAggregate(cache => cache.SetAsync<TValue>(key, value));
+        WhenAllAggregate(cache => cache.SetAsync(key, value));
         
     private Task WhenAllAggregate(Func<IActionCache, Task> cacheSelector) => 
         Task.WhenAll(Caches.Select(cacheSelector));

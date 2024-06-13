@@ -10,7 +10,7 @@ public class ActionCacheEvictionFilter : IAsyncActionFilter
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var actionExecutedContext = await next();
-        if (actionExecutedContext.TryGetObjectResultValue(out _))
+        if (actionExecutedContext.TryGetOkObjectResultValue(out _))
         {
             await _cache.RemoveAsync();
         }

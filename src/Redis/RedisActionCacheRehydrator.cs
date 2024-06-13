@@ -1,18 +1,12 @@
 using System.Text.Json;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Mvc;
 using ActionCache.Common;
 using ActionCache.Common.Utilities;
-using Microsoft.AspNetCore.Mvc;
+using ActionCache.Redis.Extensions;
 using System.Reflection;
-using ActionCache.Attributes;
 
 namespace ActionCache.Redis;
-
-public class RehydrationResult
-{
-    public string Key { get; set; }
-    public object Value { get; set; }
-}
 
 public class RedisActionCacheRehydrator : IActionCacheRehydrator
 {
@@ -23,7 +17,7 @@ public class RedisActionCacheRehydrator : IActionCacheRehydrator
         ActionCacheDescriptorProvider descriptorProvider
     ) => (Cache, DescriptorProvider) = (connectionMultiplexer.GetDatabase(), descriptorProvider);
     
-    public async Task<List<RehydrationResult>> GetRehydrationResultsAsync(string @namespace)
+    public async Task<IReadOnlyCollection<RehydrationResult>> GetRehydrationResultsAsync(string @namespace)
     {
         var rehydrationDescriptor = new List<RehydrationResult>();
         var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
@@ -36,32 +30,32 @@ public class RedisActionCacheRehydrator : IActionCacheRehydrator
                 var actionArgs = actionArgsJson.Select(arg => JsonSerializer.Deserialize<Dictionary<string, JsonElement>>((string)arg!));
                 foreach (var actionArg in actionArgs)
                 {
-                    var actionValueConversions = new SortedList<int, object>();
+                    var actionValueConversions = new SortedList<int, object?>();
                     foreach (var parameter in methodInfo.GetParameters())
                     {
-                        var actionCacheAttribute = parameter.GetCustomAttribute<ActionCacheKeyAttribute>();
-                        if (actionCacheAttribute is not null)
+                        if (parameter.TryGetValue(actionArg, out var actionCacheAttribute))
                         {
-                            var actionValue = actionArg.First(arg => arg.Key == parameter.Name);
-                            var actionValueConversion = actionValue.Value.Deserialize(parameter.ParameterType);
-                            actionValueConversions.Add(actionCacheAttribute.Order, actionValueConversion);
+                            actionValueConversions.Add(
+                                actionCacheAttribute.Order, 
+                                actionCacheAttribute.Value
+                            );
                         }
                     }
 
-                    var result = methodInfo.Invoke(controller, actionValueConversions.Values.ToArray());
-                    if (result is OkObjectResult okObjectResult)
+                    if (TryGetRehydrationResult(
+                            methodInfo, 
+                            controller, 
+                            actionValueConversions.Values.ToArray(), 
+                            out var result
+                    ))
                     {
-                        rehydrationDescriptor.Add(new RehydrationResult
-                        {
-                            Key = string.Join(":", actionValueConversions.Values),
-                            Value = okObjectResult.Value
-                        });
+                        rehydrationDescriptor.Add(result);
                     }
                 }     
             }
         }
 
-        return rehydrationDescriptor;
+        return rehydrationDescriptor.AsReadOnly();
     }
 
     public Task SetAsync<TValue>(string key, TValue value)
@@ -69,14 +63,28 @@ public class RedisActionCacheRehydrator : IActionCacheRehydrator
         return Cache.SetAddAsync(key, JsonSerializer.Serialize(value));
     }
 
-    private bool TryGetValue(ParameterInfo parameterInfo)
+    public bool TryGetRehydrationResult(
+        MethodInfo? methodInfo, 
+        object? controller, 
+        object?[]? parameters, 
+        out RehydrationResult value
+    )
     {
-        var attribute = parameterInfo.GetCustomAttribute<ActionCacheKeyAttribute>();
-        if (attribute is not null)
+        var result = methodInfo.Invoke(controller, parameters);
+        if (result is OkObjectResult okObjectResult)
         {
-            var actionValue = actionArg.First(arg => arg.Key == parameterInfo.Name);
-            var actionValueConversion = actionValue.Value.Deserialize(parameterInfo.ParameterType);
-            return (attribute.Order, actionValueConversion);
+            value = new RehydrationResult
+            {
+                Key = string.Join(":", parameters),
+                Value = okObjectResult.Value
+            };
+
+            return true;
+        }
+        else
+        {
+            value = default!;
+            return false;
         }
     }
 }

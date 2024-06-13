@@ -9,9 +9,9 @@ public class ExpirationTokenSources : IExpirationTokenSources
     public ExpirationTokenSources(IMemoryCache cache) => Cache = cache;
 
     public MemoryCacheEntryOptions EntryOptions(CancellationTokenSource source) => 
-            new MemoryCacheEntryOptions { Size = 1 }
-                .AddExpirationToken(
-                    new CancellationChangeToken(source.Token));
+        new MemoryCacheEntryOptions { Size = 1 }
+            .AddExpirationToken(
+                new CancellationChangeToken(source.Token));
 
     public bool TryGetOrAdd(string key, out CancellationTokenSource cancellationTokenSource)
     {

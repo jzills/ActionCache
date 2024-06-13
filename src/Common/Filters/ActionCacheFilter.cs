@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using ActionCache.Common;
+using ActionCache.Common.Extensions;
 
 namespace ActionCache.Filters;
 
@@ -27,7 +27,7 @@ public class ActionCacheFilter : IAsyncActionFilter
             }
 
             var actionExecutedContext = await next();
-            if (actionExecutedContext.TryGetObjectResultValue(out var value))
+            if (actionExecutedContext.TryGetOkObjectResultValue(out var value))
             {
                 await _cache.SetAsync(key, value);
 

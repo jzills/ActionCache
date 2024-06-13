@@ -5,7 +5,7 @@ namespace ActionCache.Common.Extensions;
 
 internal static class ActionExecutedContextExtensions
 {
-    internal static bool TryGetObjectResultValue(this ActionExecutedContext context, out object result)
+    internal static bool TryGetOkObjectResultValue(this ActionExecutedContext context, out object result)
     {
         if (context is not null &&
             context.Result is OkObjectResult okObjectResult)
