@@ -35,7 +35,7 @@ public class ActionCacheFilter : IAsyncActionFilter
                 {
                     // TODO: Get area
                     var rehydrationKey = $"ActionCache:Rehydration:{controllerActionDescriptor.ControllerName}:{controllerActionDescriptor.ActionName}";
-                    await _cacheRehydrator.SetAsync(rehydrationKey, context.ActionArguments);
+                    await _cache.SetAsync(rehydrationKey, context.ActionArguments);
                 }
             }
         }

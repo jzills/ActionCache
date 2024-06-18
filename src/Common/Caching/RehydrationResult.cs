@@ -1,4 +1,4 @@
-namespace ActionCache.Redis;
+namespace ActionCache.Common;
 
 public class RehydrationResult
 {
