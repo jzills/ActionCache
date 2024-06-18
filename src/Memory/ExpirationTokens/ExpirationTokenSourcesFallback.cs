@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace ActionCache.Memory;
 
-public class ExpirationTokenSourcesBackup : IExpirationTokenSources
+public class ExpirationTokenSourcesFallback : IExpirationTokenSources
 {
     protected ConcurrentDictionary<string, CancellationTokenSource> Tokens = new();
     public bool TryGetOrAdd(string key, out CancellationTokenSource cancellationTokenSource)
