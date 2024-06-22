@@ -12,16 +12,20 @@ internal static class ActionExecutingContextExtensions
     )
     {
         attributes = new();
-        foreach (var parameter in context.ActionDescriptor.Parameters)
-        {
-            if (parameter is ControllerParameterDescriptor controllerParameter)
-            {
-                var attribute = controllerParameter.ParameterInfo
-                    .GetCustomAttribute<ActionCacheKeyAttribute>();
 
-                if (attribute is not null)
+        if (context.ActionDescriptor.Parameters is not null)
+        {
+            foreach (var parameter in context.ActionDescriptor.Parameters)
+            {
+                if (parameter is ControllerParameterDescriptor controllerParameter)
                 {
-                    attributes[parameter.Name] = attribute;
+                    var attribute = controllerParameter.ParameterInfo
+                        .GetCustomAttribute<ActionCacheKeyAttribute>();
+
+                    if (attribute is not null)
+                    {
+                        attributes.TryAdd(parameter.Name, attribute);
+                    }
                 }
             }
         }
@@ -36,6 +40,11 @@ internal static class ActionExecutingContextExtensions
         {
             var args = attributes.GetArguments(context.ActionArguments);
             key = string.Join(":", args);
+            return !string.IsNullOrWhiteSpace(key);
+        }
+        else if (context.RouteData.Values.Any())
+        {
+            key = string.Join(":", context.RouteData.Values.Select(route => route.Value));
             return !string.IsNullOrWhiteSpace(key);
         }
         else

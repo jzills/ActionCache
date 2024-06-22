@@ -5,7 +5,7 @@ using ActionCache.Common.Extensions.Internal;
 
 namespace ActionCache.Common;
 
-public class ActionCacheRehydrator : IActionCacheRehydrator
+internal abstract class ActionCacheRehydrator : IActionCacheRehydrator
 {
     protected virtual Func<string, Task<IEnumerable<IDictionary<string, JsonElement>?>?>>? ActionArgsAccessor { get; init; }
     protected readonly ActionCacheDescriptorProvider DescriptorProvider;
@@ -25,7 +25,7 @@ public class ActionCacheRehydrator : IActionCacheRehydrator
             foreach (var (route, methodInfo) in descriptorCollection.MethodInfos)
             {
                 var controller = descriptorCollection.Controllers[route];
-                var actionArgs = await ActionArgsAccessor($"ActionCache:Rehydration:{route}");
+                var actionArgs = await ActionArgsAccessor($"ActionCache:{@namespace}:Rehydration:{route}");
                 if (actionArgs is not null)
                 {
                     foreach (var actionArg in actionArgs)

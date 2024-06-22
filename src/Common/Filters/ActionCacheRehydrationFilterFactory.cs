@@ -6,7 +6,7 @@ using ActionCache.Common;
 namespace ActionCache.Filters;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
+internal class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
 {
     public required string Namespace { get; set; }
     public bool IsReusable => false;
@@ -18,14 +18,12 @@ public class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
             return new ActionCacheRehydrationFilter(
+                Namespace,
                 new ActionCacheAggregate(caches),
                 serviceProvider.GetRequiredService<IActionCacheRehydrator>());
         }
         else
         {
-            // TODO: Test this...not sure what happens
-            // when you return default or null from
-            // IFilterFactory
             return default!;
         }
     }

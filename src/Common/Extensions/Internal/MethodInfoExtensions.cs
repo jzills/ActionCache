@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ActionCache.Common.Extensions.Internal;
 
-public static class MethodInfoExtensions
+internal static class MethodInfoExtensions
 {
     public static bool HasActionCacheAttribute(this MethodInfo source, string @namespace) =>
         source.GetCustomAttribute<ActionCacheAttribute>()?

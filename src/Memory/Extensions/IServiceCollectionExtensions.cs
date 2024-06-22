@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Utilities;
 
 namespace ActionCache.Memory.Extensions;
 
@@ -20,6 +21,7 @@ public static class IServiceCollectionExtensions
                 return new ExpirationTokenSourcesValidated(
                     new ExpirationTokenSources(cache));
             })
+            .AddScoped<ActionCacheDescriptorProvider>()
             .AddScoped<IActionCacheFactory, MemoryActionCacheFactory>();
     } 
 }

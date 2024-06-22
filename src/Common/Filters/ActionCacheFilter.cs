@@ -1,25 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using ActionCache.Common;
 using ActionCache.Common.Extensions;
 
 namespace ActionCache.Filters;
 
 public class ActionCacheFilter : IAsyncActionFilter
 {
-    private readonly IActionCache _cache;
-    private readonly IActionCacheRehydrator _cacheRehydrator;
-    public ActionCacheFilter(
-        IActionCache cache,
-        IActionCacheRehydrator cacheRehydrator
-    ) => (_cache, _cacheRehydrator) = (cache, cacheRehydrator);
+    protected readonly IActionCache Cache;
+    public ActionCacheFilter(IActionCache cache) => Cache = cache;
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (context.TryGetKey(out var key))
         {
-            var cacheValue = await _cache.GetAsync<object>(key);
+            var cacheValue = await Cache.GetAsync<object>(key);
             if (cacheValue is not null)
             {
                 context.Result = new OkObjectResult(cacheValue);
@@ -29,13 +24,11 @@ public class ActionCacheFilter : IAsyncActionFilter
             var actionExecutedContext = await next();
             if (actionExecutedContext.TryGetOkObjectResultValue(out var value))
             {
-                await _cache.SetAsync(key, value);
+                await Cache.SetAsync(key, value);
 
                 if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
                 {
-                    // TODO: Get area
-                    var rehydrationKey = $"ActionCache:Rehydration:{controllerActionDescriptor.ControllerName}:{controllerActionDescriptor.ActionName}";
-                    await _cache.SetAsync(rehydrationKey, context.ActionArguments);
+                    // TODO: Rehydration
                 }
             }
         }

@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
-using ActionCache.Common;
 using ActionCache.Common.Extensions;
 
 namespace ActionCache.Filters;
@@ -17,15 +15,10 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
 
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
-            return new ActionCacheFilter(
-                new ActionCacheAggregate(caches),
-                serviceProvider.GetRequiredService<IActionCacheRehydrator>());
+            return new ActionCacheFilter(new ActionCacheAggregate(caches));
         }
         else
         {
-            // TODO: Test this...not sure what happens
-            // when you return default or null from
-            // IFilterFactory
             return default!;
         }
     }

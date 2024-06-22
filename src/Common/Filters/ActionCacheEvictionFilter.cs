@@ -5,14 +5,14 @@ namespace ActionCache.Filters;
 
 public class ActionCacheEvictionFilter : IAsyncActionFilter
 {
-    private readonly IActionCache _cache;
-    public ActionCacheEvictionFilter(IActionCache cache) => _cache = cache;
+    protected readonly IActionCache Cache;
+    public ActionCacheEvictionFilter(IActionCache cache) => Cache = cache;
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var actionExecutedContext = await next();
         if (actionExecutedContext.TryGetOkObjectResultValue(out _))
         {
-            await _cache.RemoveAsync();
+            await Cache.RemoveAsync();
         }
     }
 }

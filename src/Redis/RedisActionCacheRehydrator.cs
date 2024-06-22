@@ -5,7 +5,31 @@ using ActionCache.Common.Utilities;
 
 namespace ActionCache.Redis;
 
-public class RedisActionCacheRehydrator : ActionCacheRehydrator
+internal class RedisActionCacheRehydratorInternal : RedisActionCache
+{
+    protected readonly RedisActionCacheRehydrator Rehydrator;
+    public RedisActionCacheRehydratorInternal(
+        RedisNamespace @namespace, 
+        IDatabase cache,
+        RedisActionCacheRehydrator rehydrator
+    ) : base(@namespace, cache)
+    {
+        Rehydrator = rehydrator;
+    }
+
+    public async Task SetRehydrationValuesAsync(
+        string keySuffix, 
+        IDictionary<string, object?> values
+    )
+    {
+        var setKey = $"ActionCache:{Namespace}:Rehydration";
+        var setMemberKey = $"ActionCache:{Namespace}:Rehydration:{keySuffix}:{string.Join(":", values)}";
+        await Cache.SetAddAsync(setKey, setMemberKey);
+        await Cache.SetAddAsync(setMemberKey, JsonSerializer.Serialize(values));
+    } 
+}
+
+internal class RedisActionCacheRehydrator : ActionCacheRehydrator
 {
     protected readonly IDatabase Cache;
     public RedisActionCacheRehydrator(

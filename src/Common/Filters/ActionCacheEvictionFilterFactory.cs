@@ -20,9 +20,6 @@ public class ActionCacheEvictionFilterFactory : Attribute, IFilterFactory
         }
         else
         {
-            // TODO: Test this...not sure what happens
-            // when you return default or null from
-            // IFilterFactory
             return default!;
         }
     }
