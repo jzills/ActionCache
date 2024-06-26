@@ -11,8 +11,7 @@ public static class ActionDescriptorCollectionExtensions
         out IEnumerable<ControllerActionDescriptor> descriptors
     )
     {
-        descriptors = source.Items.
-            OfType<ControllerActionDescriptor>()
+        descriptors = source.Items.OfType<ControllerActionDescriptor>()
             .Where(descriptor => descriptor.MethodInfo.HasActionCacheAttribute(@namespace));
 
         return descriptors.Any();

@@ -1,3 +1,5 @@
+using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Common.Extensions;
@@ -13,21 +15,27 @@ public static class IServiceCollectionExtensions
         configureOptions.Invoke(optionsBuilder);
 
         var options = optionsBuilder.Build();
-        if (options.EnabledCaches[CacheProvider.Memory])
+        if (options.EnabledCaches[CacheType.Memory])
         {
             // Register MemoryCache dependencies
         }
 
-        if (options.EnabledCaches[CacheProvider.Redis])
+        if (options.EnabledCaches[CacheType.Redis])
         {
             // Register Redis dependencies
         }
 
-        if (options.EnabledCaches[CacheProvider.SqlServer])
+        if (options.EnabledCaches[CacheType.SqlServer])
         {
             // Register SqlServer dependencies
         }
 
         return services;
     }
+
+    internal static IServiceCollection AddActionCacheCommon(
+        this IServiceCollection services
+    ) => services
+            .AddControllerInfo()
+            .AddScoped<ActionCacheDescriptorProvider>();
 }

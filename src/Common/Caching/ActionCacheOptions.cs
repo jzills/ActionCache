@@ -3,11 +3,11 @@ namespace ActionCache.Common;
 public class ActionCacheOptions
 {
     public readonly ActionCacheEntryOptions EntryOptions = new();
-    public readonly IDictionary<CacheProvider, bool> EnabledCaches = 
-        new Dictionary<CacheProvider, bool>
+    public readonly IDictionary<CacheType, bool> EnabledCaches = 
+        new Dictionary<CacheType, bool>
         {
-            [CacheProvider.Redis]     = false,
-            [CacheProvider.Memory]    = false,
-            [CacheProvider.SqlServer] = false
+            [CacheType.Redis]     = false,
+            [CacheType.Memory]    = false,
+            [CacheType.SqlServer] = false
         };
 }

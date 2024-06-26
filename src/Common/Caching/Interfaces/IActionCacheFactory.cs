@@ -2,6 +2,6 @@ namespace ActionCache;
 
 public interface IActionCacheFactory
 {
-    CacheProvider Provider { get; }
+    CacheType Type { get; }
     IActionCache? Create(string @namespace);
 }

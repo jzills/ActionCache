@@ -5,7 +5,7 @@ namespace ActionCache.Common.Extensions;
 internal static class ActionCacheKeyAttributeExtensions
 {
     internal static IEnumerable<object> GetArguments(
-        this IDictionary<string, ActionCacheKeyAttribute> source,
+        this IReadOnlyDictionary<string, ActionCacheKeyAttribute> source,
         IDictionary<string, object> args
     ) => source
             .OrderBy(attribute => attribute.Value.Order)

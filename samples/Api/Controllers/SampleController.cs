@@ -1,18 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using ActionCache.Attributes;
-using Api.Models;
 
 namespace Api.Controllers;
 
 [ApiController]
-// [Area("MyArea")]
 [Route("[controller]")]
-// [ActionCache(Namespace = "Namespace1")]
 public class SampleController : ControllerBase
 {
     [HttpPut]
     [Route("/")]
-    [ActionCacheRehydration(Namespace = "Namespace1")]
     public IActionResult Put()
     {
         return Ok("My result!");
@@ -26,7 +22,7 @@ public class SampleController : ControllerBase
         [ActionCacheKey(Order = 2)]DateTime date
     )
     {
-        return Ok("Hooray!");
+        return Ok($"The current time is {DateTime.Now}");
     }
 
     [HttpDelete]

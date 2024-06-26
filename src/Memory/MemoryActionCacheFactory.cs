@@ -12,7 +12,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
         IExpirationTokenSources expirationTokens) => 
             (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
 
-    public CacheProvider Provider => CacheProvider.Memory;
+    public CacheType Type => CacheType.Memory;
 
     public IActionCache? Create(string @namespace)
     {

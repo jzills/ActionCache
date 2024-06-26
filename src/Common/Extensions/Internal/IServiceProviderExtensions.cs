@@ -34,14 +34,14 @@ internal static class IServiceProviderExtensions
 
     internal static bool TryGetActionCacheFactory(
         this IServiceProvider serviceProvider,
-        CacheProvider cacheProvider,
+        CacheType CacheType,
         out IActionCacheFactory cacheFactory
     )
     {
         cacheFactory = serviceProvider
             .GetActionCacheFactories()
             .FirstOrDefault(cacheFactory => 
-                cacheFactory.Provider == cacheProvider)!;
+                cacheFactory.Type == CacheType)!;
 
         return cacheFactory is not null;
     }

@@ -2,13 +2,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
 using ActionCache.Hosting;
-using ActionCache.Common.Extensions.Internal;
-using ActionCache.Common.Utilities;
+using ActionCache.Common.Extensions;
 
 namespace ActionCache.Redis.Extensions;
 
 public static class IServiceCollectionExtensions
 {
+    public static IServiceCollection AddActionCacheRedis(
+        this IServiceCollection services
+    ) => services.AddActionCacheRedisInternal();
+
     public static IServiceCollection AddActionCacheRedis(
         this IServiceCollection services, 
         Action<RedisCacheOptions> configureOptions
@@ -20,11 +23,15 @@ public static class IServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Configuration);
 
         return services
-            .AddControllerInfo()
+            .AddActionCacheRedis()
             .AddStackExchangeRedisCache(configureOptions)
-            .AddScoped<ActionCacheDescriptorProvider>()
-            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
-            .AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options.Configuration))
-            .AddHostedService<RedisHostedService>();
+            .AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options.Configuration));
     }
+
+    internal static IServiceCollection AddActionCacheRedisInternal(
+        this IServiceCollection services
+    ) => services
+            .AddActionCacheCommon()
+            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
+            .AddHostedService<RedisHostedService>();
 }

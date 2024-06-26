@@ -34,7 +34,7 @@ public class RedisHostedService : IHostedService
             if (message is not null)
             {
                 using var scope = ServiceProvider.CreateAsyncScope();
-                if (scope.ServiceProvider.TryGetActionCacheFactory(CacheProvider.Memory, out var cacheFactory))
+                if (scope.ServiceProvider.TryGetActionCacheFactory(CacheType.Memory, out var cacheFactory))
                 {
                     var cache = cacheFactory.Create(message.Namespace);
                     if (cache is not null)

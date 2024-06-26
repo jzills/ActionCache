@@ -1,6 +1,6 @@
 namespace ActionCache;
 
-public enum CacheProvider
+public enum CacheType
 {
     Memory,
     Redis,

@@ -11,19 +11,19 @@ public class ActionCacheOptionsBuilder
 
     public ActionCacheOptionsBuilder UseMemoryCache()
     {
-        Options.EnabledCaches[CacheProvider.Memory] = true;
+        Options.EnabledCaches[CacheType.Memory] = true;
         return this;
     }
 
     public ActionCacheOptionsBuilder UseRedisCache()
     {
-        Options.EnabledCaches[CacheProvider.Redis] = true;
+        Options.EnabledCaches[CacheType.Redis] = true;
         return this;
     }
 
     public ActionCacheOptionsBuilder UseSqlServerCache()
     {
-        Options.EnabledCaches[CacheProvider.SqlServer] = true;
+        Options.EnabledCaches[CacheType.SqlServer] = true;
         return this;
     }
 
