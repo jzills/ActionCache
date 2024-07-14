@@ -3,7 +3,7 @@
 
 ## Summary
 
-Integrate caching as a cross cutting concern seamlessly into your .NET Core applications.
+Integrate data caching seamlessly into your .NET Core applications.
 
 ## Features
 

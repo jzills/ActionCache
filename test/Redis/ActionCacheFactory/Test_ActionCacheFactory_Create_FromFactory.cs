@@ -19,6 +19,6 @@ public class Test_ActionCacheFactory_Create_FromFactory
         var cache = cacheFactory.Create("MyNamespace");
 
         Assert.That(cache, Is.Not.Null);
-        Assert.That(cache, Is.TypeOf<RedisActionCache>());
+        Assert.That(cache, Is.InstanceOf<RedisActionCache>());
     }
 }

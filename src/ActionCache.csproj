@@ -4,7 +4,25 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>ActionCache</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Joshua Zillwood</Authors>
+    <Description></Description>
+    <Company></Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jzills/ActionCache</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jzills/ActionCache.git</RepositoryUrl> 
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Redis/Scripts/UnlinkNamespace.lua" />
