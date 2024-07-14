@@ -2,10 +2,31 @@ using StackExchange.Redis;
 
 namespace ActionCache.Redis;
 
+/// <summary>
+/// Factory class for creating RedisActionCache instances.
+/// </summary>
 public class RedisActionCacheFactory : IActionCacheFactory
 {
+    /// <summary>
+    /// An IDatabase representation of a Redis cache.
+    /// </summary> 
     protected readonly IDatabase Cache;
+    
+    /// <summary>
+    /// Constructor for RedisActionCacheFactory.
+    /// </summary>
+    /// <param name="connectionMultiplexer">ConnectionMultiplexer for Redis.</param>
     public RedisActionCacheFactory(IConnectionMultiplexer connectionMultiplexer) => Cache = connectionMultiplexer.GetDatabase();
+    
+    /// <summary>
+    /// Gets the type of cache.
+    /// </summary>
     public CacheType Type => CacheType.Redis;
-    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache);//new RedisActionCachePublisher(@namespace, Cache);
+    
+    /// <summary>
+    /// Creates a new RedisActionCache instance.
+    /// </summary>
+    /// <param name="namespace">Namespace for the cache.</param>
+    /// <returns>New instance of RedisActionCache.</returns>
+    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache);
 }
