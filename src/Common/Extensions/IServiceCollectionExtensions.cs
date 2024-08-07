@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Common.Extensions;
 
-public static class IServiceCollectionExtensions
+internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddActionCache(
+    internal static IServiceCollection AddActionCache(
         this IServiceCollection services,
         Action<ActionCacheOptionsBuilder> configureOptions
     )

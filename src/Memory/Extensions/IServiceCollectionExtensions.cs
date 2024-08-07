@@ -16,7 +16,9 @@ public static class IServiceCollectionExtensions
     /// <returns>The IServiceCollection with added Action Cache memory services.</returns>
     public static IServiceCollection AddActionCacheMemory(
         this IServiceCollection services
-    ) => services.AddActionCacheMemoryInternal();
+    ) => services
+            .AddActionCacheMemoryInternal()
+            .AddMemoryCache();
 
     /// <summary>
     /// Adds Action Cache memory services with configuration options to the IServiceCollection.

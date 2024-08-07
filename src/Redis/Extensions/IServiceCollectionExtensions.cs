@@ -15,9 +15,9 @@ public static class IServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The IServiceCollection to add the services to.</param>
     /// <returns>The updated IServiceCollection.</returns>
-    public static IServiceCollection AddActionCacheRedis(
-        this IServiceCollection services
-    ) => services.AddActionCacheRedisInternal();
+    // public static IServiceCollection AddActionCacheRedis(
+    //     this IServiceCollection services
+    // ) => services.AddActionCacheRedisInternal();
 
     /// <summary>
     /// Adds ActionCache with Redis to the IServiceCollection with custom configuration options.
@@ -36,7 +36,7 @@ public static class IServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Configuration);
 
         return services
-            .AddActionCacheRedis()
+            .AddActionCacheRedisInternal()
             .AddStackExchangeRedisCache(configureOptions)
             .AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options.Configuration));
     }
