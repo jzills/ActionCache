@@ -48,7 +48,7 @@ Add an `ActionCacheAttribute` to any controller actions that should be cached. T
 
 ## Cache Key Creation
 
-An `ActionCacheKeyAttribute` can be applied to any parameters. In the case of a complex object, the instance will be serialized as JSON an appended to the cache entry key. 
+An `ActionCacheKeyAttribute` can be applied to any parameters. In the case of a complex object, the instance will be serialized as JSON and appended to the cache entry key. 
 
     [HttpPost]
     [Route("/")]
@@ -66,7 +66,7 @@ An `ActionCacheKeyAttribute` can be applied to any parameters. In the case of a 
 
 ## Cache Eviction
 
-An `ActionCacheEvictionAttribute` can be applied to a controller action. Cache eviction occurs at the namespace level. In the example below, both *MyNamespace* and *MyOtherNamespace* would have their entries evicted on a successful execution of the action.
+An `ActionCacheEvictionAttribute` can be applied to a controller action. Cache eviction occurs at the namespace level. One or more namespaces can be used separated by a comma. In the example below, both *MyNamespace* and *MyOtherNamespace* would have their entries evicted on a successful execution of the action.
 
     [HttpDelete]
     [Route("/")]

@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>ActionCache</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Joshua Zillwood</Authors>
     <Description></Description>
     <Company></Company>
