@@ -6,7 +6,7 @@ namespace ActionCache.Memory;
 public interface IExpirationTokenSources
 {
     /// <summary>
-    /// Tries to get or add a cancellation token source for the specified key
+    /// Attempts to get or add a cancellation token source for the specified key
     /// </summary>
     /// <param name="key">The key associated with the cancellation token source</param>
     /// <param name="cancellationTokenSource">The cancellation token source associated with the key</param>

@@ -14,7 +14,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     /// Initializes a new instance of the <see cref="MemoryActionCacheFactory"/> class.
     /// </summary>
     /// <param name="memoryCache">The memory cache to use.</param>
-    /// <param name="expirationTokens">The expirationToken source to use.</param>
+    /// <param name="expirationTokens">The expiration token source to use.</param>
     public MemoryActionCacheFactory(
         IMemoryCache memoryCache,
         IExpirationTokenSources expirationTokens) => 

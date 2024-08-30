@@ -1,6 +1,6 @@
 using ActionCache.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
 namespace ActionCache.Redis.Extensions;
