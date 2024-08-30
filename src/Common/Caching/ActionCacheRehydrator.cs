@@ -3,58 +3,78 @@ using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Utilities;
 using System.Text.Json;
 
-namespace ActionCache.Common;
-
-internal abstract class ActionCacheRehydrator : IActionCacheRehydrator
+namespace ActionCache.Common
 {
-    protected virtual Func<string, Task<IEnumerable<IDictionary<string, JsonElement>?>?>>? ActionArgsAccessor { get; init; }
-    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
-
-    public ActionCacheRehydrator(
-        ActionCacheDescriptorProvider descriptorProvider
-    ) => DescriptorProvider = descriptorProvider;
-    
-    public async Task<IReadOnlyCollection<RehydrationResult>> GetRehydrationResultsAsync(string @namespace)
+    /// <summary>
+    /// Provides functionality to rehydrate actions from cache.
+    /// </summary>
+    internal abstract class ActionCacheRehydrator : IActionCacheRehydrator
     {
-        ArgumentNullException.ThrowIfNull(ActionArgsAccessor, nameof(ActionArgsAccessor));
+        /// <summary>
+        /// Accessor property to retrieve action arguments.
+        /// </summary>
+        protected virtual Func<string, Task<IEnumerable<IDictionary<string, JsonElement>?>?>>? ActionArgsAccessor { get; init; }
 
-        var rehydrationDescriptor = new List<RehydrationResult>();
-        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
-        if (descriptorCollection.MethodInfos.Any())
+        /// <summary>
+        /// Descriptor provider for action cache.
+        /// </summary>
+        protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ActionCacheRehydrator"/> class.
+        /// </summary>
+        /// <param name="descriptorProvider">The descriptor provider instance.</param>
+        public ActionCacheRehydrator(
+            ActionCacheDescriptorProvider descriptorProvider
+        ) => DescriptorProvider = descriptorProvider;
+
+        /// <summary>
+        /// Asynchronously gets rehydration results for a given namespace.
+        /// </summary>
+        /// <param name="namespace">The namespace to rehydrate.</param>
+        /// <returns>A read-only collection of rehydration results.</returns>
+        public async Task<IReadOnlyCollection<RehydrationResult>> GetRehydrationResultsAsync(string @namespace)
         {
-            foreach (var (route, methodInfo) in descriptorCollection.MethodInfos)
+            ArgumentNullException.ThrowIfNull(ActionArgsAccessor, nameof(ActionArgsAccessor));
+
+            var rehydrationDescriptor = new List<RehydrationResult>();
+            var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
+            if (descriptorCollection.MethodInfos.Any())
             {
-                var controller = descriptorCollection.Controllers[route];
-                var actionArgs = await ActionArgsAccessor($"ActionCache:{@namespace}:Rehydration:{route}");
-                if (actionArgs is not null)
+                foreach (var (route, methodInfo) in descriptorCollection.MethodInfos)
                 {
-                    foreach (var actionArg in actionArgs)
+                    var controller = descriptorCollection.Controllers[route];
+                    var actionArgs = await ActionArgsAccessor($"ActionCache:{@namespace}:Rehydration:{route}");
+                    if (actionArgs is not null)
                     {
-                        var actionValueConversions = new SortedList<int, object?>();
-                        foreach (var parameter in methodInfo.GetParameters())
+                        foreach (var actionArg in actionArgs)
                         {
-                            if (parameter.TryGetValue(actionArg, out var actionCacheAttribute))
+                            var actionValueConversions = new SortedList<int, object?>();
+                            foreach (var parameter in methodInfo.GetParameters())
                             {
-                                actionValueConversions.Add(
-                                    actionCacheAttribute.Order, 
-                                    actionCacheAttribute.Value
-                                );
+                                if (parameter.TryGetValue(actionArg, out var actionCacheAttribute))
+                                {
+                                    actionValueConversions.Add(
+                                        actionCacheAttribute.Order, 
+                                        actionCacheAttribute.Value
+                                    );
+                                }
                             }
-                        }
 
-                        if (methodInfo.TryGetRehydrationResult( 
-                                controller, 
-                                actionValueConversions.Values.ToArray(), 
-                                out var result
-                        ))
-                        {
-                            rehydrationDescriptor.Add(result);
-                        }
-                    } 
-                }    
+                            if (methodInfo.TryGetRehydrationResult(
+                                    controller, 
+                                    actionValueConversions.Values.ToArray(), 
+                                    out var result
+                            ))
+                            {
+                                rehydrationDescriptor.Add(result);
+                            }
+                        } 
+                    }    
+                }
             }
-        }
 
-        return rehydrationDescriptor.AsReadOnly();
+            return rehydrationDescriptor.AsReadOnly();
+        }
     }
 }

@@ -15,7 +15,7 @@ A simple yet powerful data caching library that adds an extra layer of caching t
 
 ## Features
 
-- Designed for simplicity and ease of integration.
+- Designed for simplicity and ease of use.
 - Supports namespaced caching with the flexibility to utilize multiple cache layers, including IMemoryCache and Redis.
 - Implements automatic cache eviction policies based on one or more namespaces to ensure efficient cache management.
 

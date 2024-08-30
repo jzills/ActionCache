@@ -1,7 +1,20 @@
-namespace ActionCache;
-
-public interface IActionCacheFactory
+namespace ActionCache
 {
-    CacheType Type { get; }
-    IActionCache? Create(string @namespace);
+    /// <summary>
+    /// Provides functionalities to create specific instances of IActionCache based on a specified type.
+    /// </summary>
+    public interface IActionCacheFactory
+    {
+        /// <summary>
+        /// Gets the type of cache used by this factory.
+        /// </summary>
+        CacheType Type { get; }
+
+        /// <summary>
+        /// Creates an action cache instance with a specified namespace.
+        /// </summary>
+        /// <param name="namespace">The namespace to associate with the cache.</param>
+        /// <returns>An instance of IActionCache or null if it cannot be created.</returns>
+        IActionCache? Create(string @namespace);
+    }
 }

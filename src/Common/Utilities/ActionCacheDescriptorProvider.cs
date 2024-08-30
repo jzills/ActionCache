@@ -1,24 +1,49 @@
-using System.Text;
+using ActionCache.Common.Extensions.Internal;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using ActionCache.Common.Extensions.Internal;
 using System.Collections.Concurrent;
+using System.Text;
 
 namespace ActionCache.Common.Utilities;
 
+/// <summary>
+/// Provides functionality to retrieve and cache action descriptor information.
+/// </summary>
 public class ActionCacheDescriptorProvider
 {
+    /// <summary>
+    /// Static cache for action rehydration descriptors.
+    /// </summary>
     protected static readonly IDictionary<string, ActionCacheRehydrationDescriptor> Cache;
 
+    /// <summary>
+    /// Service provider for obtaining services.
+    /// </summary>
     protected readonly IServiceProvider ServiceProvider;
+
+    /// <summary>
+    /// Collection of action descriptors.
+    /// </summary>
     protected readonly ActionDescriptorCollection ActionDescriptors;
+    
+    /// <summary>
+    /// Builder for creating cache keys.
+    /// </summary>
     protected readonly StringBuilder KeyBuilder;
 
+    /// <summary>
+    /// Initializes the static cache.
+    /// </summary>
     static ActionCacheDescriptorProvider()
     {
         Cache = new ConcurrentDictionary<string, ActionCacheRehydrationDescriptor>();
     }
 
+    /// <summary>
+    /// Constructs an ActionCacheDescriptorProvider with a service provider and descriptor provider.
+    /// </summary>
+    /// <param name="serviceProvider">Service provider for dependency resolution.</param>
+    /// <param name="descriptorProvider">Provider of action descriptors.</param>
     public ActionCacheDescriptorProvider(
         IServiceProvider serviceProvider,
         IActionDescriptorCollectionProvider descriptorProvider
@@ -26,9 +51,14 @@ public class ActionCacheDescriptorProvider
     {
         ServiceProvider = serviceProvider;
         ActionDescriptors = descriptorProvider.ActionDescriptors;
-        KeyBuilder = new();
+        KeyBuilder = new StringBuilder();
     }
 
+    /// <summary>
+    /// Retrieves the action method info associated with a namespace.
+    /// </summary>
+    /// <param name="namespace">The namespace of the controller.</param>
+    /// <returns>A rehydration descriptor for the specified namespace.</returns>
     public ActionCacheRehydrationDescriptor GetControllerActionMethodInfo(string @namespace)
     {
         if (Cache.TryGetValue(@namespace, out var cacheDescriptors))
@@ -59,6 +89,13 @@ public class ActionCacheDescriptorProvider
         }
     }
 
+    /// <summary>
+    /// Creates a cache key based on the area name, controller name, and action name.
+    /// </summary>
+    /// <param name="areaName">Area name of the controller action.</param>
+    /// <param name="controllerName">Controller name of the action.</param>
+    /// <param name="actionName">Name of the action method.</param>
+    /// <returns>A string key for the cache.</returns>
     private string CreateKey(string? areaName, string controllerName, string actionName)
     {
         var key = KeyBuilder.AppendJoinNonNull(':', areaName, controllerName, actionName).ToString();
