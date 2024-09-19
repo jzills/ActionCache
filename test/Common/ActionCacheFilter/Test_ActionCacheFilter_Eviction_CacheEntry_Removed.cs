@@ -8,22 +8,18 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using ActionCache.Attributes;
 using ActionCache.Filters;
 using ActionCache;
+using Unit.Common.Data;
 
-namespace Unit.Memory;
+namespace Unit.Common;
 
 [TestFixture]
-public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
+public class Test_ActionCacheFilter_Eviction_CacheEntry_Removed
 {
     [Test]
-    public async Task Test()
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
+    public async Task Test(IServiceProvider serviceProvider)
     {
         var @namespace = "Test";
-
-        var serviceProvider = new ServiceCollection()
-            .AddMemoryCache()
-            .AddActionCacheMemory(options => options.SizeLimit = int.MaxValue)
-            .BuildServiceProvider();
-
         var routeValues = new RouteValueDictionary
         {
             { "area", "someArea" },
@@ -37,7 +33,7 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
             routeData: new RouteData(routeValues),
             actionDescriptor: new ActionDescriptor()
         );
-
+        
         var actionExecutingContext = new ActionExecutingContext(
             actionContext,
             metadata,
@@ -59,11 +55,14 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create(@namespace)!;
-        var filter = new ActionCacheFilter(cache);
+
+        await cache.SetAsync("someArea:someController:someAction", "Foo");
+
+        var filter = new ActionCacheEvictionFilter(cache);
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
   
         var cacheResult = await cache.GetAsync<string>("someArea:someController:someAction");
-        Assert.That(cacheResult!.Equals("Foo"));
+        Assert.That(cacheResult, Is.Null);
     }
 }

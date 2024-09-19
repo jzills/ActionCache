@@ -1,19 +1,17 @@
 using ActionCache;
-using ActionCache.Redis.Extensions;
+using ActionCache.Memory.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Unit.Common.Data;
 
-namespace Unit.Redis;
+namespace Unit.Common;
 
 [TestFixture]
-public class Test_RedisActionCache_RemoveAsync_Namespace
+public class Test_ActionCache_RemoveAsync_Namespace
 {
     [Test]
-    public async Task Test()
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
+    public async Task Test(IServiceProvider serviceProvider)
     {
-        var serviceProvider = new ServiceCollection()
-            .AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379")
-            .BuildServiceProvider();
-
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create("Test")!;
 

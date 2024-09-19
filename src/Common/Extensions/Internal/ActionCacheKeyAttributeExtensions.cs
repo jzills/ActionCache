@@ -26,8 +26,6 @@ internal static class ActionCacheKeyAttributeExtensions
             var argType = arg.GetType();
             if (argType.IsClass)
             {
-                // TODO: Add configuration option to use base64 encoding class key elements
-                //mappedArgs.Add(Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(arg))));
                 mappedArgs.Add(JsonConvert.SerializeObject(arg));
             }
             else

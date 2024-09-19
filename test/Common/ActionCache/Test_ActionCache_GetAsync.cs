@@ -1,20 +1,16 @@
 using ActionCache;
-using ActionCache.Memory.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Unit.Common.Data;
 
-namespace Unit.Memory;
+namespace Unit.Common;
 
 [TestFixture]
-public class Test_MemoryActionCache_GetAsync
+public class Test_ActionCache_GetAsync
 {
     [Test]
-    public async Task Test()
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
+    public async Task Test(IServiceProvider serviceProvider)
     {
-        var serviceProvider = new ServiceCollection()
-            .AddMemoryCache()
-            .AddActionCacheMemory(options => options.SizeLimit = int.MaxValue)
-            .BuildServiceProvider();
-
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create("Test")!;
         await cache.SetAsync("Foo", "Bar");
