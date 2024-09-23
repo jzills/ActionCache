@@ -16,24 +16,25 @@ internal static class ActionCacheKeyAttributeExtensions
     /// <returns>An ordered list of arguments, serialized if the corresponding type is a class.</returns>
     internal static IEnumerable<object> GetArguments(
         this IReadOnlyDictionary<string, ActionCacheKeyAttribute> source,
-        IDictionary<string, object> args
+        IDictionary<string, object> actionArguments
     )
     {
-        var mappedArgs = new List<object>();
+        var mappedArguments = new List<object>(source.Count);
         foreach (var attribute in source.OrderBy(attribute => attribute.Value.Order))
         {
-            var arg = args[attribute.Key];
-            var argType = arg.GetType();
-            if (argType.IsClass)
+            var argument = actionArguments[attribute.Key];
+            if (ShouldSerialize(argument.GetType()))
             {
-                mappedArgs.Add(JsonConvert.SerializeObject(arg));
+                mappedArguments.Add(JsonConvert.SerializeObject(argument));
             }
             else
             {
-                mappedArgs.Add(arg);
+                mappedArguments.Add(argument);
             }
         }
 
-        return mappedArgs;
+        return mappedArguments;
     }
+
+    private static bool ShouldSerialize(Type type) => type != typeof(string) && type.IsClass;
 }

@@ -2,9 +2,9 @@ using ActionCache.Memory.Extensions;
 using ActionCache.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Unit.Common.Data;
+namespace Unit.TestUtiltiies.Data;
 
-public static class TestData
+public static partial class TestData
 {
     public static IEnumerable<IServiceProvider> GetServiceProviders()
     {

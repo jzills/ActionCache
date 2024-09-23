@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using ActionCache.Memory.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using ActionCache.Attributes;
 using ActionCache.Filters;
 using ActionCache;
-using Unit.Common.Data;
+using Unit.TestUtiltiies.Data;
 
 namespace Unit.Common;
 
