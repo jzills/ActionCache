@@ -3,6 +3,9 @@ using Unit.TestUtiltiies.Data;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
+using System.Text;
+using ActionCache.Common.Extensions;
+using System.Text.Json;
 
 namespace Unit.Common;
 
@@ -27,6 +30,19 @@ public class Test_ActionCacheKeyBuilder_WithActionArguments_PlainText
             .WithActionArguments(actionArguments)
             .Build();
 
-        Assert.That(key, Is.EqualTo(string.Join(":", routeValues.Values.Concat(actionArguments.Values))));
+        var keyValues = new List<object>();
+        foreach (var value in routeValues.Values.Concat(actionArguments.Values))
+        {
+            if (value.GetType().ShouldSerialize())
+            {
+                keyValues.Add(JsonSerializer.Serialize(value));
+            }
+            else
+            {
+                keyValues.Add(value);
+            }
+        }
+
+        Assert.That(key, Is.EqualTo(string.Join(":", keyValues)));
     }
 }

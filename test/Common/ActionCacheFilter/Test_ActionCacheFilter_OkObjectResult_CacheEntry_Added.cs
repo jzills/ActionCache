@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using ActionCache.Attributes;
 using ActionCache.Filters;
 using ActionCache;
-using System.Security.Cryptography;
-using System.Text;
 using Unit.TestUtiltiies.Data;
+using ActionCache.Common.Utilities;
 
 namespace Unit.Common;
 
@@ -60,7 +59,7 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
 
-        var key = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("someArea:someController:someAction")));
+        var key = KeyHashGenerator.ToHash("someArea:someController:someAction");
         var cacheResult = await cache.GetAsync<string>(key);
         Assert.That(cacheResult!.Equals("Foo"));
     }

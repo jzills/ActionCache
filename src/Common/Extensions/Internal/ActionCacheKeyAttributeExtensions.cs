@@ -23,7 +23,7 @@ internal static class ActionCacheKeyAttributeExtensions
         foreach (var attribute in source.OrderBy(attribute => attribute.Value.Order))
         {
             var argument = actionArguments[attribute.Key];
-            if (ShouldSerialize(argument.GetType()))
+            if (argument.GetType().ShouldSerialize())
             {
                 mappedArguments.Add(JsonConvert.SerializeObject(argument));
             }
@@ -35,6 +35,4 @@ internal static class ActionCacheKeyAttributeExtensions
 
         return mappedArguments;
     }
-
-    private static bool ShouldSerialize(Type type) => type != typeof(string) && type.IsClass;
 }
