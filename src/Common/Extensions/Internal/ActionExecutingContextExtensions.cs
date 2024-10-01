@@ -52,8 +52,8 @@ internal static class ActionExecutingContextExtensions
     internal static bool TryGetKey(this ActionExecutingContext context, out string key) 
     {
         var (actionDescriptor, routeData, actionArgs) = context;
-        var keyInternal = new ActionCacheKeyBuilder(actionDescriptor)
-            .WithRouteData(routeData)
+        var keyInternal = new ActionCacheKeyBuilder()
+            .WithRouteValues(routeData.Values)
             .WithActionArguments(actionArgs)
             .Build();
 

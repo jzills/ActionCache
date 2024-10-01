@@ -46,6 +46,15 @@ public class ActionCacheFilter : IAsyncActionFilter
                 if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
                 {
                     // TODO: Rehydration
+                    // Try setting using the namespace as the key
+                    // and the key as the value. This would need to 
+                    // add to a collection internally that can then be pulled from
+                    // to rehydrate based on the key structure since the key
+                    // is made of route:actionArgs
+
+                    // THESE ARE ALREADY STORED WITH REDIS IN ActionCache:Namespace
+                    // JUST PULL THOSE AND refresh based on key components.
+                    //await Cache.SetAsync(Namespace, key);
                 }
             }
         }

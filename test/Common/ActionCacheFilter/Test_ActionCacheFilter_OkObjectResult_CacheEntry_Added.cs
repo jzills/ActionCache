@@ -26,12 +26,15 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
             { "controller", "someController" },
             { "action", "someAction" }
         };
+
+        var routeData = new RouteData(routeValues);
+        var actionDescriptor = new ActionDescriptor();
         
         var metadata = new List<IFilterMetadata> { new ActionCacheAttribute { Namespace = @namespace } };
         var actionContext = new ActionContext(
             httpContext: new DefaultHttpContext(),
-            routeData: new RouteData(routeValues),
-            actionDescriptor: new ActionDescriptor()
+            routeData: routeData,
+            actionDescriptor: actionDescriptor
         );
 
         var actionExecutingContext = new ActionExecutingContext(
@@ -59,7 +62,11 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
 
-        var key = KeyHashGenerator.ToHash("someArea:someController:someAction");
+        var key = new ActionCacheKeyBuilder()
+            .WithRouteValues(routeData.Values)
+            .WithActionArguments(null)
+            .Build();
+
         var cacheResult = await cache.GetAsync<string>(key);
         Assert.That(cacheResult!.Equals("Foo"));
     }

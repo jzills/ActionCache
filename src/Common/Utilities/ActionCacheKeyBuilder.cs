@@ -1,5 +1,4 @@
-using ActionCache.Common.Extensions;
-using Microsoft.AspNetCore.Mvc.Abstractions;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Routing;
 
 namespace ActionCache.Common.Utilities;
@@ -12,50 +11,21 @@ public class ActionCacheKeyBuilder
     /// <summary>
     /// The key separator used to delineate between key components.
     /// </summary>
-    protected readonly char KeySeparator = ':';
+    protected static readonly char KeySeparator = ':';
 
     /// <summary>
-    /// The action descriptor related to the incoming request. 
+    /// A key component derived from the route data and action arguments associated with an incoming request. 
     /// </summary>
-    protected readonly ActionDescriptor ActionDescriptor;
+    protected readonly ActionCacheKeyComponents KeyComponents = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ActionCacheKeyBuilder"/> class.
+    /// Includes route values in the cache key.
     /// </summary>
-    /// <param name="actionDescriptor">The action descriptor associated with the cache key.</param>
-    /// <param name="useHashForKeyComponents">A flag indicating if the builder should hash the cache key.</param>
-    public ActionCacheKeyBuilder(
-        ActionDescriptor actionDescriptor, 
-        bool useHashForKeyComponents = true
-    )
-    {
-        ActionDescriptor = actionDescriptor;
-        UseHashForKeyComponents = useHashForKeyComponents;
-    }
-
-    /// <summary>
-    /// A key component derived from the route data associated with an incoming request. 
-    /// </summary>
-    protected string? RouteDataKey { get; set; }
-
-    /// <summary>
-    /// A key component derived from the action arguments associated with an incoming request. 
-    /// </summary>
-    protected string? ActionArgKey { get; set; }
-
-    /// <summary>
-    /// A flag indicating if the builder should hash the cache key.
-    /// </summary>
-    protected bool UseHashForKeyComponents { get; set; } = true;
-
-    /// <summary>
-    /// Includes route data in the cache key.
-    /// </summary>
-    /// <param name="routeData">Route data for the action.</param>
+    /// <param name="routeValues">Route values for the action.</param>
     /// <returns>Returns itself for chaining.</returns>
-    public ActionCacheKeyBuilder WithRouteData(RouteData routeData)
+    public ActionCacheKeyBuilder WithRouteValues(RouteValueDictionary routeValues)
     {
-        RouteDataKey = ConcatKeyComponents(routeData.Values.Select(route => route.Value));
+        KeyComponents.RouteValues = routeValues;
         return this;
     }
 
@@ -66,40 +36,19 @@ public class ActionCacheKeyBuilder
     /// <returns>Returns itself for chaining.</returns>
     public ActionCacheKeyBuilder WithActionArguments(IDictionary<string, object> actionArguments)
     {
-        if (ActionDescriptor.TryGetKeyAttributes(out var attributes) && actionArguments.Any())
-        {
-            ActionArgKey = ConcatKeyComponents(attributes.GetArguments(actionArguments));
-        }
-
+        actionArguments ??= new Dictionary<string, object>();
+        KeyComponents.ActionArguments = actionArguments.AsReadOnly();
         return this;
     }
 
     /// <summary>
     /// Builds the final cache key.
     /// </summary>
-    /// <returns>The constructed cache key, or null if critical components are missing.</returns>
-    public string? Build()
+    /// <returns>The constructed cache key.</returns>
+    public string Build()
     {
-        if (string.IsNullOrWhiteSpace(RouteDataKey))
-        {
-            return default;
-        }
-        else
-        {
-            return string.IsNullOrWhiteSpace(ActionArgKey) ?
-                RouteDataKey : ConcatKeyComponents([RouteDataKey, ActionArgKey]);
-        }
-    }
-
-    /// <summary>
-    /// Concatenates key components using the configured separator.
-    /// </summary>
-    /// <param name="components">Components to concatenate.</param>
-    /// <returns>The concatenated string.</returns>
-    private string ConcatKeyComponents(IEnumerable<object> components)
-    {
-        var keyComponents = string.Join(KeySeparator, components);
-        return UseHashForKeyComponents ?
-            KeyHashGenerator.ToHash(keyComponents) : keyComponents;
+        var keyComponents = KeyComponents.Serialize();
+        var keyCryptoGenerator = new KeyCryptoGenerator();
+        return keyCryptoGenerator.Encrypt(keyComponents);
     }
 }

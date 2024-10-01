@@ -44,6 +44,8 @@ internal abstract class ActionCacheRehydrator : IActionCacheRehydrator
             foreach (var (route, methodInfo) in descriptorCollection.MethodInfos)
             {
                 var controller = descriptorCollection.Controllers[route];
+                // Instead of ActionArgsAccessor, just use the IActionCache and get "ActionCache:Namespace" to 
+                // fetch all of the keys currently in the cache. Then decrypt the keys to get the routeValues and actionArgs.
                 var actionArgs = await ActionArgsAccessor($"ActionCache:{@namespace}:Rehydration:{route}");
                 if (actionArgs is not null)
                 {
