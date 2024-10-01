@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ActionCache.Common.Utilities;
+namespace ActionCache.Common.Keys;
 
 public static class KeyHashGenerator
 {

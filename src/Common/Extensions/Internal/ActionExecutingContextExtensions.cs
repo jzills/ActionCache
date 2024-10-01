@@ -1,5 +1,5 @@
 using ActionCache.Attributes;
-using ActionCache.Common.Utilities;
+using ActionCache.Common.Keys;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;

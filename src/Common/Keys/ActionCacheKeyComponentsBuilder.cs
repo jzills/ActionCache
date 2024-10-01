@@ -3,7 +3,7 @@ using System.Web;
 using ActionCache.Common.Extensions.Internal;
 using Microsoft.AspNetCore.Routing;
 
-namespace ActionCache.Utilities;
+namespace ActionCache.Common.Keys;
 
 public class ActionCacheKeyComponentsBuilder
 {

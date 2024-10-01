@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using System.Text.Json;
 using ActionCache.Utilities;
+using ActionCache.Common.Keys;
 
 namespace Unit.Common;
 

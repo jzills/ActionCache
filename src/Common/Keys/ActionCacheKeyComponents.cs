@@ -1,13 +1,12 @@
-using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 
-namespace ActionCache.Utilities;
+namespace ActionCache.Common.Keys;
 
 public class ActionCacheKeyComponents
 {
-    public RouteValueDictionary? RouteValues { get; set; }
-    public IReadOnlyDictionary<string, object>? ActionArguments { get; set; }
+    public RouteValueDictionary? RouteValues { get; set; } = new();
+    public IReadOnlyDictionary<string, object>? ActionArguments { get; set; } = new Dictionary<string, object>();
     public string Serialize()
     {
         var route = $"route={JsonSerializer.Serialize(RouteValues)}";

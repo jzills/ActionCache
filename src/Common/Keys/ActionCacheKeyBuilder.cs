@@ -1,7 +1,7 @@
 using ActionCache.Utilities;
 using Microsoft.AspNetCore.Routing;
 
-namespace ActionCache.Common.Utilities;
+namespace ActionCache.Common.Keys;
 
 /// <summary>
 /// Provides functionality to build cache keys for action methods.
@@ -36,7 +36,6 @@ public class ActionCacheKeyBuilder
     /// <returns>Returns itself for chaining.</returns>
     public ActionCacheKeyBuilder WithActionArguments(IDictionary<string, object> actionArguments)
     {
-        actionArguments ??= new Dictionary<string, object>();
         KeyComponents.ActionArguments = actionArguments.AsReadOnly();
         return this;
     }

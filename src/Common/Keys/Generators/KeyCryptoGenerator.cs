@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ActionCache.Utilities;
+namespace ActionCache.Common.Keys;
 
 internal class KeyCryptoGenerator
 {

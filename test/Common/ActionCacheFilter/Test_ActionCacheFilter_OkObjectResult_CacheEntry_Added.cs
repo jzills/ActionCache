@@ -9,6 +9,7 @@ using ActionCache.Filters;
 using ActionCache;
 using Unit.TestUtiltiies.Data;
 using ActionCache.Common.Utilities;
+using ActionCache.Common.Keys;
 
 namespace Unit.Common;
 
@@ -64,7 +65,6 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 
         var key = new ActionCacheKeyBuilder()
             .WithRouteValues(routeData.Values)
-            .WithActionArguments(null)
             .Build();
 
         var cacheResult = await cache.GetAsync<string>(key);
