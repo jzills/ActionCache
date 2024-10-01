@@ -1,15 +1,44 @@
-namespace Integration;
+using ActionCache.Attributes;
+using ActionCache.Redis.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 
-public class Tests
+[TestFixture]
+public class Test_ActionCacheRehydrator
 {
+    TestServer Server;
+    HttpClient Client;
+
     [SetUp]
     public void Setup()
     {
+        var builder = new WebHostBuilder()
+            .ConfigureServices(services => 
+            {
+                services.AddMvc();
+                services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
+            })
+            .Configure(app =>
+            {
+                app.UseHttpsRedirection();
+                app.UseRouting();
+
+                app.UseEndpoints(options => options.MapControllers());
+            });
+
+        Server = new TestServer(builder);
+        Client = Server.CreateClient();
     }
 
     [Test]
-    public void Test1()
+    public async Task Test()
     {
-        Assert.Pass();
+        var userResponse = await Client.GetAsync("/users");
+        userResponse.EnsureSuccessStatusCode();
     }
 }
