@@ -6,6 +6,12 @@ namespace ActionCache;
 public interface IActionCache
 {
     /// <summary>
+    /// Retrieves the keys associated with the specified namespace from the cache.
+    /// </summary>
+    /// <returns>The keys associated with the specified cache namespace.</returns>
+    Task<IEnumerable<string>> GetKeysAsync();
+
+    /// <summary>
     /// Retrieves the value associated with the specified key from the cache.
     /// </summary>
     /// <typeparam name="TValue">The type of the value to retrieve.</typeparam>

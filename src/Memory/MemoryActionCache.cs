@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
@@ -55,6 +56,15 @@ public class MemoryActionCache : IActionCache
     public Task SetAsync<TValue>(string key, TValue? value)
     {
         Cache.Set(Namespace.Create(key), value, EntryOptions);
+
+        // Use concurrent bag
+        var keys = Cache.GetOrCreate(Namespace, options => {
+            options.Size = 1;
+            return new ConcurrentHashSet<string>();
+        });
+        
+        keys.Add(key);
+
         return Task.CompletedTask;
     }
 
@@ -65,6 +75,13 @@ public class MemoryActionCache : IActionCache
     public Task RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
+
+        var keys = (ConcurrentHashSet<string>?)Cache.Get(Namespace);
+        if (keys?.Count > 0)
+        {
+            keys.Remove(key);
+        }
+
         return Task.CompletedTask;
     }
 
@@ -72,4 +89,10 @@ public class MemoryActionCache : IActionCache
     /// Asynchronously removes all values from the cache.
     /// </summary>
     public Task RemoveAsync() => CancellationTokenSource.CancelAsync();
+
+    public Task<IEnumerable<string>> GetKeysAsync()
+    {
+        var keys = (ConcurrentHashSet<string>?)Cache.Get(Namespace);
+        return Task.FromResult(keys?.ToList() ?? []);
+    }
 }

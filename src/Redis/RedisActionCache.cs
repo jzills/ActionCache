@@ -114,4 +114,10 @@ public class RedisActionCache : IActionCache
             return default;
         }
     }
+
+    public async Task<IEnumerable<string>> GetKeysAsync()
+    {
+        var value = await Cache.SetMembersAsync(Namespace);
+        return (IEnumerable<string>)value.Select(value => (string?)value);
+    }
 }

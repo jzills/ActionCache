@@ -5,6 +5,63 @@ using System.Text.Json;
 
 namespace ActionCache.Common;
 
+// internal class ActionCacheRehydrator2
+// {
+//     protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+//     protected readonly IActionCache Cache;
+
+//     public ActionCacheRehydrator2(
+//         IActionCache cache,
+//         ActionCacheDescriptorProvider descriptorProvider
+//     )
+//     {
+//         Cache = cache;
+//         DescriptorProvider = descriptorProvider;
+//     }
+
+//     public async Task Rehydrate(string @namespace)
+//     {
+//         var rehydrationDescriptor = new List<RehydrationResult>();
+//         var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
+//         if (descriptorCollection.MethodInfos.Any())
+//         {
+//             foreach (var (route, methodInfo) in descriptorCollection.MethodInfos)
+//             {
+//                 var controller = descriptorCollection.Controllers[route];
+//                 // Instead of ActionArgsAccessor, just use the IActionCache and get "ActionCache:Namespace" to 
+//                 // fetch all of the keys currently in the cache. Then decrypt the keys to get the routeValues and actionArgs.
+//                 var actionArgs = await Cache.GetAsync<IEnumerable<string>>($"ActionCache:{@namespace}");
+//                 if (actionArgs is not null)
+//                 {
+//                     foreach (var actionArg in actionArgs)
+//                     {
+//                         var actionValueConversions = new SortedList<int, object?>();
+//                         foreach (var parameter in methodInfo.GetParameters())
+//                         {
+//                             if (parameter.TryGetValue(actionArg, out var actionCacheAttribute))
+//                             {
+//                                 actionValueConversions.Add(
+//                                     actionCacheAttribute.Order, 
+//                                     actionCacheAttribute.Value
+//                                 );
+//                             }
+//                         }
+
+//                         if (methodInfo.TryGetRehydrationResult(
+//                                 controller, 
+//                                 actionValueConversions.Values.ToArray(), 
+//                                 out var result
+//                         ))
+//                         {
+//                             rehydrationDescriptor.Add(result);
+//                         }
+//                     } 
+//                 }    
+//             }
+//         }
+//     }
+// }
+
 /// <summary>
 /// Provides functionality to rehydrate actions from cache.
 /// </summary>

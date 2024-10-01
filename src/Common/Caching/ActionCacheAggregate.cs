@@ -37,6 +37,17 @@ public class ActionCacheAggregate : IActionCache
         return value;
     }
 
+    public async Task<IEnumerable<string>> GetKeysAsync()
+    {
+        var keys = new List<string>();
+        foreach (var cache in Caches)
+        {
+            keys.AddRange(await cache.GetKeysAsync());
+        }
+
+        return keys;
+    }
+
     /// <summary>
     /// Asynchronously removes the specified key from the cache.
     /// </summary>
