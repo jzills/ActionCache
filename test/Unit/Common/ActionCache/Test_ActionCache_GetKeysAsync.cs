@@ -13,6 +13,8 @@ public class Test_ActionCache_GetKeysAsync
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create("Test")!;
+        await cache.RemoveAsync();
+
         await cache.SetAsync("Foo", "Bar");
         await cache.SetAsync("Biz", "Baz");
 
