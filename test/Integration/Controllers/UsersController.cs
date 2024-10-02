@@ -8,7 +8,7 @@ public class UsersController : Controller
 {
     [HttpGet("")]
     [ActionCache(Namespace = "Users")]
-    public IActionResult GetAll() =>
+    public IActionResult Get() =>
         Ok(new object[]
         {
             new { Id = 1, Name = "Joshua" },
@@ -16,4 +16,12 @@ public class UsersController : Controller
             new { Id = 3, Name = "Izzy" },
             new { Id = 4, Name = "Vanessa" }
         });
+
+    [HttpPost("")]
+    [ActionCacheRefresh(Namespace = "Users")]
+    public IActionResult Post() => Ok();
+
+    [HttpDelete("")]
+    [ActionCacheEviction(Namespaces = "Users")]
+    public IActionResult Delete() => Ok();
 }

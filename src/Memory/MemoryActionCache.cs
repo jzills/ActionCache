@@ -10,7 +10,7 @@ namespace ActionCache.Memory;
 /// </summary>
 public class MemoryActionCache : IActionCache
 {
-    protected readonly Namespace Namespace;
+    public readonly Namespace Namespace;
     protected readonly IMemoryCache Cache;
     protected readonly CancellationTokenSource CancellationTokenSource;
 
@@ -94,5 +94,10 @@ public class MemoryActionCache : IActionCache
     {
         var keys = (ConcurrentHashSet<string>?)Cache.Get(Namespace);
         return Task.FromResult(keys?.ToList() ?? []);
+    }
+
+    public Task RefreshAsync()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -12,20 +12,21 @@ public static partial class TestData
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
     {
-        var memoryServiceProvider = new ServiceCollection()
-            .AddMemoryCache()
-            .AddActionCacheMemory(options => options.SizeLimit = int.MaxValue)
-            .BuildServiceProvider();
+        var services = new ServiceCollection();
 
-        return [memoryServiceProvider];
+        services.AddMvc();
+        services.AddActionCacheMemory(options => options.SizeLimit = int.MaxValue);
+
+        return [services.BuildServiceProvider()];
     }
 
     public static IEnumerable<IServiceProvider> GetRedisCacheServiceProvider()
     {
-        var redisServiceProvider = new ServiceCollection()
-            .AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379")
-            .BuildServiceProvider();
+        var services = new ServiceCollection();
 
-        return [redisServiceProvider];
+        services.AddMvc();
+        services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
+
+        return [services.BuildServiceProvider()];
     }
 }

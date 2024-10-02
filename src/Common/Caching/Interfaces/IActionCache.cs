@@ -40,4 +40,10 @@ public interface IActionCache
     /// </summary>
     /// <returns>A task that represents the asynchronous remove operation.</returns>
     Task RemoveAsync();
+
+    /// <summary>
+    /// Refreshs all values and keys from the cache.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous refresh operation.</returns>
+    Task RefreshAsync();
 }

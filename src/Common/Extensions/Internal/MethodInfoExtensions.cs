@@ -20,24 +20,24 @@ internal static class MethodInfoExtensions
             .Namespace.Contains(@namespace) ?? false;
 
     /// <summary>
-    /// Tries to get the rehydration result from the method execution using specified parameters.
+    /// Tries to get the refresh result from the method execution using specified parameters.
     /// </summary>
     /// <param name="methodInfo">The method to invoke.</param>
     /// <param name="controller">The controller instance on which to invoke the method.</param>
     /// <param name="parameters">Parameters to use during method invocation.</param>
-    /// <param name="value">The output rehydration result if the method execution is successful.</param>
+    /// <param name="value">The output refresh result if the method execution is successful.</param>
     /// <returns>true if the method returns an <see cref="OkObjectResult"/>; otherwise, false.</returns>
-    public static bool TryGetRehydrationResult(
+    public static bool TryGetRefreshResult(
         this MethodInfo? methodInfo, 
         object? controller, 
         object?[]? parameters, 
-        out RehydrationResult value
+        out RefreshResult value
     )
     {
         var result = methodInfo?.Invoke(controller, parameters);
         if (result is OkObjectResult okObjectResult)
         {
-            value = new RehydrationResult
+            value = new RefreshResult
             {
                 Key = string.Join(":", parameters ?? []),
                 Value = okObjectResult.Value

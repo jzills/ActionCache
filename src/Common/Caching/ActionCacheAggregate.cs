@@ -48,6 +48,14 @@ public class ActionCacheAggregate : IActionCache
         return keys;
     }
 
+    public async Task RefreshAsync()
+    {
+        foreach (var cache in Caches)
+        {
+            await cache.RefreshAsync();
+        }
+    }
+
     /// <summary>
     /// Asynchronously removes the specified key from the cache.
     /// </summary>

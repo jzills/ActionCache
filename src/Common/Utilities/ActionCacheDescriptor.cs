@@ -3,9 +3,9 @@ using System.Reflection;
 namespace ActionCache.Common.Utilities;
 
 /// <summary>
-/// Represents a descriptor to hold method information and corresponding controller instances for action cache rehydration.
+/// Represents a descriptor to hold method information and corresponding controller instances for action cache events.
 /// </summary>
-public class ActionCacheRehydrationDescriptor
+public class ActionCacheDescriptor
 {
     /// <summary>
     /// A dictionary containing method information indexed by a unique key.

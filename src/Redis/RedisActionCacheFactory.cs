@@ -1,3 +1,4 @@
+using ActionCache.Common.Utilities;
 using StackExchange.Redis;
 
 namespace ActionCache.Redis;
@@ -11,12 +12,21 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
+
+    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
     
     /// <summary>
     /// Constructor for RedisActionCacheFactory.
     /// </summary>
     /// <param name="connectionMultiplexer">ConnectionMultiplexer for Redis.</param>
-    public RedisActionCacheFactory(IConnectionMultiplexer connectionMultiplexer) => Cache = connectionMultiplexer.GetDatabase();
+    public RedisActionCacheFactory(
+        IConnectionMultiplexer connectionMultiplexer,
+        ActionCacheDescriptorProvider descriptorProvider
+    ) 
+    {
+        Cache = connectionMultiplexer.GetDatabase();
+        DescriptorProvider = descriptorProvider;
+    }
     
     /// <summary>
     /// Gets the type of cache.
@@ -28,5 +38,5 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// </summary>
     /// <param name="namespace">Namespace for the cache.</param>
     /// <returns>New instance of RedisActionCache.</returns>
-    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache);
+    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache, DescriptorProvider);
 }

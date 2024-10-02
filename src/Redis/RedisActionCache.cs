@@ -1,3 +1,6 @@
+using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Keys;
+using ActionCache.Common.Utilities;
 using ActionCache.Redis.Extensions;
 using StackExchange.Redis;
 using System.Reflection;
@@ -20,6 +23,8 @@ public class RedisActionCache : IActionCache
     /// </summary> 
     protected readonly IDatabase Cache;
 
+    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+
     /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
     /// </summary>
@@ -27,11 +32,13 @@ public class RedisActionCache : IActionCache
     /// <param name="cache">The IDatabase to use for caching.</param>
     public RedisActionCache(
         RedisNamespace @namespace, 
-        IDatabase cache
+        IDatabase cache,
+        ActionCacheDescriptorProvider descriptorProvider
     )
     {
         Namespace = @namespace;
         Cache = cache;
+        DescriptorProvider = descriptorProvider;
     }
 
     /// <summary>
@@ -119,5 +126,44 @@ public class RedisActionCache : IActionCache
     {
         var value = await Cache.SetMembersAsync(Namespace);
         return (IEnumerable<string>)value.Select(value => (string?)value);
+    }
+
+    public async Task RefreshAsync()
+    {
+        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(Namespace.Value);
+        if (descriptorCollection.MethodInfos.Any())
+        {
+            var keys = await GetKeysAsync();
+            if (keys?.Any() ?? false)
+            {
+                foreach (var key in keys)
+                {
+                    var keyComponents = new ActionCacheKeyComponentsBuilder(key).Build();
+                    var routeValuesKey = DescriptorProvider.CreateKey(
+                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("area"))?.GetString(),
+                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("controller"))?.GetString(),
+                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("action"))?.GetString()
+                    );
+
+                    if (descriptorCollection.MethodInfos.TryGetValue(
+                            routeValuesKey, 
+                            out var methodInfo
+                        ))
+                    {
+                        if (descriptorCollection.Controllers.TryGetValue(routeValuesKey, out var controller))
+                        {
+                            if (methodInfo.TryGetRefreshResult(
+                                    controller, 
+                                    keyComponents.ActionArguments?.Values?.ToArray(), 
+                                    out var result
+                            ))
+                            {
+                                await SetAsync(key, result.Value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@ public class ActionCacheDescriptorProvider
     /// <summary>
     /// Static cache for action rehydration descriptors.
     /// </summary>
-    protected static readonly IDictionary<string, ActionCacheRehydrationDescriptor> Cache;
+    protected static readonly IDictionary<string, ActionCacheDescriptor> Cache;
 
     /// <summary>
     /// Service provider for obtaining services.
@@ -36,11 +36,11 @@ public class ActionCacheDescriptorProvider
     /// </summary>
     static ActionCacheDescriptorProvider()
     {
-        Cache = new ConcurrentDictionary<string, ActionCacheRehydrationDescriptor>();
+        Cache = new ConcurrentDictionary<string, ActionCacheDescriptor>();
     }
 
     /// <summary>
-    /// Constructs an ActionCacheDescriptorProvider with a service provider and descriptor provider.
+    /// Constructs an ActionCacheDescriptor with a service provider and descriptor provider.
     /// </summary>
     /// <param name="serviceProvider">Service provider for dependency resolution.</param>
     /// <param name="descriptorProvider">Provider of action descriptors.</param>
@@ -59,7 +59,7 @@ public class ActionCacheDescriptorProvider
     /// </summary>
     /// <param name="namespace">The namespace of the controller.</param>
     /// <returns>A rehydration descriptor for the specified namespace.</returns>
-    public ActionCacheRehydrationDescriptor GetControllerActionMethodInfo(string @namespace)
+    public ActionCacheDescriptor GetControllerActionMethodInfo(string @namespace)
     {
         if (Cache.TryGetValue(@namespace, out var cacheDescriptors))
         {
@@ -67,7 +67,7 @@ public class ActionCacheDescriptorProvider
         }
         else
         {
-            var descriptors = new ActionCacheRehydrationDescriptor();
+            var descriptors = new ActionCacheDescriptor();
 
             if (ActionDescriptors.TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))
             {
@@ -96,7 +96,7 @@ public class ActionCacheDescriptorProvider
     /// <param name="controllerName">Controller name of the action.</param>
     /// <param name="actionName">Name of the action method.</param>
     /// <returns>A string key for the cache.</returns>
-    private string CreateKey(string? areaName, string controllerName, string actionName)
+    public string CreateKey(string? areaName, string controllerName, string actionName)
     {
         var key = KeyBuilder.AppendJoinNonNull(':', areaName, controllerName, actionName).ToString();
         KeyBuilder.Clear();

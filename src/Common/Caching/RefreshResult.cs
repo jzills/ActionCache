@@ -3,7 +3,7 @@ namespace ActionCache.Common;
 /// <summary>
 /// Represents the result of a rehydration process, storing the key and the value retrieved.
 /// </summary>
-internal class RehydrationResult
+internal class RefreshResult
 {
     /// <summary>
     /// Gets or sets the key related to the rehydrated value.

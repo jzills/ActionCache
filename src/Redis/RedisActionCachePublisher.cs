@@ -1,3 +1,4 @@
+using ActionCache.Common.Utilities;
 using ActionCache.Utilities;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -16,8 +17,9 @@ public class RedisActionCachePublisher : RedisActionCache
     /// <param name="cache">The Redis cache database.</param>
     public RedisActionCachePublisher(
         RedisNamespace @namespace, 
-        IDatabase cache
-    ) : base(@namespace, cache)
+        IDatabase cache,
+        ActionCacheDescriptorProvider descriptorProvider
+    ) : base(@namespace, cache, descriptorProvider)
     {
     }
 

@@ -1,6 +1,7 @@
+using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions;
+using ActionCache.Common.Extensions.Internal;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ActionCache.Filters;
@@ -34,32 +35,26 @@ public class ActionCacheFilter : IAsyncActionFilter
             var cacheValue = await Cache.GetAsync<object>(key);
             if (cacheValue is not null)
             {
+                context.AddCacheStatus(CacheStatus.HIT);
                 context.Result = new OkObjectResult(cacheValue);
-                return;
             }
-
-            var actionExecutedContext = await next();
-            if (actionExecutedContext.TryGetOkObjectResultValue(out var value))
+            else
             {
-                await Cache.SetAsync(key, value);
-
-                if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
+                var actionExecutedContext = await next();
+                if (actionExecutedContext.TryGetOkObjectResultValue(out var value))
                 {
-                    // TODO: Rehydration
-                    // Try setting using the namespace as the key
-                    // and the key as the value. This would need to 
-                    // add to a collection internally that can then be pulled from
-                    // to rehydrate based on the key structure since the key
-                    // is made of route:actionArgs
-
-                    // THESE ARE ALREADY STORED WITH REDIS IN ActionCache:Namespace
-                    // JUST PULL THOSE AND refresh based on key components.
-                    //await Cache.SetAsync(Namespace, key);
+                    context.AddCacheStatus(CacheStatus.ADD);
+                    await Cache.SetAsync(key, value);
+                }
+                else
+                {
+                    context.AddCacheStatus(CacheStatus.NONE);
                 }
             }
         }
         else
         {
+            context.AddCacheStatus(CacheStatus.MISS);
             await next();
         }
     }

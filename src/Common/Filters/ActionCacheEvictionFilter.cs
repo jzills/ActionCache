@@ -1,4 +1,6 @@
+using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ActionCache.Filters;
@@ -30,8 +32,9 @@ public class ActionCacheEvictionFilter : IAsyncActionFilter
         var actionExecutedContext = await next();
         
         // Cache eviction logic after a successful response.
-        if (actionExecutedContext.TryGetOkObjectResultValue(out _))
+        if (actionExecutedContext.HttpContext.Response.StatusCode == StatusCodes.Status200OK)
         {
+            context.AddCacheStatus(CacheStatus.EVICT);
             await Cache.RemoveAsync();
         }
     }

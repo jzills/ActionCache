@@ -1,15 +1,13 @@
-using ActionCache.Common;
 using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
 /// <summary>
-/// A filter factory attribute that rehydrates cached action data based on the specified namespace.
+/// A filter factory attribute that refreshes cached action data based on the specified namespace.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-internal class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
+[AttributeUsage(AttributeTargets.Method)]
+public class ActionCacheRefreshFilterFactory : Attribute, IFilterFactory
 {
     /// <summary>
     /// Gets or sets the namespace used to retrieve and group the action caches.
@@ -32,10 +30,8 @@ internal class ActionCacheRehydrationFilterFactory : Attribute, IFilterFactory
 
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
-            return new ActionCacheRehydrationFilter(
-                Namespace,
-                new ActionCacheAggregate(caches),
-                serviceProvider.GetRequiredService<IActionCacheRehydrator>());
+            return new ActionCacheRefreshFilter(
+                new ActionCacheAggregate(caches));
         }
         else
         {
