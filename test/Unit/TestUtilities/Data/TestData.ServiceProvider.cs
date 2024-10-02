@@ -1,5 +1,6 @@
 using ActionCache.Memory.Extensions;
 using ActionCache.Redis.Extensions;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Unit.TestUtiltiies.Data;
@@ -17,7 +18,9 @@ public static partial class TestData
         services.AddMvc();
         services.AddActionCacheMemory(options => options.SizeLimit = int.MaxValue);
 
-        return [services.BuildServiceProvider()];
+        var server = new TestServer(services.BuildServiceProvider());
+
+        return [server.Services];
     }
 
     public static IEnumerable<IServiceProvider> GetRedisCacheServiceProvider()
@@ -27,6 +30,8 @@ public static partial class TestData
         services.AddMvc();
         services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
 
-        return [services.BuildServiceProvider()];
+        var server = new TestServer(services.BuildServiceProvider());
+
+        return [server.Services];
     }
 }
