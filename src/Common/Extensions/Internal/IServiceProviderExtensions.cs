@@ -1,3 +1,4 @@
+using ActionCache.Common.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Common.Extensions;
@@ -93,6 +94,6 @@ internal static class IServiceProviderExtensions
     /// <param name="caches">The collection of caches.</param>
     /// <returns>True if all caches exist, otherwise false.</returns>
     private static bool EnsureAllCachesExist(IEnumerable<IActionCache?>? caches) =>
-        (caches?.Any() ?? false) && 
-         caches.All(cache => cache is not null);
+        caches.Some() && 
+        caches.All(cache => cache is not null);
 }

@@ -25,7 +25,7 @@ public static class IServiceCollectionExtensions
             manager.PopulateFeature(feature);
 
             var controllerTypes = feature.Controllers.Select(controller => controller.AsType());
-            if (controllerTypes?.Any() ?? false) 
+            if (controllerTypes.Some()) 
             {
                 foreach (var controller in controllerTypes)
                 {

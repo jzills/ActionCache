@@ -13,4 +13,17 @@ public class ActionCacheKeyComponents
         var args  = $"args={JsonSerializer.Serialize(ActionArguments)}";
         return $"{route}&{args}";
     }
+    public void Deconstruct(out string? area, out string? controller, out string? action)
+    {
+        ArgumentNullException.ThrowIfNull(RouteValues);
+
+        var areaElement = (JsonElement?)RouteValues.GetValueOrDefault("area");
+        area = areaElement?.GetString();
+
+        var controllerElement = (JsonElement?)RouteValues.GetValueOrDefault("controller");
+        controller = controllerElement?.GetString();
+
+        var actionElement = (JsonElement?)RouteValues.GetValueOrDefault("action");
+        action = actionElement?.GetString();
+    }
 }

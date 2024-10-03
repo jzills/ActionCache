@@ -2,24 +2,24 @@ using System.Collections.Concurrent;
 
 namespace ActionCache.Utilities;
 
-public class ConcurrentHashSet<T>
+internal class ConcurrentHashSet<T> where T : notnull
 {
-    private readonly ConcurrentDictionary<T, byte> _dictionary;
+    internal protected readonly ConcurrentDictionary<T, byte> Internal;
 
-    public ConcurrentHashSet()
+    internal ConcurrentHashSet()
     {
-        _dictionary = new ConcurrentDictionary<T, byte>();
+        Internal = new ConcurrentDictionary<T, byte>();
     }
 
-    public bool Add(T item) => _dictionary.TryAdd(item, 0);
+    internal bool Add(T item) => Internal.TryAdd(item, 0);
 
-    public bool Remove(T item) => _dictionary.TryRemove(item, out _);
+    internal bool Remove(T item) => Internal.TryRemove(item, out _);
 
-    public bool ContainsKey(T key) => _dictionary.ContainsKey(key);
+    internal bool ContainsKey(T key) => Internal.ContainsKey(key);
 
-    public int Count => _dictionary.Count;
+    internal int Count => Internal.Count;
 
-    public void Clear() => _dictionary.Clear();
+    internal void Clear() => Internal.Clear();
 
-    public IEnumerable<T> ToList() => _dictionary.Keys;
+    internal IEnumerable<T> ToList() => Internal.Keys;
 }

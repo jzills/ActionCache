@@ -1,3 +1,5 @@
+using ActionCache.Utilities;
+
 namespace ActionCache;
 
 /// <summary>
@@ -5,6 +7,12 @@ namespace ActionCache;
 /// </summary>
 public interface IActionCache
 {
+    /// <summary>
+    /// Retrieves the namespace associated with the specified cache.
+    /// </summary>
+    /// <returns>The namespace for this cache.</returns>
+    Namespace GetNamespace();
+
     /// <summary>
     /// Retrieves the keys associated with the specified namespace from the cache.
     /// </summary>

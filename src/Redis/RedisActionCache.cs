@@ -2,6 +2,7 @@ using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Keys;
 using ActionCache.Common.Utilities;
 using ActionCache.Redis.Extensions;
+using ActionCache.Utilities;
 using StackExchange.Redis;
 using System.Reflection;
 using System.Text.Json;
@@ -134,7 +135,7 @@ public class RedisActionCache : IActionCache
         if (descriptorCollection.MethodInfos.Any())
         {
             var keys = await GetKeysAsync();
-            if (keys?.Any() ?? false)
+            if (keys.Some())
             {
                 foreach (var key in keys)
                 {
@@ -155,10 +156,10 @@ public class RedisActionCache : IActionCache
                             if (methodInfo.TryGetRefreshResult(
                                     controller, 
                                     keyComponents.ActionArguments?.Values?.ToArray(), 
-                                    out var result
+                                    out var value
                             ))
                             {
-                                await SetAsync(key, result.Value);
+                                await SetAsync(key, value);
                             }
                         }
                     }
@@ -166,4 +167,6 @@ public class RedisActionCache : IActionCache
             }
         }
     }
+
+    public Namespace GetNamespace() => Namespace;
 }

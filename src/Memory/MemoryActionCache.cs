@@ -90,14 +90,26 @@ public class MemoryActionCache : IActionCache
     /// </summary>
     public Task RemoveAsync() => CancellationTokenSource.CancelAsync();
 
+    /// <summary>
+    /// Retrieves all keys associated with this cache.
+    /// </summary>
+    /// <returns>An enumerable of strings representing current cache entry keys.</returns>/// 
     public Task<IEnumerable<string>> GetKeysAsync()
     {
-        var keys = (ConcurrentHashSet<string>?)Cache.Get(Namespace);
-        return Task.FromResult(keys?.ToList() ?? []);
+        IEnumerable<string> keys = [];
+
+        if (Cache.TryGetValue<ConcurrentHashSet<string>>(Namespace, out var keysHashSet))
+        {
+            keys = keysHashSet?.ToList() ?? [];
+        }
+
+        return Task.FromResult(keys);
     }
 
     public Task RefreshAsync()
     {
         throw new NotImplementedException();
     }
+
+    public Namespace GetNamespace() => Namespace;
 }

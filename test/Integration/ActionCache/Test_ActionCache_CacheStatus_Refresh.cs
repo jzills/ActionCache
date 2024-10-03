@@ -1,4 +1,5 @@
 using ActionCache;
+using ActionCache.Common.Enums;
 using ActionCache.Redis.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 [TestFixture]
-public class Test_ActionCache_Eviction
+public class Test_ActionCache_Refresh
 {
     TestServer Server;
     HttpClient Client;
@@ -43,21 +44,14 @@ public class Test_ActionCache_Eviction
         userResponse.EnsureSuccessStatusCode();
 
         Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo("HIT"));
+        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
 
-        // Cache eviction
-        userResponse = await Client.DeleteAsync("/users");
+        // Cache refresh
+        userResponse = await Client.PostAsync("/users", null);
         userResponse.EnsureSuccessStatusCode();
 
         Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo("EVICT"));
-
-        // Cache miss
-        userResponse = await Client.GetAsync("/users");
-        userResponse.EnsureSuccessStatusCode();
-
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo("ADD"));
+        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
     }
 
     [TearDown]

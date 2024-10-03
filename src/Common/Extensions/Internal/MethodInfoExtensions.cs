@@ -31,18 +31,13 @@ internal static class MethodInfoExtensions
         this MethodInfo? methodInfo, 
         object? controller, 
         object?[]? parameters, 
-        out RefreshResult value
+        out object value
     )
     {
         var result = methodInfo?.Invoke(controller, parameters);
         if (result is OkObjectResult okObjectResult)
         {
-            value = new RefreshResult
-            {
-                Key = string.Join(":", parameters ?? []),
-                Value = okObjectResult.Value
-            };
-
+            value = okObjectResult.Value;
             return true;
         }
         else

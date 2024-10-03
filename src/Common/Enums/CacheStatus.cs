@@ -1,6 +1,6 @@
 namespace ActionCache.Common.Enums;
 
-internal enum CacheStatus
+public enum CacheStatus
 {
     ADD,
     HIT,

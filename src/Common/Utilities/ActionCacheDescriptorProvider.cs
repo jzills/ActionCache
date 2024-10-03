@@ -96,8 +96,11 @@ public class ActionCacheDescriptorProvider
     /// <param name="controllerName">Controller name of the action.</param>
     /// <param name="actionName">Name of the action method.</param>
     /// <returns>A string key for the cache.</returns>
-    public string CreateKey(string? areaName, string controllerName, string actionName)
+    public string CreateKey(string? areaName, string? controllerName, string? actionName)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(controllerName, nameof(controllerName));
+        ArgumentException.ThrowIfNullOrWhiteSpace(actionName, nameof(actionName));
+
         var key = KeyBuilder.AppendJoinNonNull(':', areaName, controllerName, actionName).ToString();
         KeyBuilder.Clear();
         return key;
