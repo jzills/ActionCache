@@ -5,7 +5,7 @@ namespace ActionCache.Redis.Extensions;
 /// <summary>
 /// Extensions for working with Assemblies and embedded resources.
 /// </summary>
-public static class AssemblyExtensions
+internal static class AssemblyExtensions
 {
     private static Dictionary<string, string> _cache = new();
 
@@ -16,7 +16,7 @@ public static class AssemblyExtensions
     /// <param name="name">The name of the embedded resource.</param>
     /// <param name="resource">The text content of the resource if found.</param>
     /// <returns>True if the resource is successfully retrieved, false otherwise.</returns>
-    public static bool TryGetResourceAsText(this Assembly source, string name, out string resource)
+    internal static bool TryGetResourceAsText(this Assembly source, string name, out string resource)
     {
         if (_cache.TryGetValue(name, out resource!))
         {
@@ -39,7 +39,7 @@ public static class AssemblyExtensions
     /// <param name="source">The Assembly to search for the resource.</param>
     /// <param name="fileName">The file name to match against.</param>
     /// <returns>The name of the matching embedded resource or an empty string if not found.</returns>
-    public static string GetResourceName(this Assembly source, string fileName)
+    internal static string GetResourceName(this Assembly source, string fileName)
     {
         var resourceName = source
             .GetManifestResourceNames()

@@ -1,30 +1,26 @@
-using System.Text.Json;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Keys;
 using ActionCache.Common.Utilities;
 
 namespace ActionCache.Caching;
 
+public record ActionCacheRefreshResult(string Key, object? Value);
+
 public class ActionCacheRefreshProvider
 {
-    protected readonly IActionCache Cache;
     protected readonly ActionCacheDescriptorProvider DescriptorProvider;
 
-    public ActionCacheRefreshProvider(
-        IActionCache cache,
-        ActionCacheDescriptorProvider descriptorProvider
-    )
+    public ActionCacheRefreshProvider(ActionCacheDescriptorProvider descriptorProvider)
     {
-        Cache = cache;
         DescriptorProvider = descriptorProvider;
     }
 
-    public async Task RefreshAsync()
+    public async Task<IReadOnlyCollection<ActionCacheRefreshResult>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
     {
-        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(Cache.GetNamespace());
+        var refreshResults = new List<ActionCacheRefreshResult>();
+        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
         if (descriptorCollection.MethodInfos.Any())
         {
-            var keys = await Cache.GetKeysAsync();
             if (keys.Some())
             {
                 foreach (var key in keys)
@@ -50,12 +46,14 @@ public class ActionCacheRefreshProvider
                                     out var value
                             ))
                             {
-                                await Cache.SetAsync(key, value);
+                                refreshResults.Add(new ActionCacheRefreshResult(key, value));
                             }
                         }
                     }
                 }
             }
         }
+
+        return refreshResults;
     }
 }

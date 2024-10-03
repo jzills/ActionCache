@@ -1,3 +1,4 @@
+using ActionCache.Caching;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,5 +52,6 @@ internal static class IServiceCollectionExtensions
         this IServiceCollection services
     ) => services
             .AddControllerInfo()
-            .AddScoped<ActionCacheDescriptorProvider>();
+            .AddScoped<ActionCacheDescriptorProvider>()
+            .AddScoped<ActionCacheRefreshProvider>();
 }

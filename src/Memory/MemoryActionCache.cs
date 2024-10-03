@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using ActionCache.Caching;
 using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
@@ -10,9 +10,10 @@ namespace ActionCache.Memory;
 /// </summary>
 public class MemoryActionCache : IActionCache
 {
-    public readonly Namespace Namespace;
+    protected readonly Namespace Namespace;
     protected readonly IMemoryCache Cache;
     protected readonly CancellationTokenSource CancellationTokenSource;
+    protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the MemoryActionCache class.
@@ -23,12 +24,14 @@ public class MemoryActionCache : IActionCache
     public MemoryActionCache(
         Namespace @namespace,
         IMemoryCache cache,
-        CancellationTokenSource cancellationTokenSource
+        CancellationTokenSource cancellationTokenSource,
+        ActionCacheRefreshProvider refreshProvider
     )
     {
         Namespace = @namespace;
         Cache = cache;
         CancellationTokenSource = cancellationTokenSource;
+        RefreshProvider = refreshProvider;
     }
 
     /// <summary>
@@ -106,9 +109,18 @@ public class MemoryActionCache : IActionCache
         return Task.FromResult(keys);
     }
 
-    public Task RefreshAsync()
+    public async Task RefreshAsync()
     {
-        throw new NotImplementedException();
+        var keys = await GetKeysAsync();
+        var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
+
+        var refreshTasks = new List<Task>();
+        foreach (var refreshResult in refreshResults)
+        {
+            refreshTasks.Add(SetAsync(refreshResult.Key, refreshResult.Value));
+        }
+
+        await Task.WhenAll(refreshTasks);
     }
 
     public Namespace GetNamespace() => Namespace;

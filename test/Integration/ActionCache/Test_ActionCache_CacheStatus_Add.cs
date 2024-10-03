@@ -43,22 +43,22 @@ public class Test_ActionCache_CacheStatus_Add
         userResponse = await Client.GetAsync("/users");
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
 
         // Cache eviction
         userResponse = await Client.DeleteAsync("/users");
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
 
         // Cache miss
         userResponse = await Client.GetAsync("/users");
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.ADD)));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.ADD)));
     }
 
     [TearDown]

@@ -43,15 +43,15 @@ public class Test_ActionCache_Refresh
         userResponse = await Client.GetAsync("/users");
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
 
         // Cache refresh
         userResponse = await Client.PostAsync("/users", null);
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
     }
 
     [TearDown]

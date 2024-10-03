@@ -1,5 +1,4 @@
-using ActionCache.Common.Extensions.Internal;
-using ActionCache.Common.Keys;
+using ActionCache.Caching;
 using ActionCache.Common.Utilities;
 using ActionCache.Redis.Extensions;
 using ActionCache.Utilities;
@@ -11,7 +10,7 @@ namespace ActionCache.Redis;
 
 /// <summary>
 /// Represents a Redis implementation of the IActionCache interface.
-/// </summary>
+/// /// </summary>
 public class RedisActionCache : IActionCache
 {
     /// <summary>
@@ -26,6 +25,8 @@ public class RedisActionCache : IActionCache
 
     protected readonly ActionCacheDescriptorProvider DescriptorProvider;
 
+    protected readonly ActionCacheRefreshProvider RefreshProvider;
+
     /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
     /// </summary>
@@ -34,12 +35,14 @@ public class RedisActionCache : IActionCache
     public RedisActionCache(
         RedisNamespace @namespace, 
         IDatabase cache,
-        ActionCacheDescriptorProvider descriptorProvider
+        ActionCacheDescriptorProvider descriptorProvider,
+        ActionCacheRefreshProvider refreshProvider
     )
     {
         Namespace = @namespace;
         Cache = cache;
         DescriptorProvider = descriptorProvider;
+        RefreshProvider = refreshProvider;
     }
 
     /// <summary>
@@ -131,41 +134,16 @@ public class RedisActionCache : IActionCache
 
     public async Task RefreshAsync()
     {
-        var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(Namespace.Value);
-        if (descriptorCollection.MethodInfos.Any())
-        {
-            var keys = await GetKeysAsync();
-            if (keys.Some())
-            {
-                foreach (var key in keys)
-                {
-                    var keyComponents = new ActionCacheKeyComponentsBuilder(key).Build();
-                    var routeValuesKey = DescriptorProvider.CreateKey(
-                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("area"))?.GetString(),
-                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("controller"))?.GetString(),
-                        ((JsonElement?)keyComponents.RouteValues.GetValueOrDefault("action"))?.GetString()
-                    );
+        var keys = await GetKeysAsync();
+        var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
 
-                    if (descriptorCollection.MethodInfos.TryGetValue(
-                            routeValuesKey, 
-                            out var methodInfo
-                        ))
-                    {
-                        if (descriptorCollection.Controllers.TryGetValue(routeValuesKey, out var controller))
-                        {
-                            if (methodInfo.TryGetRefreshResult(
-                                    controller, 
-                                    keyComponents.ActionArguments?.Values?.ToArray(), 
-                                    out var value
-                            ))
-                            {
-                                await SetAsync(key, value);
-                            }
-                        }
-                    }
-                }
-            }
+        var refreshTasks = new List<Task>();
+        foreach (var refreshResult in refreshResults)
+        {
+            refreshTasks.Add(SetAsync(refreshResult.Key, refreshResult.Value));
         }
+
+        await Task.WhenAll(refreshTasks);
     }
 
     public Namespace GetNamespace() => Namespace;

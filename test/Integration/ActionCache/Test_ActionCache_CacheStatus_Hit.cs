@@ -1,4 +1,5 @@
 using ActionCache;
+using ActionCache.Common.Enums;
 using ActionCache.Redis.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,8 +43,8 @@ public class Test_ActionCache_CacheStatus_Hit
         userResponse = await Client.GetAsync("/users");
         userResponse.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains("Cache-Status"));
-        Assert.That(userResponse.Headers.GetValues("Cache-Status").First(), Is.EqualTo("HIT"));
+        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
     }
 
     [TearDown]

@@ -1,3 +1,4 @@
+using ActionCache.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ActionCache.Memory;
@@ -9,6 +10,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
     protected readonly IExpirationTokenSources ExpirationTokens;
+    protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryActionCacheFactory"/> class.
@@ -34,7 +36,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {
-            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource);
+            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource, RefreshProvider);
         }
         else
         {
