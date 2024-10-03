@@ -32,8 +32,6 @@ public static partial class TestData
     {
         var controllerActions = ControllerExtensions.GetControllerActionDescriptorsWithValues(actionExpression);
         var actionArguments = controllerActions
-            .Where(controllerAction => controllerAction.HasActionCacheKeyAttribute())
-            .OrderBy(controllerAction => controllerAction.GetActionCacheKeyOrder())
             .ToDictionary(
                 controllerAction => controllerAction.ParameterDescriptor.Name, 
                 controllerAction => controllerAction.ParameterValue
@@ -48,12 +46,12 @@ public static partial class TestData
 
     private class SampleController : Controller
     {
-        public IActionResult OneParameter([ActionCacheKey] int _) => Ok();
-        public IActionResult TwoParametersWithEqualOrder([ActionCacheKey(Order = 1)] int _, [ActionCacheKey(Order = 1)] string __) => Ok();
-        public IActionResult TwoParametersAscendingOrder([ActionCacheKey(Order = 1)] int _, [ActionCacheKey(Order = 2)] string __) => Ok();
-        public IActionResult TwoParametersDescendingOrder([ActionCacheKey(Order = 2)] int _, [ActionCacheKey(Order = 1)] string __) => Ok();
-        public IActionResult TwoParametersOneComplex([ActionCacheKey(Order = 1)] int _, [ActionCacheKey(Order = 2)] SampleModel __) => Ok();
-        public IActionResult TwoParametersOneComplexNested([ActionCacheKey(Order = 2)] int _, [ActionCacheKey(Order = 1)] SampleNestedModel __) => Ok();
+        public IActionResult OneParameter(int _) => Ok();
+        public IActionResult TwoParametersWithEqualOrder(int _, string __) => Ok();
+        public IActionResult TwoParametersAscendingOrder(int _, string __) => Ok();
+        public IActionResult TwoParametersDescendingOrder(int _, string __) => Ok();
+        public IActionResult TwoParametersOneComplex(int _, SampleModel __) => Ok();
+        public IActionResult TwoParametersOneComplexNested(int _, SampleNestedModel __) => Ok();
     }
 
     private class SampleModel

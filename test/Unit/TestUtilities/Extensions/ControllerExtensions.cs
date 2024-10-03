@@ -12,8 +12,6 @@ public static class ControllerExtensions
     {
         public ControllerParameterDescriptor ParameterDescriptor { get; set; }
         public object ParameterValue { get; set; }
-        public bool HasActionCacheKeyAttribute() => ParameterDescriptor.ParameterInfo.GetCustomAttribute<ActionCacheKeyAttribute>() is not null;
-        public int GetActionCacheKeyOrder() => ParameterDescriptor.ParameterInfo.GetCustomAttribute<ActionCacheKeyAttribute>()?.Order ?? -1;
     }
 
     public static ControllerParameterWithValue[] GetControllerActionDescriptorsWithValues<TController, TResult>(

@@ -48,18 +48,7 @@ Add an `ActionCacheAttribute` to any controller actions that should be cached. T
 
 ## Cache Key Creation
 
-An `ActionCacheKeyAttribute` can be applied to any parameters. In the case of a complex object, the instance will be serialized as JSON and appended to the cache entry key. 
-
-    [HttpPost]
-    [Route("/")]
-    [ActionCache(Namespace = "MyNamespace")]
-    public IActionResult Post(
-        [ActionCacheKey(Order = 1)]int id, 
-        [ActionCacheKey(Order = 2)]DateTime date,
-        [ActionCacheKey(Order = 3)]SampleModel model
-    )
-    {
-    }
+Both the route values and the action arguments are serialized then AES encrypted to generate the cache key suffix. This suffix is appended to the string "ActionCache:{Namespace}".
 
 > [!NOTE]
 > Any route data from the request, i.e. the area, controller and action names are also added to the key. This is helpful for the case of automatic cache rehydration which will be part of a future release.
