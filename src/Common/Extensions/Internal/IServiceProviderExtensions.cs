@@ -30,13 +30,14 @@ internal static class IServiceProviderExtensions
     /// <returns>True if all specified caches exist, otherwise false.</returns>
     internal static bool TryGetActionCaches(
         this IServiceProvider serviceProvider, 
-        string namespaces,
+        string @namespace,
         out IEnumerable<IActionCache> caches
     )
     {
-        if (namespaces.Contains(","))
+        //RoutePatternFactory.Parse(routeTemplate);
+        if (@namespace.Contains(","))
         {
-            caches = GetNamespaces(namespaces)
+            caches = GetNamespaces(@namespace)
                 .SelectMany(@namespace => 
                     serviceProvider.GetActionCaches(@namespace)!)!;
 
@@ -44,7 +45,7 @@ internal static class IServiceProviderExtensions
         }
         else
         {
-            caches = serviceProvider.GetActionCaches(@namespaces)!;
+            caches = serviceProvider.GetActionCaches(@namespace)!;
             return EnsureAllCachesExist(caches);
         }
     }

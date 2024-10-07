@@ -1,5 +1,4 @@
 using ActionCache.Caching;
-using ActionCache.Common.Utilities;
 using ActionCache.Utilities;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -19,9 +18,8 @@ public class RedisActionCachePublisher : RedisActionCache
     public RedisActionCachePublisher(
         RedisNamespace @namespace, 
         IDatabase cache,
-        ActionCacheDescriptorProvider descriptorProvider,
         ActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, cache, descriptorProvider, refreshProvider)
+    ) : base(@namespace, cache, refreshProvider)
     {
     }
 

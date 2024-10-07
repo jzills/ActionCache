@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -11,7 +12,8 @@ public class ActionCacheEvictionFilterFactory : Attribute, IFilterFactory
     /// <summary>
     /// Gets or sets the namespaces used to identify the related action caches.
     /// </summary>
-    public required string Namespaces { get; set; }
+    [StringSyntax("Route")] 
+    public required string Namespace { get; set; }
 
     /// <summary>
     /// Determines whether multiple instances of the filter are reusable. Returns false indicating non-reusability.
@@ -25,9 +27,9 @@ public class ActionCacheEvictionFilterFactory : Attribute, IFilterFactory
     /// <returns>An instance of <see cref="IFilterMetadata"/> representing the action cache eviction filter.</returns>
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(Namespaces, nameof(Namespaces));
+        ArgumentException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
 
-        if (serviceProvider.TryGetActionCaches(Namespaces, out var caches))
+        if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
             return new ActionCacheEvictionFilter(
                 new ActionCacheAggregate(caches));

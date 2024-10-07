@@ -10,22 +10,13 @@ namespace ActionCache.Redis;
 
 /// <summary>
 /// Represents a Redis implementation of the IActionCache interface.
-/// /// </summary>
-public class RedisActionCache : IActionCache
+/// </summary>
+public class RedisActionCache : Common.Caching.ActionCache
 {
-    /// <summary>
-    /// A namespace for this Redis cache.
-    /// </summary>
-    protected readonly RedisNamespace Namespace;
-
     /// <summary>
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
-
-    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
-
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
@@ -35,14 +26,10 @@ public class RedisActionCache : IActionCache
     public RedisActionCache(
         RedisNamespace @namespace, 
         IDatabase cache,
-        ActionCacheDescriptorProvider descriptorProvider,
         ActionCacheRefreshProvider refreshProvider
-    )
+    ) : base(@namespace, refreshProvider)
     {
-        Namespace = @namespace;
         Cache = cache;
-        DescriptorProvider = descriptorProvider;
-        RefreshProvider = refreshProvider;
     }
 
     /// <summary>
@@ -54,18 +41,18 @@ public class RedisActionCache : IActionCache
     /// Removes the cached item with the specified key.
     /// </summary>
     /// <param name="key">The key of the item to remove from the cache.</param>
-    public virtual async Task RemoveAsync(string key)
+    public override async Task RemoveAsync(string key)
     {
         if (Assembly.TryGetResourceAsText("UnlinkKeyWithKeySet.lua", out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [Namespace, key], null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace, key], null, CommandFlags.FireAndForget);
         }
         else
         {
             var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
             if (isSuccessful)
             {
-                await Cache.SetRemoveAsync(Namespace, key);
+                await Cache.SetRemoveAsync((RedisNamespace)Namespace, key);
             }
         }
     }
@@ -73,11 +60,11 @@ public class RedisActionCache : IActionCache
     /// <summary>
     /// Removes all items in the cache associated with the current namespace.
     /// </summary>
-    public virtual async Task RemoveAsync()
+    public override async Task RemoveAsync()
     {
         if (Assembly.TryGetResourceAsText("UnlinkNamespaceWithKeySet.lua", out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [Namespace], null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace], null, CommandFlags.FireAndForget);
         }
     }
 
@@ -86,14 +73,14 @@ public class RedisActionCache : IActionCache
     /// </summary>
     /// <param name="key">The key of the item to set in the cache.</param>
     /// <param name="value">The value of the item to set in the cache.</param>
-    public virtual async Task SetAsync<TValue>(string key, TValue? value)
+    public override async Task SetAsync<TValue>(string key, TValue value)
     {
         RedisValue redisValue = JsonSerializer.Serialize(value);
 
         if (Assembly.TryGetResourceAsText("SetJsonWithKeySet.lua", out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
-                [Namespace, (RedisKey)key], 
+                [(RedisNamespace)Namespace, (RedisKey)key], 
                 [redisValue], 
                 CommandFlags.FireAndForget
             );
@@ -103,7 +90,7 @@ public class RedisActionCache : IActionCache
             var isSuccessful = await Cache.StringSetAsync(Namespace.Create(key), redisValue);
             if (isSuccessful)
             {
-                await Cache.SetAddAsync(Namespace, key, CommandFlags.FireAndForget);
+                await Cache.SetAddAsync((RedisNamespace)Namespace, key, CommandFlags.FireAndForget);
             }
         }
     }
@@ -113,7 +100,7 @@ public class RedisActionCache : IActionCache
     /// </summary>
     /// <param name="key">The key of the item to retrieve from the cache.</param>
     /// <returns>The cached item if found, otherwise default.</returns>
-    public async Task<TValue?> GetAsync<TValue>(string key)
+    public override async Task<TValue> GetAsync<TValue>(string key)
     {
         var value = await Cache.StringGetAsync(Namespace.Create(key));
         if (!string.IsNullOrWhiteSpace(value))
@@ -126,25 +113,9 @@ public class RedisActionCache : IActionCache
         }
     }
 
-    public async Task<IEnumerable<string>> GetKeysAsync()
+    public override async Task<IEnumerable<string>> GetKeysAsync()
     {
-        var value = await Cache.SetMembersAsync(Namespace);
+        var value = await Cache.SetMembersAsync((RedisNamespace)Namespace);
         return (IEnumerable<string>)value.Select(value => (string?)value);
     }
-
-    public async Task RefreshAsync()
-    {
-        var keys = await GetKeysAsync();
-        var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
-
-        var refreshTasks = new List<Task>();
-        foreach (var refreshResult in refreshResults)
-        {
-            refreshTasks.Add(SetAsync(refreshResult.Key, refreshResult.Value));
-        }
-
-        await Task.WhenAll(refreshTasks);
-    }
-
-    public Namespace GetNamespace() => Namespace;
 }

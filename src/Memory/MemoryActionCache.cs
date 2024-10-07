@@ -8,12 +8,10 @@ namespace ActionCache.Memory;
 /// <summary>
 /// Represents a memory action cache implementation.
 /// </summary>
-public class MemoryActionCache : IActionCache
+public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
 {
-    protected readonly Namespace Namespace;
     protected readonly IMemoryCache Cache;
     protected readonly CancellationTokenSource CancellationTokenSource;
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the MemoryActionCache class.
@@ -21,17 +19,16 @@ public class MemoryActionCache : IActionCache
     /// <param name="namespace">The namespace for cache isolation.</param>
     /// <param name="cache">The memory cache instance.</param>
     /// <param name="cancellationTokenSource">The source for cancellation tokens used to expire cache entries.</param>
+    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param>
     public MemoryActionCache(
         Namespace @namespace,
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource,
         ActionCacheRefreshProvider refreshProvider
-    )
+    ) : base(@namespace, refreshProvider)
     {
-        Namespace = @namespace;
         Cache = cache;
         CancellationTokenSource = cancellationTokenSource;
-        RefreshProvider = refreshProvider;
     }
 
     /// <summary>
@@ -47,8 +44,8 @@ public class MemoryActionCache : IActionCache
     /// Asynchronously gets a value from the cache.
     /// </summary>
     /// <param name="key">The key of the cache entry.</param>
-    /// <returns>The cached value or null if not found.</returns>
-    public Task<TValue?> GetAsync<TValue>(string key) =>
+    /// <returns>The cached value or null if not found.</returns> 
+    public override Task<TValue> GetAsync<TValue>(string key) =>
         Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
 
     /// <summary>
@@ -56,7 +53,7 @@ public class MemoryActionCache : IActionCache
     /// </summary>
     /// <param name="key">The cache key to set the value for.</param>
     /// <param name="value">The value to set in the cache.</param>
-    public Task SetAsync<TValue>(string key, TValue? value)
+    public override Task SetAsync<TValue>(string key, TValue value)
     {
         Cache.Set(Namespace.Create(key), value, EntryOptions);
 
@@ -65,8 +62,9 @@ public class MemoryActionCache : IActionCache
             options.Size = 1;
             return new ConcurrentHashSet<string>();
         });
-        
-        keys.Add(key);
+
+        keys?.Add(key);
+        Cache.Set(key, keys, EntryOptions);
 
         return Task.CompletedTask;
     }
@@ -75,7 +73,7 @@ public class MemoryActionCache : IActionCache
     /// Asynchronously removes a value from the cache.
     /// </summary>
     /// <param name="key">The key of the cache entry to remove.</param>
-    public Task RemoveAsync(string key)
+    public override Task RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
 
@@ -83,6 +81,7 @@ public class MemoryActionCache : IActionCache
         if (keys?.Count > 0)
         {
             keys.Remove(key);
+            Cache.Set(Namespace, keys, EntryOptions);
         }
 
         return Task.CompletedTask;
@@ -91,13 +90,13 @@ public class MemoryActionCache : IActionCache
     /// <summary>
     /// Asynchronously removes all values from the cache.
     /// </summary>
-    public Task RemoveAsync() => CancellationTokenSource.CancelAsync();
+    public override Task RemoveAsync() => CancellationTokenSource.CancelAsync();
 
     /// <summary>
     /// Retrieves all keys associated with this cache.
     /// </summary>
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>/// 
-    public Task<IEnumerable<string>> GetKeysAsync()
+    public override Task<IEnumerable<string>> GetKeysAsync()
     {
         IEnumerable<string> keys = [];
 
@@ -108,20 +107,4 @@ public class MemoryActionCache : IActionCache
 
         return Task.FromResult(keys);
     }
-
-    public async Task RefreshAsync()
-    {
-        var keys = await GetKeysAsync();
-        var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
-
-        var refreshTasks = new List<Task>();
-        foreach (var refreshResult in refreshResults)
-        {
-            refreshTasks.Add(SetAsync(refreshResult.Key, refreshResult.Value));
-        }
-
-        await Task.WhenAll(refreshTasks);
-    }
-
-    public Namespace GetNamespace() => Namespace;
 }

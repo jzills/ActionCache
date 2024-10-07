@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -12,6 +13,7 @@ public class ActionCacheRefreshFilterFactory : Attribute, IFilterFactory
     /// <summary>
     /// Gets or sets the namespace used to retrieve and group the action caches.
     /// </summary>
+    [StringSyntax("Route")]
     public required string Namespace { get; set; }
 
     /// <summary>

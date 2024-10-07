@@ -18,4 +18,14 @@ public class Test_ActionCache_GetAsync
         var result = await cache.GetAsync<string>("Foo");
         Assert.That(result, Is.EqualTo("Bar"));
     }
+
+    [Test]
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
+    public async Task Test_NullableInt_ReturnsNull(IServiceProvider serviceProvider)
+    {
+        var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
+        var cache = cacheFactory.Create("Test")!;
+        var result = await cache.GetAsync<int?>("Foo_Not_Present");
+        Assert.That(result, Is.EqualTo(null));
+    }
 }

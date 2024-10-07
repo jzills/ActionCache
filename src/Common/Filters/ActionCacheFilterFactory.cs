@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -12,6 +13,7 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
     /// <summary>
     /// Gets or sets the namespace used to identify the related action caches.
     /// </summary>
+    [StringSyntax("Route")] 
     public required string Namespace { get; set; }
 
     /// <summary>

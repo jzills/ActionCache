@@ -1,8 +1,12 @@
 using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions;
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
@@ -30,6 +34,12 @@ public class ActionCacheFilter : IAsyncActionFilter
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var templateBinderFactory = context.HttpContext.RequestServices.GetService<TemplateBinderFactory>();
+        Cache.GetNamespace().AttachRouteValues(
+            context.RouteData.Values, 
+            templateBinderFactory
+        );
+
         if (context.TryGetKey(out var key))
         {
             var cacheValue = await Cache.GetAsync<object>(key);

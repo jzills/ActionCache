@@ -6,20 +6,21 @@ namespace ActionCache.Utilities;
 public record class Namespace(string Value)
 {
     protected const string Assembly = nameof(ActionCache);
+    public string? ValueWithRouteTemplateParameters { get; set; }
 
     /// <summary>
     /// Creates a fully qualified namespace key.
     /// </summary>
     /// <param name="key">The key to append to the namespace.</param>
     /// <returns>A concatenated string with the assembly, namespace and key.</returns>
-    public string Create(string key) => Concat(Assembly, Value, key);
+    public string Create(string key) => Concat(Assembly, ValueWithRouteTemplateParameters ?? Value, key);
 
     /// <summary>
     /// Allows implicit conversion of the Namespace instance to a string.
     /// </summary>
     /// <param name="this">The Namespace instance.</param>
     /// <returns>A concatenated string with the assembly and namespace value.</returns>
-    public static implicit operator string(Namespace @this) => Concat(Assembly, @this.Value);
+    public static implicit operator string(Namespace @this) => Concat(Assembly, @this.ValueWithRouteTemplateParameters ?? @this.Value);
 
     /// <summary>
     /// Allows implicit conversion of a string to a Namespace instance.

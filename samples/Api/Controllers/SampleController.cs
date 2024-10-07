@@ -18,18 +18,14 @@ public class SampleController : ControllerBase
     [HttpPost]
     [Route("/")]
     [ActionCache(Namespace = "Namespace1")]
-    public IActionResult Post(
-        [ActionCacheKey(Order = 1)]int id, 
-        [ActionCacheKey(Order = 2)]DateTime date,
-        [ActionCacheKey(Order = 3)]SampleModel model
-    )
+    public IActionResult Post(int id, DateTime date, SampleModel model)
     {
         return Ok($"The current time is {DateTime.Now}");
     }
 
     [HttpDelete]
     [Route("/")]
-    [ActionCacheEviction(Namespaces = "Namespace1, Namespace2")]
+    [ActionCacheEviction(Namespace = "Namespace1, Namespace2")]
     public IActionResult Delete()
     {
         return Ok("Ok!");

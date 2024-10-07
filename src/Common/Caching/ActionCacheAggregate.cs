@@ -39,7 +39,7 @@ public class ActionCacheAggregate : IActionCache
         return value;
     }
 
-    public Namespace GetNamespace() => new Namespace(string.Join(",", Caches.Select(cache => cache.GetNamespace()))); 
+    public Namespace GetNamespace() => new Namespace(string.Join(",", Caches.Select(cache => cache.GetNamespace().Value))); 
 
     public async Task<IEnumerable<string>> GetKeysAsync()
     {

@@ -22,6 +22,6 @@ public class UsersController : Controller
     public IActionResult Post() => Ok();
 
     [HttpDelete("")]
-    [ActionCacheEviction(Namespaces = "Users")]
+    [ActionCacheEviction(Namespace = "Users")]
     public IActionResult Delete() => Ok();
 }

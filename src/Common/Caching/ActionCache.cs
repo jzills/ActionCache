@@ -15,10 +15,7 @@ public abstract class ActionCache : IActionCache
 
     public abstract Task<TValue?> GetAsync<TValue>(string key);
 
-    public Task<IEnumerable<string>> GetKeysAsync()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<IEnumerable<string>> GetKeysAsync();
 
     public Namespace GetNamespace() => Namespace;
 
@@ -37,7 +34,8 @@ public abstract class ActionCache : IActionCache
     }
 
     public abstract Task RemoveAsync(string key);
-    public abstract Task RemoveAsync();
-    public abstract Task SetAsync<TValue>(string key, TValue? value);
 
+    public abstract Task RemoveAsync();
+
+    public abstract Task SetAsync<TValue>(string key, TValue? value);
 }

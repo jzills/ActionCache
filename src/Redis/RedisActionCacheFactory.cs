@@ -13,9 +13,6 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
-
-    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
-
     protected readonly ActionCacheRefreshProvider RefreshProvider;
     
     /// <summary>
@@ -24,12 +21,10 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// <param name="connectionMultiplexer">ConnectionMultiplexer for Redis.</param>
     public RedisActionCacheFactory(
         IConnectionMultiplexer connectionMultiplexer,
-        ActionCacheDescriptorProvider descriptorProvider,
         ActionCacheRefreshProvider refreshProvider
     ) 
     {
         Cache = connectionMultiplexer.GetDatabase();
-        DescriptorProvider = descriptorProvider;
         RefreshProvider = refreshProvider;
     }
     
@@ -43,5 +38,5 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// </summary>
     /// <param name="namespace">Namespace for the cache.</param>
     /// <returns>New instance of RedisActionCache.</returns>
-    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache, DescriptorProvider, RefreshProvider);
+    public IActionCache? Create(string @namespace) => new RedisActionCache(@namespace, Cache, RefreshProvider);
 }
