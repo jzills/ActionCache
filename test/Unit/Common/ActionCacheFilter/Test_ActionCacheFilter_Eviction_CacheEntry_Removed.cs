@@ -8,6 +8,7 @@ using ActionCache.Attributes;
 using ActionCache.Filters;
 using ActionCache;
 using Unit.TestUtiltiies.Data;
+using Microsoft.AspNetCore.Routing.Template;
 
 namespace Unit.Common;
 
@@ -52,12 +53,13 @@ public class Test_ActionCacheFilter_Eviction_CacheEntry_Removed
             return Task.FromResult(context);
         };
 
+        var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create(@namespace)!;
 
         await cache.SetAsync("someArea:someController:someAction", "Foo");
 
-        var filter = new ActionCacheEvictionFilter(cache);
+        var filter = new ActionCacheEvictionFilter(cache, binderFactory);
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
   

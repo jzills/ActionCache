@@ -1,3 +1,4 @@
+using System.Web;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.AspNetCore.Routing.Template;
@@ -24,10 +25,11 @@ internal static class NamespaceExtensions
             var boundValues = templateBinder.BindValues(routeValues);
             if (boundValues?.Contains("?") ?? false)
             {
-                boundValues = boundValues.Substring(0, boundValues.LastIndexOf("?"));
+                // Remove the first forward slash and any query string parameters
+                boundValues = boundValues.Substring(1, boundValues.LastIndexOf("?") - 1);
             }
 
-            source.ValueWithRouteTemplateParameters = boundValues;
+            source.ValueWithRouteTemplateParameters = HttpUtility.UrlDecode(boundValues);
         }
     }
 }

@@ -8,5 +8,5 @@ internal static class IHeaderDictionaryExtensions
     internal static void AddCacheStatus(
         this IHeaderDictionary headers, 
         CacheStatus status
-    ) => headers.Add(CacheHeaders.CacheStatus, Enum.GetName(status));
+    ) => headers.TryAdd(CacheHeaders.CacheStatus, Enum.GetName(status));
 }

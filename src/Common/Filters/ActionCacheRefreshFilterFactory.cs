@@ -1,6 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using ActionCache.Common.Extensions;
+using ActionCache.Common.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
@@ -32,8 +35,12 @@ public class ActionCacheRefreshFilterFactory : Attribute, IFilterFactory
 
         if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
         {
-            return new ActionCacheRefreshFilter(
-                new ActionCacheAggregate(caches));
+            var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
+            var filters = caches.Select(cache => new ActionCacheRefreshFilter(cache, binderFactory))
+                .ToList()
+                .AsReadOnly();
+                
+            return new CompositeResultFilter(filters);
         }
         else
         {

@@ -10,6 +10,7 @@ using ActionCache;
 using Unit.TestUtiltiies.Data;
 using ActionCache.Common.Utilities;
 using ActionCache.Common.Keys;
+using Microsoft.AspNetCore.Routing.Template;
 
 namespace Unit.Common;
 
@@ -57,9 +58,10 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
             return Task.FromResult(context);
         };
 
+        var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create(@namespace)!;
-        var filter = new ActionCacheFilter(cache);
+        var filter = new ActionCacheFilter(cache, binderFactory);
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
 

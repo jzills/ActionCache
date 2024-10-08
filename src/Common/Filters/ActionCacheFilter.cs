@@ -4,9 +4,7 @@ using ActionCache.Common.Extensions.Internal;
 using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Template;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
@@ -16,15 +14,27 @@ namespace ActionCache.Filters;
 public class ActionCacheFilter : IAsyncActionFilter
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ActionCacheFilter"/> class.
-    /// </summary>
-    /// <param name="cache">The cache implementation to use.</param>
-    public ActionCacheFilter(IActionCache cache) => Cache = cache;
-
-    /// <summary>
     /// The cache facility to use for caching action results.
     /// </summary>
     protected readonly IActionCache Cache;
+
+    /// <summary>
+    /// The template binder for parsing route parameters for templated namespaces.
+    /// </summary>
+    protected readonly TemplateBinderFactory BinderFactory;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActionCacheFilter"/> class.
+    /// </summary>
+    /// <param name="cache">The cache implementation to use.</param>
+    public ActionCacheFilter(
+        IActionCache cache, 
+        TemplateBinderFactory binderFactory
+    )
+    {
+        Cache = cache;
+        BinderFactory = binderFactory;
+    }
 
     /// <summary>
     /// Called asynchronously before the action, after model binding is complete.
@@ -34,10 +44,9 @@ public class ActionCacheFilter : IAsyncActionFilter
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        var templateBinderFactory = context.HttpContext.RequestServices.GetService<TemplateBinderFactory>();
         Cache.GetNamespace().AttachRouteValues(
             context.RouteData.Values, 
-            templateBinderFactory
+            BinderFactory
         );
 
         if (context.TryGetKey(out var key))

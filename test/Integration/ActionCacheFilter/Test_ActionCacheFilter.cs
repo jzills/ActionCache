@@ -25,7 +25,6 @@ public class Test_ActionCacheFilter
             {
                 app.UseHttpsRedirection();
                 app.UseRouting();
-
                 app.UseEndpoints(options => options.MapControllers());
             });
 
