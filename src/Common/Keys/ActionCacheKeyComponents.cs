@@ -1,4 +1,4 @@
-using System.Text.Json;
+using ActionCache.Common.Serialization;
 using Microsoft.AspNetCore.Routing;
 
 namespace ActionCache.Common.Keys;
@@ -6,24 +6,33 @@ namespace ActionCache.Common.Keys;
 public class ActionCacheKeyComponents
 {
     public RouteValueDictionary? RouteValues { get; set; } = new();
-    public IReadOnlyDictionary<string, object>? ActionArguments { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object>? ActionArguments { get; set; } = new Dictionary<string, object>();
     public string Serialize()
     {
-        var route = $"route={JsonSerializer.Serialize(RouteValues)}";
-        var args  = $"args={JsonSerializer.Serialize(ActionArguments)}";
+        var route = $"route={CacheJsonSerializer.Serialize(RouteValues)}";
+        var args  = $"args={CacheJsonSerializer.Serialize(ActionArguments)}";
         return $"{route}&{args}";
     }
     public void Deconstruct(out string? area, out string? controller, out string? action)
     {
         ArgumentNullException.ThrowIfNull(RouteValues);
 
-        var areaElement = (JsonElement?)RouteValues.GetValueOrDefault("area");
-        area = areaElement?.GetString();
+        area = null;
+        if (RouteValues.ContainsKey("area"))
+        {
+            area = (string?)RouteValues["area"];
+        }
 
-        var controllerElement = (JsonElement?)RouteValues.GetValueOrDefault("controller");
-        controller = controllerElement?.GetString();
+        controller = null;
+        if (RouteValues.ContainsKey("controller"))
+        {
+            controller = (string?)RouteValues["controller"];
+        }
 
-        var actionElement = (JsonElement?)RouteValues.GetValueOrDefault("action");
-        action = actionElement?.GetString();
+        action = null;
+        if (RouteValues.ContainsKey("action"))
+        {
+            action = (string?)RouteValues["action"];
+        }
     }
 }

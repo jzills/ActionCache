@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 [TestFixture]
-public class Test_ActionCache_CacheStatus_Add
+public class Test_ActionCacheEvictionFilter_WithRouteTemplateParameter
 {
     TestServer Server;
     HttpClient Client;
@@ -25,7 +25,6 @@ public class Test_ActionCache_CacheStatus_Add
             {
                 app.UseHttpsRedirection();
                 app.UseRouting();
-
                 app.UseEndpoints(options => options.MapControllers());
             });
 
@@ -36,36 +35,22 @@ public class Test_ActionCache_CacheStatus_Add
     [Test]
     public async Task Test()
     {
-        var response = await Client.GetAsync("/users");
+        var route = $"/teams/{Guid.NewGuid()}";
+        var response = await Client.GetAsync(route);
         response.EnsureSuccessStatusCode();
 
-        // Cache hit
-        response = await Client.GetAsync("/users");
-        response.EnsureSuccessStatusCode();
-
-        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
-
-        // Cache eviction
-        response = await Client.DeleteAsync("/users");
+        response = await Client.DeleteAsync(route);
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
         Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
-
-        // Cache miss
-        response = await Client.GetAsync("/users");
-        response.EnsureSuccessStatusCode();
-
-        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.ADD)));
     }
 
     [TearDown]
     public async Task TearDown()
     {
         var cacheFactory = Server.Services.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create("Users");
+        var cache = cacheFactory.Create("Teams");
         await cache!.RemoveAsync();
     }
 }

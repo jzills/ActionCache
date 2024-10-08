@@ -1,13 +1,15 @@
+using System.Net.Http.Json;
 using ActionCache;
 using ActionCache.Common.Enums;
 using ActionCache.Redis.Extensions;
+using Integration.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 [TestFixture]
-public class Test_ActionCache_CacheStatus_Add
+public class Test_ActionCacheRefreshFilter_WithBody
 {
     TestServer Server;
     HttpClient Client;
@@ -25,7 +27,6 @@ public class Test_ActionCache_CacheStatus_Add
             {
                 app.UseHttpsRedirection();
                 app.UseRouting();
-
                 app.UseEndpoints(options => options.MapControllers());
             });
 
@@ -36,29 +37,19 @@ public class Test_ActionCache_CacheStatus_Add
     [Test]
     public async Task Test()
     {
-        var response = await Client.GetAsync("/users");
+        var response = await Client.PostAsJsonAsync("users/query", new Query 
+        {
+             IncludeIds = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()],
+             ShowAll = true,
+             SubQueries = [new SubQuery { Contains = "Test Contains" }]
+        });
         response.EnsureSuccessStatusCode();
 
-        // Cache hit
-        response = await Client.GetAsync("/users");
-        response.EnsureSuccessStatusCode();
-
-        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
-
-        // Cache eviction
-        response = await Client.DeleteAsync("/users");
+        response = await Client.PostAsync("users", null);
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
-
-        // Cache miss
-        response = await Client.GetAsync("/users");
-        response.EnsureSuccessStatusCode();
-
-        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.ADD)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
     }
 
     [TearDown]

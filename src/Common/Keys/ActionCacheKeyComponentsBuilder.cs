@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Text.Json;
 using System.Web;
 using ActionCache.Common.Extensions.Internal;
 using Microsoft.AspNetCore.Routing;
@@ -18,6 +19,6 @@ public class ActionCacheKeyComponentsBuilder
         new ActionCacheKeyComponents 
         { 
             RouteValues     = NameValues.ParseValueAsJson<RouteValueDictionary>("route"), 
-            ActionArguments = NameValues.ParseValueAsJson<Dictionary<string, object>>("args") 
+            ActionArguments = NameValues.ParseValueAsJson<Dictionary<string, dynamic>>("args")
         };
 }

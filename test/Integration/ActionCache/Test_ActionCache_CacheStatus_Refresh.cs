@@ -36,22 +36,22 @@ public class Test_ActionCache_Refresh
     [Test]
     public async Task Test()
     {
-        var userResponse = await Client.GetAsync("/users");
-        userResponse.EnsureSuccessStatusCode();
+        var response = await Client.GetAsync("/users");
+        response.EnsureSuccessStatusCode();
 
         // Cache hit
-        userResponse = await Client.GetAsync("/users");
-        userResponse.EnsureSuccessStatusCode();
+        response = await Client.GetAsync("/users");
+        response.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
+        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
 
         // Cache refresh
-        userResponse = await Client.PostAsync("/users", null);
-        userResponse.EnsureSuccessStatusCode();
+        response = await Client.PostAsync("/users", null);
+        response.EnsureSuccessStatusCode();
 
-        Assert.That(userResponse.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(userResponse.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
+        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
     }
 
     [TearDown]

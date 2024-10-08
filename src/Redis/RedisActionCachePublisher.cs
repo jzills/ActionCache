@@ -1,5 +1,7 @@
 using ActionCache.Caching;
+using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Text.Json;
 
@@ -68,5 +70,5 @@ public class RedisActionCachePublisher : RedisActionCache
     private Task PublishMessageAsync(RedisChannelMessage message) => 
         Cache.PublishAsync(
             RedisChannel.Literal(RedisActionCacheChannels.Main), 
-            JsonSerializer.Serialize(message));
+            CacheJsonSerializer.Serialize(message));
 }

@@ -1,7 +1,9 @@
 using ActionCache.Caching;
+using ActionCache.Common.Serialization;
 using ActionCache.Common.Utilities;
 using ActionCache.Redis.Extensions;
 using ActionCache.Utilities;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Reflection;
 using System.Text.Json;
@@ -75,7 +77,7 @@ public class RedisActionCache : Common.Caching.ActionCache
     /// <param name="value">The value of the item to set in the cache.</param>
     public override async Task SetAsync<TValue>(string key, TValue value)
     {
-        RedisValue redisValue = JsonSerializer.Serialize(value);
+        RedisValue redisValue = CacheJsonSerializer.Serialize(value);
 
         if (Assembly.TryGetResourceAsText("SetJsonWithKeySet.lua", out var script))
         {
@@ -105,7 +107,7 @@ public class RedisActionCache : Common.Caching.ActionCache
         var value = await Cache.StringGetAsync(Namespace.Create(key));
         if (!string.IsNullOrWhiteSpace(value))
         {
-            return JsonSerializer.Deserialize<TValue>(value!);
+            return CacheJsonSerializer.Deserialize<TValue>(value);
         }
         else
         {

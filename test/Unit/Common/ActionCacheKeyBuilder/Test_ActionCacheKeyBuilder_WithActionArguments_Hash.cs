@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Routing;
 using System.Text.Json;
 using ActionCache.Utilities;
 using ActionCache.Common.Keys;
+using Newtonsoft.Json;
+using ActionCache.Common.Serialization;
 
 namespace Unit.Common;
 
@@ -25,6 +27,6 @@ public class Test_ActionCacheKeyBuilder_WithActionArguments_Hash
             .Build();
 
         var decryptedKey = new KeyCryptoGenerator().Decrypt(key);
-        Assert.That(decryptedKey, Is.EqualTo($"route={JsonSerializer.Serialize(routeValues)}&args={JsonSerializer.Serialize(actionArguments)}"));
+        Assert.That(decryptedKey, Is.EqualTo($"route={CacheJsonSerializer.Serialize(routeValues)}&args={CacheJsonSerializer.Serialize(actionArguments)}"));
     }
 }

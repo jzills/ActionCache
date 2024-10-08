@@ -33,18 +33,18 @@ public class Test_ActionCacheKeyComponentsBuilder
         var keyComponents = new ActionCacheKeyComponentsBuilder(key).Build();
 
         Assert.That(keyComponents.ActionArguments.ContainsKey("Foo"));
-        Assert.That(((JsonElement)keyComponents.ActionArguments["Foo"]).GetString(), Is.EqualTo("Bar"));
+        Assert.That((string)keyComponents.ActionArguments["Foo"], Is.EqualTo("Bar"));
 
         Assert.That(keyComponents.ActionArguments.ContainsKey("Biz"));
-        Assert.That(((JsonElement)keyComponents.ActionArguments["Biz"]).GetInt32(), Is.EqualTo(22222));
+        Assert.That((long?)keyComponents.ActionArguments["Biz"], Is.EqualTo(22222));
 
         Assert.That(keyComponents.RouteValues.ContainsKey("area"));
-        Assert.That(((JsonElement)keyComponents.RouteValues["area"]).GetString(), Is.EqualTo("someArea"));
+        Assert.That((string?)keyComponents.RouteValues["area"], Is.EqualTo("someArea"));
 
         Assert.That(keyComponents.RouteValues.ContainsKey("controller"));
-        Assert.That(((JsonElement)keyComponents.RouteValues["controller"]).GetString(), Is.EqualTo("someController"));
+        Assert.That((string?)keyComponents.RouteValues["controller"], Is.EqualTo("someController"));
 
         Assert.That(keyComponents.RouteValues.ContainsKey("action"));
-        Assert.That(((JsonElement)keyComponents.RouteValues["action"]).GetString(), Is.EqualTo("someAction"));
+        Assert.That((string?)keyComponents.RouteValues["action"], Is.EqualTo("someAction"));
     }
 }

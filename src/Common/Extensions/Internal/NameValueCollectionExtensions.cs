@@ -1,5 +1,5 @@
+using ActionCache.Common.Serialization;
 using System.Collections.Specialized;
-using System.Text.Json;
 
 namespace ActionCache.Common.Extensions.Internal;
 
@@ -15,7 +15,7 @@ internal static class NameValueCollectionExtensions
 
         try
         {
-            return JsonSerializer.Deserialize<T>(json);
+            return CacheJsonSerializer.Deserialize<T>(json);
         }
         catch (Exception)
         {

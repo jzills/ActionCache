@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 [TestFixture]
-public class Test_ActionCacheFilter
+public class Test_ActionCacheRefreshFilter_WithRouteTemplateParameter
 {
     TestServer Server;
     HttpClient Client;
@@ -36,8 +36,14 @@ public class Test_ActionCacheFilter
     public async Task Test()
     {
         var route = $"/teams/{Guid.NewGuid()}";
-        var userResponse = await Client.GetAsync(route);
-        userResponse.EnsureSuccessStatusCode();
+        var response = await Client.GetAsync(route);
+        response.EnsureSuccessStatusCode();
+
+        response = await Client.PutAsync(route, null);
+        response.EnsureSuccessStatusCode();
+
+        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
     }
 
     [TearDown]

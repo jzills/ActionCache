@@ -36,7 +36,7 @@ public class ActionCacheKeyBuilder
     /// <returns>Returns itself for chaining.</returns>
     public ActionCacheKeyBuilder WithActionArguments(IDictionary<string, object> actionArguments)
     {
-        KeyComponents.ActionArguments = actionArguments.AsReadOnly();
+        KeyComponents.ActionArguments = actionArguments.ToDictionary();
         return this;
     }
 
