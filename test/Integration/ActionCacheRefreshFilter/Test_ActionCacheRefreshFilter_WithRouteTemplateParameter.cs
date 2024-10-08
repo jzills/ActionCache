@@ -11,6 +11,7 @@ public class Test_ActionCacheRefreshFilter_WithRouteTemplateParameter
 {
     TestServer Server;
     HttpClient Client;
+    Guid AccountId = Guid.NewGuid();
 
     [SetUp]
     public void Setup()
@@ -35,22 +36,21 @@ public class Test_ActionCacheRefreshFilter_WithRouteTemplateParameter
     [Test]
     public async Task Test()
     {
-        var route = $"/teams/{Guid.NewGuid()}";
-        var response = await Client.GetAsync(route);
-        response.EnsureSuccessStatusCode();
+        var teamIds = Enumerable.Range(0, 10).Select(_ => Guid.NewGuid());
+        var teamTasks = teamIds.Select(teamId => Client.GetAsync($"{AccountId}/teams/{teamId}"));
+        await Task.WhenAll(teamTasks);
 
-        response = await Client.PutAsync(route, null);
-        response.EnsureSuccessStatusCode();
-
-        Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
+        var cacheFactory = Server.Services.GetRequiredService<IActionCacheFactory>();
+        var cache = cacheFactory.Create($"Teams:{AccountId}");
+        var keys = await cache.GetKeysAsync();
+        Assert.That(keys.Count(), Is.EqualTo(10));
     }
 
     [TearDown]
     public async Task TearDown()
     {
         var cacheFactory = Server.Services.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create("Teams");
+        var cache = cacheFactory.Create($"Teams:{AccountId}");
         await cache!.RemoveAsync();
     }
 }

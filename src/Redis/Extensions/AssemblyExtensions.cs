@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace ActionCache.Redis.Extensions;
@@ -7,7 +8,7 @@ namespace ActionCache.Redis.Extensions;
 /// </summary>
 internal static class AssemblyExtensions
 {
-    private static Dictionary<string, string> _cache = new();
+    private static ConcurrentDictionary<string, string> _cache = new();
 
     /// <summary>
     /// Tries to retrieve the embedded resource as text from the Assembly.
@@ -24,7 +25,7 @@ internal static class AssemblyExtensions
         }
         else if (source.TryReadResourceStream(name, out resource))
         {
-            _cache.Add(name, resource);
+            _cache.TryAdd(name, resource);
             return true;
         }
         else
