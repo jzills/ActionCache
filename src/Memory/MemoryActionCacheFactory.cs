@@ -1,4 +1,4 @@
-using ActionCache.Caching;
+using ActionCache.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ActionCache.Memory;
@@ -10,7 +10,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
     protected readonly IExpirationTokenSources ExpirationTokens;
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
+    protected ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryActionCacheFactory"/> class.

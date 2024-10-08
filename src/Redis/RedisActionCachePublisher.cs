@@ -1,4 +1,4 @@
-using ActionCache.Caching;
+using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
 using Newtonsoft.Json;

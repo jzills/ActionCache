@@ -35,7 +35,7 @@ public class Test_ActionCacheFilter_WithRouteTemplateParameter
     [Test]
     public async Task Test()
     {
-        var route = $"/teams/{Guid.NewGuid()}";
+        var route = $"{Guid.NewGuid()}/teams/{Guid.NewGuid()}";
         var response = await Client.GetAsync(route);
         response.EnsureSuccessStatusCode();
 

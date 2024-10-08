@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace ActionCache.Common.Utilities;
+namespace ActionCache.Common.Caching;
 
 /// <summary>
 /// Represents a descriptor to hold method information and corresponding controller instances for action cache events.

@@ -1,10 +1,11 @@
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Utilities;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace ActionCache.Common.Utilities;
+namespace ActionCache.Common.Caching;
 
 /// <summary>
 /// Provides functionality to retrieve and cache action descriptor information.

@@ -35,11 +35,11 @@ public class Test_ActionCacheEvictionFilter_WithRouteTemplateParameter
     [Test]
     public async Task Test()
     {
-        var route = $"/teams/{Guid.NewGuid()}";
+        var route = $"{Guid.NewGuid()}/teams/{Guid.NewGuid()}";
         var response = await Client.GetAsync(route);
         response.EnsureSuccessStatusCode();
 
-        response = await Client.DeleteAsync(route);
+        response = await Client.DeleteAsync($"{route}/{Guid.NewGuid()}");
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));

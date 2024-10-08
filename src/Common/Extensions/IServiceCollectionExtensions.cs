@@ -1,6 +1,5 @@
-using ActionCache.Caching;
+using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions.Internal;
-using ActionCache.Common.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Common.Extensions;

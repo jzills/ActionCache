@@ -1,4 +1,3 @@
-using ActionCache.Caching;
 using ActionCache.Utilities;
 
 namespace ActionCache.Common.Caching;
@@ -6,7 +5,7 @@ namespace ActionCache.Common.Caching;
 public abstract class ActionCache : IActionCache
 {
     protected readonly Namespace Namespace;
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
+    protected ActionCacheRefreshProvider RefreshProvider;
     public ActionCache(Namespace @namespace, ActionCacheRefreshProvider refreshProvider)
     {
         Namespace = @namespace;
@@ -25,9 +24,9 @@ public abstract class ActionCache : IActionCache
         var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
 
         var refreshTasks = new List<Task>();
-        foreach (var refreshResult in refreshResults)
+        foreach (var (key, value) in refreshResults)
         {
-            refreshTasks.Add(SetAsync(refreshResult.Key, refreshResult.Value));
+            refreshTasks.Add(SetAsync(key, value));
         }
 
         await Task.WhenAll(refreshTasks);

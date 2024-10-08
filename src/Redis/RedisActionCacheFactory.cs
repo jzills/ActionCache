@@ -1,4 +1,4 @@
-using ActionCache.Caching;
+using ActionCache.Common.Caching;
 using ActionCache.Common.Utilities;
 using StackExchange.Redis;
 
@@ -13,7 +13,7 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
+    protected ActionCacheRefreshProvider RefreshProvider;
     
     /// <summary>
     /// Constructor for RedisActionCacheFactory.

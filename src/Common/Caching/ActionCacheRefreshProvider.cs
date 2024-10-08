@@ -1,10 +1,7 @@
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Keys;
-using ActionCache.Common.Utilities;
 
-namespace ActionCache.Caching;
-
-public record ActionCacheRefreshResult(string Key, object? Value);
+namespace ActionCache.Common.Caching;
 
 public class ActionCacheRefreshProvider
 {
@@ -15,9 +12,9 @@ public class ActionCacheRefreshProvider
         DescriptorProvider = descriptorProvider;
     }
 
-    public async Task<IReadOnlyCollection<ActionCacheRefreshResult>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
+    public async Task<IReadOnlyDictionary<string, object>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
     {
-        var refreshResults = new List<ActionCacheRefreshResult>();
+        var refreshResults = new Dictionary<string, object>();
         var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
         if (descriptorCollection.MethodInfos.Any())
         {
@@ -46,7 +43,7 @@ public class ActionCacheRefreshProvider
                                     out var value
                             ))
                             {
-                                refreshResults.Add(new ActionCacheRefreshResult(key, value));
+                                refreshResults.Add(key, value);
                             }
                         }
                     }

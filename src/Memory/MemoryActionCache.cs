@@ -1,4 +1,5 @@
-using ActionCache.Caching;
+using ActionCache.Common.Caching;
+using ActionCache.Memory.Extensions.Internal;
 using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
@@ -56,15 +57,7 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
     public override Task SetAsync<TValue>(string key, TValue value)
     {
         Cache.Set(Namespace.Create(key), value, EntryOptions);
-
-        // Use concurrent bag
-        var keys = Cache.GetOrCreate(Namespace, options => {
-            options.Size = 1;
-            return new ConcurrentHashSet<string>();
-        });
-
-        keys?.Add(key);
-        Cache.Set(key, keys, EntryOptions);
+        Cache.SetKey(Namespace, key, EntryOptions);
 
         return Task.CompletedTask;
     }
@@ -76,13 +69,7 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
     public override Task RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
-
-        var keys = (ConcurrentHashSet<string>?)Cache.Get(Namespace);
-        if (keys?.Count > 0)
-        {
-            keys.Remove(key);
-            Cache.Set(Namespace, keys, EntryOptions);
-        }
+        Cache.RemoveKey(Namespace, key, EntryOptions);
 
         return Task.CompletedTask;
     }
@@ -96,15 +83,6 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
     /// Retrieves all keys associated with this cache.
     /// </summary>
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>/// 
-    public override Task<IEnumerable<string>> GetKeysAsync()
-    {
-        IEnumerable<string> keys = [];
-
-        if (Cache.TryGetValue<ConcurrentHashSet<string>>(Namespace, out var keysHashSet))
-        {
-            keys = keysHashSet?.ToList() ?? [];
-        }
-
-        return Task.FromResult(keys);
-    }
+    public override Task<IEnumerable<string>> GetKeysAsync() =>
+        Task.FromResult(Cache.GetKeys(Namespace).ToList());
 }
