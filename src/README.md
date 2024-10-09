@@ -59,7 +59,7 @@ An `ActionCacheEvictionAttribute` can be applied to a controller action. Cache e
 
     [HttpDelete]
     [Route("/")]
-    [ActionCacheEviction(Namespaces = "MyNamespace, MyOtherNamespace")]
+    [ActionCacheEviction(Namespace = "MyNamespace, MyOtherNamespace")]
     public IActionResult Delete()
     {
     }
