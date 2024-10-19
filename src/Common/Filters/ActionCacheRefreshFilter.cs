@@ -2,6 +2,7 @@ using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Utilities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing.Template;
 
@@ -53,13 +54,21 @@ internal class ActionCacheRefreshFilter : IAsyncResultFilter
         ResultExecutionDelegate next
     )
     {
-        Cache.GetNamespace().AttachRouteValues(
-            context.RouteData.Values, 
-            BinderFactory
-        );
+        if (context.Result.IsSuccessfulResult())
+        {
+            Cache.GetNamespace().AttachRouteValues(
+                context.RouteData.Values, 
+                BinderFactory
+            );
+            
+            await Cache.RefreshAsync();
+
+            if (!context.HttpContext.Response.HasStarted)
+            {
+                context.AddCacheStatus(CacheStatus.REFRESH);
+            }
+        }
         
-        context.AddCacheStatus(CacheStatus.REFRESH);
-        await Cache.RefreshAsync();
         await next();
     }
 }

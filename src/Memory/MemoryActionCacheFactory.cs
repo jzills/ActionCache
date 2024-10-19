@@ -10,7 +10,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
     protected readonly IExpirationTokenSources ExpirationTokens;
-    protected ActionCacheRefreshProvider RefreshProvider;
+    protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryActionCacheFactory"/> class.
@@ -19,8 +19,14 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     /// <param name="expirationTokens">The expiration token source to use.</param>
     public MemoryActionCacheFactory(
         IMemoryCache memoryCache,
-        IExpirationTokenSources expirationTokens) => 
-            (MemoryCache, ExpirationTokens) = (memoryCache, expirationTokens);
+        IExpirationTokenSources expirationTokens,
+        ActionCacheRefreshProvider refreshProvider
+    )
+    {
+        MemoryCache = memoryCache;
+        ExpirationTokens = expirationTokens;
+        RefreshProvider = refreshProvider;
+    }
 
     /// <summary>
     /// Gets the type of cache.

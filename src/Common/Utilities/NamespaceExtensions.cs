@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Routing.Template;
 
 namespace ActionCache.Utilities;
 
-public static class NamespaceExtensions
+internal static class NamespaceExtensions
 {
-    public static bool ContainsRouteTemplateParameters(this Namespace source) =>
+    internal static bool ContainsRouteTemplateParameters(this Namespace source) =>
         RoutePatternFactory.Parse(source)?.Parameters?.Any() ?? false;
 
-    public static void AttachRouteValues(this Namespace source, 
+    internal static void AttachRouteValues(this Namespace source, 
         RouteValueDictionary routeValues, 
         TemplateBinderFactory templateBinderFactory
     )
