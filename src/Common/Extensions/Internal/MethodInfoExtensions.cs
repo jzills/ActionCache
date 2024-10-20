@@ -31,19 +31,31 @@ internal static class MethodInfoExtensions
         this MethodInfo? methodInfo, 
         object? controller, 
         object?[]? parameters, 
-        out object value
+        out object? value
     )
     {
         var result = methodInfo?.Invoke(controller, parameters);
+        if (result is Task taskResult)
+        {
+            result = GetAsyncResult(taskResult);
+        }
+        
         if (result is OkObjectResult okObjectResult)
         {
-            value = okObjectResult.Value;
+            value = okObjectResult?.Value;
             return true;
         }
         else
         {
-            value = default!;
+            value = default;
             return false;
         }
+    }
+
+    private static object? GetAsyncResult(Task taskResult)
+    {
+        taskResult.Wait();
+        var resultProperty = taskResult.GetType().GetProperty("Result");
+        return resultProperty?.GetValue(taskResult);
     }
 }

@@ -12,9 +12,9 @@ public class ActionCacheRefreshProvider
         DescriptorProvider = descriptorProvider;
     }
 
-    public async Task<IReadOnlyDictionary<string, object>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
+    public async Task<IReadOnlyDictionary<string, object?>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
     {
-        var refreshResults = new Dictionary<string, object>();
+        var refreshResults = new Dictionary<string, object?>();
         var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);
         if (descriptorCollection.MethodInfos.Any())
         {

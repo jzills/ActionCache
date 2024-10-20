@@ -13,11 +13,6 @@ namespace ActionCache.Common.Caching;
 public class ActionCacheDescriptorProvider
 {
     /// <summary>
-    /// Static cache for action rehydration descriptors.
-    /// </summary>
-    protected static readonly IDictionary<string, ActionCacheDescriptor> Cache;
-
-    /// <summary>
     /// Service provider for obtaining services.
     /// </summary>
     protected readonly IServiceProvider ServiceProvider;
@@ -31,14 +26,6 @@ public class ActionCacheDescriptorProvider
     /// Builder for creating cache keys.
     /// </summary>
     protected readonly StringBuilder KeyBuilder;
-
-    /// <summary>
-    /// Initializes the static cache.
-    /// </summary>
-    static ActionCacheDescriptorProvider()
-    {
-        Cache = new ConcurrentDictionary<string, ActionCacheDescriptor>();
-    }
 
     /// <summary>
     /// Constructs an ActionCacheDescriptor with a service provider and descriptor provider.
@@ -62,32 +49,22 @@ public class ActionCacheDescriptorProvider
     /// <returns>A rehydration descriptor for the specified namespace.</returns>
     public ActionCacheDescriptor GetControllerActionMethodInfo(string @namespace)
     {
-        if (Cache.TryGetValue(@namespace, out var cacheDescriptors))
+        var descriptors = new ActionCacheDescriptor();
+        if (ActionDescriptors.TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))
         {
-            return cacheDescriptors;
-        }
-        else
-        {
-            var descriptors = new ActionCacheDescriptor();
-
-            if (ActionDescriptors.TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))
+            foreach (var (areaName, controllerName, actionName, controllerTypeInfo) in controllerActionDescriptors)
             {
-                foreach (var (areaName, controllerName, actionName, controllerTypeInfo) in controllerActionDescriptors)
+                var controller = ServiceProvider.GetRequiredService(controllerTypeInfo);
+                var methodInfo = controller.GetType().GetMethod(actionName);
+                if (methodInfo is not null)
                 {
-                    var controller = ServiceProvider.GetRequiredService(controllerTypeInfo);
-                    var methodInfo = controller.GetType().GetMethod(actionName);
-                    if (methodInfo is not null)
-                    {
-                        var key = CreateKey(areaName, controllerName, actionName);
-                        descriptors.Add(key, methodInfo, controller);
-                    }
+                    var key = CreateKey(areaName, controllerName, actionName);
+                    descriptors.Add(key, methodInfo, controller);
                 }
             }
-
-            Cache.TryAdd(@namespace, descriptors);
-
-            return descriptors;
         }
+
+        return descriptors;
     }
 
     /// <summary>

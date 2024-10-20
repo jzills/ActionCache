@@ -10,7 +10,6 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseInMemoryDatabase(nameof(ApplicationDbContext)));
 
-builder.Services.AddActionCacheMemory();
 builder.Services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
 
 builder.Services.AddEndpointsApiExplorer();
