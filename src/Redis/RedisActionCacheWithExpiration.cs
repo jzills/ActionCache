@@ -81,12 +81,15 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
 
         var absoluteExpiration = EntryOptions.GetAbsoluteExpirationFromUtcNowInMilliseconds();
         var slidingExpiration = EntryOptions.GetSlidingExpirationInMilliseconds();
+        var ttl = slidingExpiration > 0 ?
+            slidingExpiration :
+            EntryOptions.GetAbsoluteExpirationAsTTLInMilliseconds();
 
         if (Assembly.TryGetResourceAsText(LuaResourceEnum.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
                 [(RedisNamespace)Namespace, (RedisKey)key], 
-                [redisValue, absoluteExpiration, slidingExpiration], 
+                [redisValue, absoluteExpiration, slidingExpiration, ttl], 
                 CommandFlags.FireAndForget
             );
         }
@@ -101,7 +104,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
 
             if (EntryOptions.SlidingExpiration.HasValue || EntryOptions.AbsoluteExpiration.HasValue)
             {
-                await Cache.KeyExpireAsync(Namespace.Create(key), expiry: EntryOptions.SlidingExpiration ?? EntryOptions.AbsoluteExpiration);
+                await Cache.KeyExpireAsync(Namespace.Create(key), expiry: TimeSpan.FromMilliseconds(ttl));
             }
 
             await Cache.SortedSetAddAsync((RedisNamespace)Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
@@ -119,31 +122,36 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
         var hashEntries = await Cache.HashGetAllAsync(namespaceKey);
         if (hashEntries is null || hashEntries.Length == 0)
         {
+            await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
             return default;
         }
 
         var absoluteExpirationUnix = hashEntries.GetAbsoluteExpiration();
-        var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
-        if (DateTimeOffset.UtcNow >= absoluteExpiration)
+        if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
         {
-            await Cache.KeyDeleteAsync(namespaceKey);
-            await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
+            var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
+            if (DateTimeOffset.UtcNow >= absoluteExpiration)
+            {
+                await Cache.KeyDeleteAsync(namespaceKey);
+                await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
+                return default;
+            }
+        }
+        
+        var slidingExpiration = hashEntries.GetSlidingExpiration();
+        if (slidingExpiration > ActionCacheEntryOptions.NoExpiration)
+        {
+            await Cache.KeyExpireAsync(namespaceKey, TimeSpan.FromMilliseconds(slidingExpiration), CommandFlags.FireAndForget);
+        }
+
+        var jsonValue = hashEntries.GetRedisValue();
+        if (string.IsNullOrWhiteSpace(jsonValue))
+        {
             return default;
         }
         else
         {
-            var slidingExpiration = hashEntries.GetSlidingExpiration();
-            await Cache.KeyExpireAsync(namespaceKey, TimeSpan.FromMilliseconds(slidingExpiration), CommandFlags.FireAndForget);
-
-            var jsonValue = hashEntries.GetRedisValue();
-            if (string.IsNullOrWhiteSpace(jsonValue))
-            {
-                return default;
-            }
-            else
-            {
-                return CacheJsonSerializer.Deserialize<TValue>(jsonValue);
-            }
+            return CacheJsonSerializer.Deserialize<TValue>(jsonValue);
         }
     }
 

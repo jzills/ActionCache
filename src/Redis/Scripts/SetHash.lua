@@ -1,3 +1,12 @@
-redis.call("HSET",  KEYS[1] .. ":" .. KEYS[2], "VALUE", ARGV[1], "ABSOLUTE_EXPIRATION", ARGV[2], "SLIDING_EXPIRATION", ARGV[3])
-redis.call("ZADD", KEYS[1], ARGV[2], KEYS[2])
-redis.call("PEXPIRE", KEYS[1] .. ":" .. KEYS[2], ARGV[3])
+local namespace = KEYS[1]
+local key = KEYS[2]
+local absoluteExpiration = tonumber(ARGV[2])
+local slidingExpiration = tonumber(ARGV[3])
+local ttl = tonumber(ARGV[4])
+
+redis.call("HSET",  namespace .. ":" .. key, "VALUE", ARGV[1], "ABSOLUTE_EXPIRATION", absoluteExpiration, "SLIDING_EXPIRATION", slidingExpiration)
+redis.call("ZADD", namespace, absoluteExpiration, key)
+
+if ttl > 0 then 
+    redis.call("PEXPIRE", namespace .. ":" .. key, ttl) 
+end

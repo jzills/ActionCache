@@ -31,6 +31,18 @@ public class ActionCacheEntryOptions
         }
     }
 
+    public long GetAbsoluteExpirationAsTTLInMilliseconds()
+    {
+        if (AbsoluteExpiration.HasValue)
+        {
+            return (long)AbsoluteExpiration.Value.TotalMilliseconds;
+        }
+        else
+        {
+            return NoExpiration;
+        }
+    }
+
     public long GetAbsoluteExpirationFromUtcNowInMilliseconds()
     {
         var expirationDateTime = GetAbsoluteExpirationFromUtcNow();
