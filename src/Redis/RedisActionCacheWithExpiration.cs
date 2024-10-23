@@ -45,7 +45,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     /// <param name="key">The key of the item to remove from the cache.</param>
     public override async Task RemoveAsync(string key)
     {
-        if (Assembly.TryGetResourceAsText(LuaResourceEnum.Remove, out var script))
+        if (Assembly.TryGetResourceAsText(LuaResources.Remove, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace, key], null, CommandFlags.FireAndForget);
         }
@@ -64,7 +64,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     /// </summary>
     public override async Task RemoveAsync()
     {
-        if (Assembly.TryGetResourceAsText(LuaResourceEnum.RemoveNamespace, out var script))
+        if (Assembly.TryGetResourceAsText(LuaResources.RemoveNamespace, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace], flags: CommandFlags.FireAndForget);
         }
@@ -85,7 +85,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
             slidingExpiration :
             EntryOptions.GetAbsoluteExpirationAsTTLInMilliseconds();
 
-        if (Assembly.TryGetResourceAsText(LuaResourceEnum.SetHash, out var script))
+        if (Assembly.TryGetResourceAsText(LuaResources.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
                 [(RedisNamespace)Namespace, (RedisKey)key], 
@@ -97,9 +97,9 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
         {
             await Cache.HashSetAsync(Namespace.Create(key), 
             [
-                new HashEntry(RedisHashEntryEnum.Value, redisValue),
-                new HashEntry(RedisHashEntryEnum.AbsoluteExpiration, absoluteExpiration),
-                new HashEntry(RedisHashEntryEnum.SlidingExpiration, slidingExpiration)
+                new HashEntry(RedisHashEntries.Value, redisValue),
+                new HashEntry(RedisHashEntries.AbsoluteExpiration, absoluteExpiration),
+                new HashEntry(RedisHashEntries.SlidingExpiration, slidingExpiration)
             ]);
 
             if (EntryOptions.SlidingExpiration.HasValue || EntryOptions.AbsoluteExpiration.HasValue)

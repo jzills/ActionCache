@@ -1,6 +1,6 @@
 namespace ActionCache.Redis;
 
-public static class RedisHashEntryEnum
+public static class RedisHashEntries
 {
     public const string Value = "VALUE";
     public const string AbsoluteExpiration = "ABSOLUTE_EXPIRATION";
