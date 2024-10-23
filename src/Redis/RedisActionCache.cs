@@ -1,3 +1,4 @@
+using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Redis.Extensions;
@@ -10,7 +11,7 @@ namespace ActionCache.Redis;
 /// <summary>
 /// Represents a Redis implementation of the IActionCache interface.
 /// </summary>
-public class RedisActionCache : Common.Caching.ActionCache
+public class RedisActionCache : ActionCacheBase
 {
     /// <summary>
     /// An IDatabase representation of a Redis cache.
@@ -25,8 +26,9 @@ public class RedisActionCache : Common.Caching.ActionCache
     public RedisActionCache(
         RedisNamespace @namespace, 
         IDatabase cache,
+        ActionCacheEntryOptions entryOptions,
         ActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, refreshProvider)
+    ) : base(@namespace, entryOptions, refreshProvider)
     {
         Cache = cache;
     }

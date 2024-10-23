@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 namespace ActionCache.Common;
 
 /// <summary>
@@ -25,9 +28,10 @@ public class ActionCacheOptionsBuilder
     /// Enables the use of the memory cache.
     /// </summary>
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
-    public ActionCacheOptionsBuilder UseMemoryCache()
+    public ActionCacheOptionsBuilder UseMemoryCache(Action<MemoryCacheOptions> configureOptions)
     {
         Options.EnabledCaches[CacheType.Memory] = true;
+        Options.ConfigureMemoryCacheOptions = configureOptions;
         return this;
     }
 
@@ -35,9 +39,10 @@ public class ActionCacheOptionsBuilder
     /// Enables the use of the Redis cache.
     /// </summary>
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
-    public ActionCacheOptionsBuilder UseRedisCache()
+    public ActionCacheOptionsBuilder UseRedisCache(Action<RedisCacheOptions> configureOptions)
     {
         Options.EnabledCaches[CacheType.Redis] = true;
+        Options.ConfigureRedisCacheOptions = configureOptions;
         return this;
     }
 

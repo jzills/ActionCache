@@ -1,3 +1,4 @@
+using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Memory.Extensions.Internal;
 using ActionCache.Utilities;
@@ -9,7 +10,7 @@ namespace ActionCache.Memory;
 /// <summary>
 /// Represents a memory action cache implementation.
 /// </summary>
-public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
+public class MemoryActionCache : ActionCacheBase
 {
     protected readonly IMemoryCache Cache;
     protected readonly CancellationTokenSource CancellationTokenSource;
@@ -25,8 +26,9 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
         Namespace @namespace,
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource,
+        ActionCacheEntryOptions entryOptions,
         ActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, refreshProvider)
+    ) : base(@namespace, entryOptions, refreshProvider)
     {
         Cache = cache;
         CancellationTokenSource = cancellationTokenSource;
@@ -36,10 +38,13 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
     /// Gets the entry options for memory cache.
     /// </summary>
     /// <value>The cache entry options applied to new entries.</value>
-    public MemoryCacheEntryOptions EntryOptions =>
-        new MemoryCacheEntryOptions { Size = 1 }
-            .AddExpirationToken(
-                new CancellationChangeToken(CancellationTokenSource.Token));
+    public MemoryCacheEntryOptions EntryOptions => 
+        new MemoryCacheEntryOptions 
+        { 
+            Size = 1,
+            SlidingExpiration  = base.EntryOptions.SlidingExpiration,
+            AbsoluteExpiration = base.EntryOptions.GetAbsoluteExpirationFromUtcNow() 
+        }.AddExpirationToken(new CancellationChangeToken(CancellationTokenSource.Token));
 
     /// <summary>
     /// Asynchronously gets a value from the cache.
@@ -47,7 +52,7 @@ public class MemoryActionCache : Common.Caching.ActionCache//IActionCache
     /// <param name="key">The key of the cache entry.</param>
     /// <returns>The cached value or null if not found.</returns> 
     public override Task<TValue> GetAsync<TValue>(string key) =>
-        Task.FromResult(Cache.Get<TValue?>(Namespace.Create(key)));
+        Task.FromResult(Cache.Get<TValue>(Namespace.Create(key)));
 
     /// <summary>
     /// Asynchronously sets a value in the cache.

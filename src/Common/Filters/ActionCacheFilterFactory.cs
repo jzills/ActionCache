@@ -18,6 +18,10 @@ public class ActionCacheFilterFactory : Attribute, IFilterFactory
     [StringSyntax("Route")] 
     public required string Namespace { get; set; }
 
+    public TimeSpan? AbsoluteExpiration { get; set; }
+
+    public TimeSpan? SlidingExpiration { get; set; }
+
     /// <summary>
     /// Indicates whether multiple instances of the filter attribute are reusable.
     /// </summary>

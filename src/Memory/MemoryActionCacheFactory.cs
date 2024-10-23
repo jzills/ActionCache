@@ -1,5 +1,7 @@
+using ActionCache.Common;
 using ActionCache.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace ActionCache.Memory;
 
@@ -10,6 +12,7 @@ public class MemoryActionCacheFactory : IActionCacheFactory
 {
     protected readonly IMemoryCache MemoryCache;
     protected readonly IExpirationTokenSources ExpirationTokens;
+    protected readonly ActionCacheEntryOptions EntryOptions;
     protected readonly ActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
@@ -20,12 +23,14 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     public MemoryActionCacheFactory(
         IMemoryCache memoryCache,
         IExpirationTokenSources expirationTokens,
+        IOptions<ActionCacheEntryOptions> entryOptions,
         ActionCacheRefreshProvider refreshProvider
     )
     {
         MemoryCache = memoryCache;
         ExpirationTokens = expirationTokens;
         RefreshProvider = refreshProvider;
+        EntryOptions = entryOptions.Value;
     }
 
     /// <summary>
@@ -42,7 +47,19 @@ public class MemoryActionCacheFactory : IActionCacheFactory
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {
-            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource, RefreshProvider);
+            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource, EntryOptions, RefreshProvider);
+        }
+        else
+        {
+            return default;
+        }
+    }
+
+    public IActionCache? Create(string @namespace, ActionCacheEntryOptions entryOptions)
+    {
+        if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
+        {
+            return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource, entryOptions, RefreshProvider);
         }
         else
         {

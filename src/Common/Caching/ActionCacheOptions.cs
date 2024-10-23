@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 namespace ActionCache.Common;
 
 /// <summary>
@@ -9,6 +12,10 @@ public class ActionCacheOptions
     /// Gets the default entry options for the cache.
     /// </summary>
     public readonly ActionCacheEntryOptions EntryOptions = new();
+
+    public Action<MemoryCacheOptions> ConfigureMemoryCacheOptions { get; set; }
+
+    public Action<RedisCacheOptions> ConfigureRedisCacheOptions { get; set; }
 
     /// <summary>
     /// Gets the dictionary that indicates whether a specific cache type is enabled.

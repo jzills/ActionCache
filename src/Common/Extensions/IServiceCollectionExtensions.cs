@@ -1,6 +1,9 @@
 using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Memory.Extensions;
+using ActionCache.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace ActionCache.Common.Extensions;
 
@@ -24,14 +27,20 @@ internal static class IServiceCollectionExtensions
         configureOptions.Invoke(optionsBuilder);
 
         var options = optionsBuilder.Build();
+        services.Configure<ActionCacheEntryOptions>(configureOptions => 
+        {
+            configureOptions.SlidingExpiration = options.EntryOptions.SlidingExpiration;
+            configureOptions.AbsoluteExpiration = options.EntryOptions.AbsoluteExpiration;
+        });
+
         if (options.EnabledCaches[CacheType.Memory])
         {
-            // Register MemoryCache dependencies
+            services.AddActionCacheMemory(options.ConfigureMemoryCacheOptions);
         }
 
         if (options.EnabledCaches[CacheType.Redis])
         {
-            // Register Redis dependencies
+            services.AddActionCacheRedis(options.ConfigureRedisCacheOptions);
         }
 
         if (options.EnabledCaches[CacheType.SqlServer])

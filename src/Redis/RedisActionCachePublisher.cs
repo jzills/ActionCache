@@ -1,9 +1,7 @@
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
-using Newtonsoft.Json;
 using StackExchange.Redis;
-using System.Text.Json;
 
 namespace ActionCache.Redis;
 
@@ -21,7 +19,7 @@ public class RedisActionCachePublisher : RedisActionCache
         RedisNamespace @namespace, 
         IDatabase cache,
         ActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, cache, refreshProvider)
+    ) : base(@namespace, cache, new Common.ActionCacheEntryOptions(), refreshProvider)
     {
     }
 

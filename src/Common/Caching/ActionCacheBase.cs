@@ -2,13 +2,20 @@ using ActionCache.Utilities;
 
 namespace ActionCache.Common.Caching;
 
-public abstract class ActionCache : IActionCache
+public abstract class ActionCacheBase : IActionCache
 {
     protected readonly Namespace Namespace;
-    protected ActionCacheRefreshProvider RefreshProvider;
-    public ActionCache(Namespace @namespace, ActionCacheRefreshProvider refreshProvider)
+    protected readonly ActionCacheEntryOptions EntryOptions;
+    protected readonly ActionCacheRefreshProvider RefreshProvider;
+
+    public ActionCacheBase(
+        Namespace @namespace, 
+        ActionCacheEntryOptions entryOptions,
+        ActionCacheRefreshProvider refreshProvider
+    )
     {
         Namespace = @namespace;
+        EntryOptions = entryOptions;
         RefreshProvider = refreshProvider;
     }
 
