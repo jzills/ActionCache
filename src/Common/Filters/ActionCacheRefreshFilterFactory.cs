@@ -1,5 +1,3 @@
-using ActionCache.Common.Extensions;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,36 +8,19 @@ namespace ActionCache.Filters;
 /// A filter factory attribute that refreshes cached action data based on the specified namespace.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class ActionCacheRefreshFilterFactory : Attribute, IFilterFactory
+public class ActionCacheRefreshFilterFactory : ActionCacheFilterFactoryBase
 {
-    /// <summary>
-    /// Gets or sets the namespace used to retrieve and group the action caches.
-    /// </summary>
-    [StringSyntax("Route")]
-    public required string Namespace { get; set; }
-
-    /// <summary>
-    /// Determines whether multiple instances of the filter can be reused. Returns false indicating non-reusability.
-    /// </summary>
-    public bool IsReusable => false;
-
     /// <summary>
     /// Creates an instance of the action cache rehydration filter using the specified service provider.
     /// </summary>
     /// <param name="serviceProvider">The service provider used to access services.</param>
     /// <returns>Returns the constructed filter or null if caches could not be retrieved.</returns>
-    public virtual IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
+    public override IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
 
-        if (serviceProvider.TryGetActionCaches(Namespace, out var caches))
-        {
-            var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
-            return new ActionCacheRefreshFilter(caches.First(), binderFactory);
-        }
-        else
-        {
-            return default!;
-        }
+        var caches = GetCacheInstances(serviceProvider);
+        var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
+        return new ActionCacheRefreshFilter(caches.First(), binderFactory);
     }
 }

@@ -43,4 +43,15 @@ public class RedisActionCacheFactory : IActionCacheFactory
     /// <param name="namespace">Namespace for the cache.</param>
     /// <returns>New instance of RedisActionCache.</returns>
     public IActionCache? Create(string @namespace) => new RedisActionCacheWithExpiration(@namespace, Cache, EntryOptions, RefreshProvider);
+
+    public IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
+    {
+        var entryOptions = new ActionCacheEntryOptions
+        {
+            AbsoluteExpiration = absoluteExpiration,
+            SlidingExpiration = slidingExpiration
+        };
+
+        return new RedisActionCacheWithExpiration(@namespace, Cache, entryOptions, RefreshProvider);
+    }
 }

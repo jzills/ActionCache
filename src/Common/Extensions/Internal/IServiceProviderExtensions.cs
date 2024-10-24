@@ -16,10 +16,42 @@ internal static class IServiceProviderExtensions
     /// <returns>A collection of IActionCache instances or null.</returns>
     internal static IEnumerable<IActionCache?>? GetActionCaches(
         this IServiceProvider serviceProvider, 
-        string @namespace
+        string @namespace,
+        TimeSpan? absoluteExpiration = null,
+        TimeSpan? slidingExpiration = null
     ) => serviceProvider
             .GetActionCacheFactories()
-            .Select(factory => factory.Create(@namespace));
+            .Select(factory => factory.Create(@namespace, absoluteExpiration, slidingExpiration));
+
+    /// <summary>
+    /// Tries to retrieve action caches for specified namespaces and provides them out if successful.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider instance.</param>
+    /// <param name="namespaces">A comma-separated list of namespaces.</param>
+    /// <param name="caches">Out parameter that returns the retrieved caches.</param>
+    /// <returns>True if all specified caches exist, otherwise false.</returns>
+    internal static bool TryGetActionCaches(
+        this IServiceProvider serviceProvider, 
+        string @namespace,
+        TimeSpan? absoluteExpiration,
+        TimeSpan? slidingExpiration,
+        out IEnumerable<IActionCache> caches
+    )
+    {
+        if (@namespace.Contains(","))
+        {
+            caches = GetNamespaces(@namespace)
+                .SelectMany(@namespace => 
+                    serviceProvider.GetActionCaches(@namespace, absoluteExpiration, slidingExpiration)!)!;
+
+            return EnsureAllCachesExist(caches);
+        }
+        else
+        {
+            caches = serviceProvider.GetActionCaches(@namespace, absoluteExpiration, slidingExpiration)!;
+            return EnsureAllCachesExist(caches);
+        }
+    }
 
     /// <summary>
     /// Tries to retrieve action caches for specified namespaces and provides them out if successful.
@@ -34,7 +66,6 @@ internal static class IServiceProviderExtensions
         out IEnumerable<IActionCache> caches
     )
     {
-        //RoutePatternFactory.Parse(routeTemplate);
         if (@namespace.Contains(","))
         {
             caches = GetNamespaces(@namespace)

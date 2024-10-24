@@ -16,4 +16,13 @@ public interface IActionCacheFactory
     /// <param name="namespace">The namespace to associate with the cache.</param>
     /// <returns>An instance of IActionCache or null if it cannot be created.</returns>
     IActionCache? Create(string @namespace);
+
+    /// <summary>
+    /// Creates an action cache instance with a specified namespace and entry options with specified absolute and sliding expirations.
+    /// </summary>
+    /// <param name="namespace">The namespace to associate with the cache.</param>
+    /// <param name="absoluteExpiration">The absolute expiration for cache entry options.</param>
+    /// <param name="slidingExpiration">The sliding expiration for cache entry options.</param> 
+    /// <returns>An instance of IActionCache or null if it cannot be created.</returns>
+    IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration);
 }

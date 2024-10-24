@@ -55,10 +55,16 @@ public class MemoryActionCacheFactory : IActionCacheFactory
         }
     }
 
-    public IActionCache? Create(string @namespace, ActionCacheEntryOptions entryOptions)
+    public IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {
+            var entryOptions = new ActionCacheEntryOptions
+            {
+                AbsoluteExpiration = absoluteExpiration,
+                SlidingExpiration = slidingExpiration
+            };
+            
             return new MemoryActionCache(@namespace, MemoryCache, expirationTokenSource, entryOptions, RefreshProvider);
         }
         else
