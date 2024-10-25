@@ -1,5 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
+using ActionCache.Common;
+using ActionCache.Common.Enums;
+using ActionCache.Common.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
@@ -21,4 +25,36 @@ public abstract class ActionCacheFilterFactoryBase : Attribute, IFilterFactory
 
     /// <inheritdoc/>
     public abstract IFilterMetadata CreateInstance(IServiceProvider serviceProvider);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="serviceProvider">The service provider.</param>
+    /// <param name="type">The type of filter to be created.</param>
+    /// <param name="absoluteExpiration">The absolute expiration in milliseconds for a cache entry.</param>
+    /// <param name="slidingExpiration">The sliding expiration in milliseconds for a cache entry.</param>
+    /// <returns>An instance of a cache filter.</returns>
+    protected IFilterMetadata CreateInstance(IServiceProvider serviceProvider, 
+        FilterType type,
+        TimeSpan? absoluteExpiration = null, 
+        TimeSpan? slidingExpiration = null 
+    )
+    {
+        if (absoluteExpiration == TimeSpan.FromMilliseconds(ActionCacheEntryOptions.NoExpiration))
+        {
+            absoluteExpiration = null;
+        }
+
+        if (slidingExpiration == TimeSpan.FromMilliseconds(ActionCacheEntryOptions.NoExpiration))
+        {
+            slidingExpiration = null;
+        }
+
+        return serviceProvider.GetRequiredService<IActionCacheFilterAbstractFactory>()
+            .CreateInstance(Namespace, 
+                absoluteExpiration, 
+                slidingExpiration, 
+                type
+            );
+    }
 }

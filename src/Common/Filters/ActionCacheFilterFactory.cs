@@ -1,8 +1,6 @@
 using ActionCache.Common;
 using ActionCache.Common.Enums;
-using ActionCache.Common.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
@@ -30,6 +28,9 @@ public class ActionCacheFilterFactory : ActionCacheFilterFactoryBase
     /// <param name="serviceProvider">The service provider to resolve dependencies.</param>
     /// <returns>An instance of an action cache filter.</returns>
     public override IFilterMetadata CreateInstance(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IActionCacheFilterAbstractFactory>()
-            .CreateInstance(Namespace, FilterType.Add);
+        CreateInstance(serviceProvider,
+            FilterType.Add,
+            TimeSpan.FromMilliseconds(AbsoluteExpiration),
+            TimeSpan.FromMilliseconds(SlidingExpiration)
+        );
 }

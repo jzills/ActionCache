@@ -12,7 +12,14 @@ namespace ActionCache.Memory;
 /// </summary>
 public class MemoryActionCache : ActionCacheBase
 {
+    /// <summary>
+    /// A memory cache implementation.
+    /// </summary>
     protected readonly IMemoryCache Cache;
+
+    /// <summary>
+    /// A source of tokens used to combine cache entries for actions like namespace eviction.
+    /// </summary>
     protected readonly CancellationTokenSource CancellationTokenSource;
 
     /// <summary>
@@ -21,6 +28,7 @@ public class MemoryActionCache : ActionCacheBase
     /// <param name="namespace">The namespace for cache isolation.</param>
     /// <param name="cache">The memory cache instance.</param>
     /// <param name="cancellationTokenSource">The source for cancellation tokens used to expire cache entries.</param>
+    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
     /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param>
     public MemoryActionCache(
         Namespace @namespace,
@@ -87,7 +95,7 @@ public class MemoryActionCache : ActionCacheBase
     /// <summary>
     /// Retrieves all keys associated with this cache.
     /// </summary>
-    /// <returns>An enumerable of strings representing current cache entry keys.</returns>/// 
+    /// <returns>An enumerable of strings representing current cache entry keys.</returns>
     public override Task<IEnumerable<string>> GetKeysAsync() =>
         Task.FromResult(Cache.GetKeys(Namespace).ToList());
 }

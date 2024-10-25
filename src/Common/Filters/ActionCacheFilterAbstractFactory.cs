@@ -43,17 +43,34 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
 
         // TODO: Allow multiple cache instances
-        var caches = GetCacheInstances(@namespace).First(); 
-        return type switch
-        {
-            FilterType.Add      => new ActionCacheFilter(caches, BinderFactory),
-            FilterType.Evict    => new ActionCacheEvictionFilter(caches, BinderFactory),
-            FilterType.Refresh  => new ActionCacheRefreshFilter(caches, BinderFactory),   
-            _                   => throw new FilterTypeNotSupportedException(type)         
-        };
+        var cache = GetCacheInstances(@namespace).First(); 
+        return CreateFilter(cache, type);
     }
 
-    internal IReadOnlyList<IActionCache> GetCacheInstances(string @namespace)
+    /// <inheritdoc/>
+    /// <exception cref="FilterTypeNotSupportedException"></exception>
+    public IFilterMetadata CreateInstance(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration, FilterType type)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
+
+        // TODO: Allow multiple cache instances
+        var cache = GetCacheInstances(@namespace, absoluteExpiration, slidingExpiration).First();
+        return CreateFilter(cache, type);
+    }
+
+    internal IFilterMetadata CreateFilter(IActionCache cache, FilterType type) => 
+        type switch
+        {
+            FilterType.Add      => new ActionCacheFilter(cache, BinderFactory),
+            FilterType.Evict    => new ActionCacheEvictionFilter(cache, BinderFactory),
+            FilterType.Refresh  => new ActionCacheRefreshFilter(cache, BinderFactory),   
+            _                   => throw new FilterTypeNotSupportedException(type)         
+        };
+
+    internal IReadOnlyList<IActionCache> GetCacheInstances(string @namespace,
+        TimeSpan? absoluteExpiration = null,
+        TimeSpan? slidingExpiration = null
+    )
     {
         List<IActionCache> cacheInstances = [];
 
@@ -61,20 +78,24 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         {
             foreach (var value in @namespace.SplitNamespace())
             {
-                AddCacheInstances(value, cacheInstances);
+                AddCacheInstances(value, cacheInstances, absoluteExpiration, slidingExpiration);
             }
         }
         else
         {
-            AddCacheInstances(@namespace, cacheInstances);
+            AddCacheInstances(@namespace, cacheInstances, absoluteExpiration, slidingExpiration);
         }
 
         return cacheInstances.AsReadOnly();
     }
 
-    internal void AddCacheInstances(string @namespace, in List<IActionCache> cacheInstances)
+    internal void AddCacheInstances(string @namespace, 
+        in List<IActionCache> cacheInstances,
+        TimeSpan? absoluteExpiration = null,
+        TimeSpan? slidingExpiration = null
+    )
     {
-        var instances = CreateCacheInstances(@namespace);
+        var instances = CreateCacheInstances(@namespace, absoluteExpiration, slidingExpiration);
         if (instances is null || instances.Any(instance => instance is null))
         {
             throw new InvalidCacheInstanceException();

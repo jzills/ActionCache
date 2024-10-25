@@ -10,7 +10,14 @@ namespace ActionCache.Memory;
 /// </summary>
 public class MemoryActionCacheFactory : ActionCacheFactoryBase
 {
+    /// <summary>
+    /// A memory cache implementation.
+    /// </summary>
     protected readonly IMemoryCache MemoryCache;
+
+    /// <summary>
+    /// A source of expiration tokens.
+    /// </summary>
     protected readonly IExpirationTokenSources ExpirationTokens;
 
     /// <summary>
