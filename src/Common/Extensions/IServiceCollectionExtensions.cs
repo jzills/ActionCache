@@ -1,5 +1,6 @@
 using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions.Internal;
+using ActionCache.Common.Filters;
 using ActionCache.Memory.Extensions;
 using ActionCache.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,6 +61,7 @@ internal static class IServiceCollectionExtensions
         this IServiceCollection services
     ) => services
             .AddControllerInfo()
+            .AddScoped<IActionCacheFilterAbstractFactory, ActionCacheFilterAbstractFactory>()
             .AddScoped<ActionCacheDescriptorProvider>()
             .AddScoped<ActionCacheRefreshProvider>();
 }

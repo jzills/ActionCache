@@ -43,7 +43,7 @@ public class Test_ActionCacheEvictionFilter_WithRouteTemplateParameter
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.Evict)));
     }
 
     [TearDown]

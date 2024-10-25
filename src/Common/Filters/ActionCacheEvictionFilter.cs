@@ -1,6 +1,5 @@
 using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions;
-using ActionCache.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing.Template;
@@ -10,18 +9,8 @@ namespace ActionCache.Filters;
 /// <summary>
 /// An action filter to handle cache eviction after successful action execution.
 /// </summary>
-public class ActionCacheEvictionFilter : IAsyncActionFilter
+public class ActionCacheEvictionFilter : ActionCacheFilterBase, IAsyncActionFilter
 {
-    /// <summary>
-    /// The action cache manager.
-    /// </summary>
-    protected readonly IActionCache Cache;
-
-    /// <summary>
-    /// The template binder for parsing route parameters for templated namespaces.
-    /// </summary>
-    protected readonly TemplateBinderFactory BinderFactory;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ActionCacheEvictionFilter"/> class.
     /// </summary>
@@ -30,10 +19,8 @@ public class ActionCacheEvictionFilter : IAsyncActionFilter
     public ActionCacheEvictionFilter(
         IActionCache cache, 
         TemplateBinderFactory binderFactory
-    )
+    ) : base(cache, binderFactory)
     {
-        Cache = cache;
-        BinderFactory = binderFactory;
     }
 
     /// <summary>
@@ -49,12 +36,9 @@ public class ActionCacheEvictionFilter : IAsyncActionFilter
         // Cache eviction logic after a successful response.
         if (actionExecutedContext.HttpContext.Response.StatusCode == StatusCodes.Status200OK)
         {
-            Cache.GetNamespace().AttachRouteValues(
-                context.RouteData.Values, 
-                BinderFactory
-            );
+            AttachRouteValues(context.RouteData.Values);
 
-            context.AddCacheStatus(CacheStatus.EVICT);
+            context.AddCacheStatus(CacheStatus.Evict);
             await Cache.RemoveAsync();
         }
     }

@@ -49,7 +49,7 @@ public class Test_ActionCacheRefreshFilter_WithBody
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.REFRESH)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.Refresh)));
     }
 
     [TearDown]

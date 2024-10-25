@@ -1,5 +1,6 @@
+using ActionCache.Common.Enums;
+using ActionCache.Common.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
@@ -14,12 +15,7 @@ public class ActionCacheEvictionFilterFactory : ActionCacheFilterFactoryBase
     /// </summary>
     /// <param name="serviceProvider">The service provider to use for getting action cache services.</param>
     /// <returns>An instance of <see cref="IFilterMetadata"/> representing the action cache eviction filter.</returns>
-    public override IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(Namespace, nameof(Namespace));
-
-        var caches = GetCacheInstances(serviceProvider);
-        var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
-        return new ActionCacheEvictionFilter(caches.First(), binderFactory);
-    }
+    public override IFilterMetadata CreateInstance(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<IActionCacheFilterAbstractFactory>()
+            .CreateInstance(Namespace, FilterType.Evict);
 }

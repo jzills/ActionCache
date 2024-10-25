@@ -44,7 +44,7 @@ public class Test_ActionCache_CacheStatus_Hit
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.Hit)));
     }
 
     [TearDown]

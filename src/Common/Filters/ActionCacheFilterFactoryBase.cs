@@ -1,10 +1,11 @@
-using ActionCache.Common.Extensions.Internal;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Filters;
 
+/// <summary>
+/// Provides a base factory for creating instances of action cache filters.
+/// </summary>
 public abstract class ActionCacheFilterFactoryBase : Attribute, IFilterFactory
 {
     /// <summary>
@@ -18,49 +19,6 @@ public abstract class ActionCacheFilterFactoryBase : Attribute, IFilterFactory
     /// </summary>
     public bool IsReusable => false;
 
+    /// <inheritdoc/>
     public abstract IFilterMetadata CreateInstance(IServiceProvider serviceProvider);
-
-    internal IReadOnlyList<IActionCache> GetCacheInstances(IServiceProvider serviceProvider)
-    {
-        List<IActionCache> cacheInstances = [];
-
-        if (Namespace.Contains(","))
-        {
-            foreach (var @namespace in Namespace.SplitNamespace())
-            {
-                AddCacheInstances(serviceProvider, @namespace, cacheInstances);
-            }
-        }
-        else
-        {
-            AddCacheInstances(serviceProvider, Namespace, cacheInstances);
-        }
-
-        return cacheInstances.AsReadOnly();
-    }
-
-    internal void AddCacheInstances(IServiceProvider serviceProvider, string @namespace, in List<IActionCache> cacheInstances)
-    {
-        var instances = CreateCacheInstances(serviceProvider, @namespace);
-        if (instances is null || instances.Any(instance => instance is null))
-        {
-            throw new Exception();
-        }
-        else
-        {
-            cacheInstances.AddRange(instances);
-        }
-    }
-
-    internal IEnumerable<IActionCache?>? CreateCacheInstances(
-        IServiceProvider serviceProvider, 
-        string @namespace,
-        TimeSpan? absoluteExpiration = null,
-        TimeSpan? slidingExpiration = null
-    ) => GetCacheFactories(serviceProvider)
-            .Select(factory => factory.Create(@namespace, absoluteExpiration, slidingExpiration));
-
-    private IEnumerable<IActionCacheFactory> GetCacheFactories(
-        IServiceProvider serviceProvider
-    ) => serviceProvider.GetRequiredService<IEnumerable<IActionCacheFactory>>();
 }

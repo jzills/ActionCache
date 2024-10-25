@@ -44,14 +44,14 @@ public class Test_ActionCache_Eviction
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.HIT)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.Hit)));
 
         // Cache eviction
         response = await Client.DeleteAsync("/users");
         response.EnsureSuccessStatusCode();
 
         Assert.That(response.Headers.Contains(CacheHeaders.CacheStatus));
-        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.EVICT)));
+        Assert.That(response.Headers.GetValues(CacheHeaders.CacheStatus).First(), Is.EqualTo(Enum.GetName(CacheStatus.Evict)));
     }
 
     [TearDown]
