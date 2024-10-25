@@ -3,7 +3,6 @@ using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Redis.Extensions;
 using ActionCache.Redis.Extensions.Internal;
-using ActionCache.Utilities;
 using StackExchange.Redis;
 using System.Reflection;
 
@@ -18,6 +17,8 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
+
+    protected new RedisNamespace Namespace => (RedisNamespace)base.Namespace;
 
     /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
@@ -47,14 +48,14 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     {
         if (Assembly.TryGetResourceAsText(LuaResources.Remove, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace, key], null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [Namespace, key], flags: CommandFlags.FireAndForget);
         }
         else
         {
             var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
             if (isSuccessful)
             {
-                await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
+                await Cache.SortedSetRemoveAsync(Namespace, key);
             }
         }
     }
@@ -66,7 +67,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     {
         if (Assembly.TryGetResourceAsText(LuaResources.RemoveNamespace, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace], flags: CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [Namespace], flags: CommandFlags.FireAndForget);
         }
     }
 
@@ -88,7 +89,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
         if (Assembly.TryGetResourceAsText(LuaResources.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
-                [(RedisNamespace)Namespace, (RedisKey)key], 
+                [Namespace, (RedisKey)key], 
                 [redisValue, absoluteExpiration, slidingExpiration, ttl], 
                 CommandFlags.FireAndForget
             );
@@ -107,7 +108,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
                 await Cache.KeyExpireAsync(Namespace.Create(key), expiry: TimeSpan.FromMilliseconds(ttl));
             }
 
-            await Cache.SortedSetAddAsync((RedisNamespace)Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
+            await Cache.SortedSetAddAsync(Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
         }
     }
 
@@ -122,7 +123,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
         var hashEntries = await Cache.HashGetAllAsync(namespaceKey);
         if (hashEntries is null || hashEntries.Length == 0)
         {
-            await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
+            await Cache.SortedSetRemoveAsync(Namespace, key);
             return default;
         }
 
@@ -133,7 +134,7 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
             if (DateTimeOffset.UtcNow >= absoluteExpiration)
             {
                 await Cache.KeyDeleteAsync(namespaceKey);
-                await Cache.SortedSetRemoveAsync((RedisNamespace)Namespace, key);
+                await Cache.SortedSetRemoveAsync(Namespace, key);
                 return default;
             }
         }
@@ -158,13 +159,13 @@ public class RedisActionCacheWithExpiration : ActionCacheBase
     public override async Task<IEnumerable<string>> GetKeysAsync()
     {
         await Cache.SortedSetRemoveRangeByScoreAsync(
-            (RedisNamespace)Namespace, 
+            Namespace, 
             ActionCacheEntryOptions.NoExpiration,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 
             Exclude.Start
         );
 
-        var entries = await Cache.SortedSetRangeByRankAsync((RedisNamespace)Namespace);
+        var entries = await Cache.SortedSetRangeByRankAsync(Namespace);
         return (IEnumerable<string>)entries.Select(value => (string?)value);
     }
 }
