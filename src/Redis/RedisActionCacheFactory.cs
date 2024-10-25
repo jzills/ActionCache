@@ -8,14 +8,12 @@ namespace ActionCache.Redis;
 /// <summary>
 /// Factory class for creating RedisActionCache instances.
 /// </summary>
-public class RedisActionCacheFactory : IActionCacheFactory
+public class RedisActionCacheFactory : ActionCacheFactoryBase
 {
     /// <summary>
     /// An IDatabase representation of a Redis cache.
     /// </summary> 
     protected readonly IDatabase Cache;
-    protected readonly ActionCacheEntryOptions EntryOptions;
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
     
     /// <summary>
     /// Constructor for RedisActionCacheFactory.
@@ -25,26 +23,16 @@ public class RedisActionCacheFactory : IActionCacheFactory
         IConnectionMultiplexer connectionMultiplexer,
         IOptions<ActionCacheEntryOptions> entryOptions,
         ActionCacheRefreshProvider refreshProvider
-    ) 
+    ) : base(CacheType.Redis, entryOptions.Value, refreshProvider)
     {
         Cache = connectionMultiplexer.GetDatabase();
-        EntryOptions = entryOptions.Value;
-        RefreshProvider = refreshProvider;
     }
     
-    /// <summary>
-    /// Gets the type of cache.
-    /// </summary>
-    public CacheType Type => CacheType.Redis;
-    
-    /// <summary>
-    /// Creates a new RedisActionCache instance.
-    /// </summary>
-    /// <param name="namespace">Namespace for the cache.</param>
-    /// <returns>New instance of RedisActionCache.</returns>
-    public IActionCache? Create(string @namespace) => new RedisActionCacheWithExpiration(@namespace, Cache, EntryOptions, RefreshProvider);
+    /// <inheritdoc/>
+    public override IActionCache? Create(string @namespace) => new RedisActionCacheWithExpiration(@namespace, Cache, EntryOptions, RefreshProvider);
 
-    public IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
+    /// <inheritdoc/>
+    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
     {
         var entryOptions = new ActionCacheEntryOptions
         {

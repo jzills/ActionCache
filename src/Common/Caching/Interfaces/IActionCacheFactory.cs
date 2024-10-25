@@ -6,11 +6,6 @@ namespace ActionCache;
 public interface IActionCacheFactory
 {
     /// <summary>
-    /// Gets the type of cache used by this factory.
-    /// </summary>
-    CacheType Type { get; }
-
-    /// <summary>
     /// Creates an action cache instance with a specified namespace.
     /// </summary>
     /// <param name="namespace">The namespace to associate with the cache.</param>

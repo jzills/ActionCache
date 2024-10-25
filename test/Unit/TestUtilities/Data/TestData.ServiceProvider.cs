@@ -1,6 +1,4 @@
 using ActionCache.Common.Extensions;
-using ActionCache.Memory.Extensions;
-using ActionCache.Redis.Extensions;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 

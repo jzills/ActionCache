@@ -1,3 +1,4 @@
+using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -97,7 +98,7 @@ internal static class IServiceProviderExtensions
         cacheFactory = serviceProvider
             .GetActionCacheFactories()
             .FirstOrDefault(cacheFactory => 
-                cacheFactory.Type == CacheType)!;
+                ((ActionCacheFactoryBase)cacheFactory).Type == CacheType)!;
 
         return cacheFactory is not null;
     }
