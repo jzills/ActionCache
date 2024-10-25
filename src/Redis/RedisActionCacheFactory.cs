@@ -32,7 +32,7 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
     public override IActionCache? Create(string @namespace) => new RedisActionCacheWithExpiration(@namespace, Cache, EntryOptions, RefreshProvider);
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
+    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
     {
         var entryOptions = new ActionCacheEntryOptions
         {

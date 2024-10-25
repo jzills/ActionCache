@@ -19,5 +19,5 @@ public interface IActionCacheFactory
     /// <param name="absoluteExpiration">The absolute expiration for cache entry options.</param>
     /// <param name="slidingExpiration">The sliding expiration for cache entry options.</param> 
     /// <returns>An instance of IActionCache or null if it cannot be created.</returns>
-    IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration);
+    IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null);
 }
