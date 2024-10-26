@@ -19,6 +19,8 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
     /// Constructor for RedisActionCacheFactory.
     /// </summary>
     /// <param name="connectionMultiplexer">ConnectionMultiplexer for Redis.</param>
+    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
+    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param>  
     public RedisActionCacheFactory(
         IConnectionMultiplexer connectionMultiplexer,
         IOptions<ActionCacheEntryOptions> entryOptions,
@@ -29,10 +31,14 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
     }
     
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace) => new RedisActionCacheWithExpiration(@namespace, Cache, EntryOptions, RefreshProvider);
+    public override IActionCache? Create(string @namespace) => 
+        new RedisActionCache(@namespace, Cache, EntryOptions, RefreshProvider);
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
+    public override IActionCache? Create(string @namespace, 
+        TimeSpan? absoluteExpiration = null, 
+        TimeSpan? slidingExpiration = null
+    )
     {
         var entryOptions = new ActionCacheEntryOptions
         {
@@ -40,6 +46,6 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
             SlidingExpiration = slidingExpiration
         };
 
-        return new RedisActionCacheWithExpiration(@namespace, Cache, entryOptions, RefreshProvider);
+        return new RedisActionCache(@namespace, Cache, entryOptions, RefreshProvider);
     }
 }

@@ -50,6 +50,5 @@ public static class IServiceCollectionExtensions
         this IServiceCollection services
     ) => services
             .AddActionCacheCommon()
-            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
-            .AddHostedService<RedisHostedService>();
+            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>();
 }

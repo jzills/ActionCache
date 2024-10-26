@@ -2,7 +2,7 @@ using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Redis.Extensions;
-using ActionCache.Utilities;
+using ActionCache.Redis.Extensions.Internal;
 using StackExchange.Redis;
 using System.Reflection;
 
@@ -19,10 +19,17 @@ public class RedisActionCache : ActionCacheBase
     protected readonly IDatabase Cache;
 
     /// <summary>
+    /// The namespace used for cache entries.
+    /// </summary>
+    protected new RedisNamespace Namespace => (RedisNamespace)base.Namespace;
+
+    /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
     /// </summary>
     /// <param name="namespace">The RedisNamespace to use for caching.</param>
     /// <param name="cache">The IDatabase to use for caching.</param>
+    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
+    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param> 
     public RedisActionCache(
         RedisNamespace @namespace, 
         IDatabase cache,
@@ -44,16 +51,16 @@ public class RedisActionCache : ActionCacheBase
     /// <param name="key">The key of the item to remove from the cache.</param>
     public override async Task RemoveAsync(string key)
     {
-        if (Assembly.TryGetResourceAsText("UnlinkKeyWithKeySet.lua", out var script))
+        if (Assembly.TryGetResourceAsText(LuaResources.Remove, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace, key], null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [Namespace, key], flags: CommandFlags.FireAndForget);
         }
         else
         {
             var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
             if (isSuccessful)
             {
-                await Cache.SetRemoveAsync((RedisNamespace)Namespace, key);
+                await Cache.SortedSetRemoveAsync(Namespace, key);
             }
         }
     }
@@ -63,11 +70,13 @@ public class RedisActionCache : ActionCacheBase
     /// </summary>
     public override async Task RemoveAsync()
     {
-        if (Assembly.TryGetResourceAsText("UnlinkNamespaceWithKeySet.lua", out var script))
+        if (Assembly.TryGetResourceAsText(LuaResources.RemoveNamespace, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [(RedisNamespace)Namespace], null, CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [Namespace], flags: CommandFlags.FireAndForget);
         }
     }
+
+#pragma warning disable CS8765
 
     /// <summary>
     /// Sets a cached item with the specified key and value.
@@ -78,23 +87,41 @@ public class RedisActionCache : ActionCacheBase
     {
         RedisValue redisValue = CacheJsonSerializer.Serialize(value);
 
-        if (Assembly.TryGetResourceAsText("SetJsonWithKeySet.lua", out var script))
+        var absoluteExpiration = EntryOptions.GetAbsoluteExpirationFromUtcNowInMilliseconds();
+        var slidingExpiration = EntryOptions.GetSlidingExpirationInMilliseconds();
+        var ttl = slidingExpiration > 0 ?
+            slidingExpiration :
+            EntryOptions.GetAbsoluteExpirationAsTTLInMilliseconds();
+
+        if (Assembly.TryGetResourceAsText(LuaResources.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
-                [(RedisNamespace)Namespace, (RedisKey)key], 
-                [redisValue], 
+                [Namespace, (RedisKey)key], 
+                [redisValue, absoluteExpiration, slidingExpiration, ttl], 
                 CommandFlags.FireAndForget
             );
         }
         else
         {
-            var isSuccessful = await Cache.StringSetAsync(Namespace.Create(key), redisValue);
-            if (isSuccessful)
+            await Cache.HashSetAsync(Namespace.Create(key), 
+            [
+                new HashEntry(RedisHashEntries.Value, redisValue),
+                new HashEntry(RedisHashEntries.AbsoluteExpiration, absoluteExpiration),
+                new HashEntry(RedisHashEntries.SlidingExpiration, slidingExpiration)
+            ]);
+
+            if (EntryOptions.SlidingExpiration.HasValue || EntryOptions.AbsoluteExpiration.HasValue)
             {
-                await Cache.SetAddAsync((RedisNamespace)Namespace, key, CommandFlags.FireAndForget);
+                await Cache.KeyExpireAsync(Namespace.Create(key), expiry: TimeSpan.FromMilliseconds(ttl));
             }
+
+            await Cache.SortedSetAddAsync(Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
         }
     }
+
+#pragma warning restore CS8765
+
+#pragma warning disable CS8609, CS8603
 
     /// <summary>
     /// Gets a cached item of type TValue with the specified key.
@@ -103,20 +130,56 @@ public class RedisActionCache : ActionCacheBase
     /// <returns>The cached item if found, otherwise default.</returns>
     public override async Task<TValue> GetAsync<TValue>(string key)
     {
-        var value = await Cache.StringGetAsync(Namespace.Create(key));
-        if (!string.IsNullOrWhiteSpace(value))
+        var namespaceKey = Namespace.Create(key);
+        var hashEntries = await Cache.HashGetAllAsync(namespaceKey);
+        if (hashEntries is null || hashEntries.Length == 0)
         {
-            return CacheJsonSerializer.Deserialize<TValue>(value);
+            await Cache.SortedSetRemoveAsync(Namespace, key);
+            return default;
         }
-        else
+
+        var absoluteExpirationUnix = hashEntries.GetAbsoluteExpiration();
+        if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+        {
+            var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
+            if (DateTimeOffset.UtcNow >= absoluteExpiration)
+            {
+                await Cache.KeyDeleteAsync(namespaceKey);
+                await Cache.SortedSetRemoveAsync(Namespace, key);
+                return default;
+            }
+        }
+        
+        var slidingExpiration = hashEntries.GetSlidingExpiration();
+        if (slidingExpiration > ActionCacheEntryOptions.NoExpiration)
+        {
+            await Cache.KeyExpireAsync(namespaceKey, TimeSpan.FromMilliseconds(slidingExpiration), CommandFlags.FireAndForget);
+        }
+
+        var jsonValue = (string?)hashEntries.GetRedisValue();
+        if (string.IsNullOrWhiteSpace(jsonValue))
         {
             return default;
         }
+        else
+        {
+            return CacheJsonSerializer.Deserialize<TValue>(jsonValue);
+        }
     }
 
+#pragma warning restore CS8609, CS8603
+
+    /// <inheritdoc/>
     public override async Task<IEnumerable<string>> GetKeysAsync()
     {
-        var value = await Cache.SetMembersAsync((RedisNamespace)Namespace);
-        return (IEnumerable<string>)value.Select(value => (string?)value);
+        await Cache.SortedSetRemoveRangeByScoreAsync(
+            Namespace, 
+            ActionCacheEntryOptions.NoExpiration,
+            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 
+            Exclude.Start
+        );
+
+        var entries = await Cache.SortedSetRangeByRankAsync(Namespace);
+        return (IEnumerable<string>)entries.Select(value => (string?)value);
     }
 }
