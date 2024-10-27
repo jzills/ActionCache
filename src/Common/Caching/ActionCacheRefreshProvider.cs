@@ -1,9 +1,13 @@
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Keys;
+using ActionCache.Utilities;
 
 namespace ActionCache.Common.Caching;
 
-public class ActionCacheRefreshProvider
+/// <summary>
+/// A class responsible for executing controller actions for cache keys
+/// </summary>
+public class ActionCacheRefreshProvider : IActionCacheRefreshProvider
 {
     protected readonly ActionCacheDescriptorProvider DescriptorProvider;
 
@@ -12,7 +16,8 @@ public class ActionCacheRefreshProvider
         DescriptorProvider = descriptorProvider;
     }
 
-    public async Task<IReadOnlyDictionary<string, object?>> GetRefreshResultsAsync(string @namespace, IEnumerable<string> keys)
+    /// <inheritdoc/>
+    public IReadOnlyDictionary<string, object?> GetRefreshResults(Namespace @namespace, IEnumerable<string> keys)
     {
         var refreshResults = new Dictionary<string, object?>();
         var descriptorCollection = DescriptorProvider.GetControllerActionMethodInfo(@namespace);

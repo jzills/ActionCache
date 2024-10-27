@@ -2,13 +2,13 @@ using ActionCache;
 using Microsoft.Extensions.DependencyInjection;
 using Unit.TestUtiltiies.Data;
 
-namespace Unit.Redis;
+namespace Unit.Common;
 
 [TestFixture]
-public class Test_RedisActionCache_Expiration
+public class Test_ActionCache_Expiration
 {
     [Test]
-    [TestCaseSource(typeof(TestData), nameof(TestData.GetRedisCacheServiceProvider))]
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
     public async Task Test_GetAsync_Expires(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
@@ -31,7 +31,7 @@ public class Test_RedisActionCache_Expiration
     }
 
     [Test]
-    [TestCaseSource(typeof(TestData), nameof(TestData.GetRedisCacheServiceProvider))]
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
     public async Task Test_GetKeys_Expires(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();

@@ -34,7 +34,7 @@ public class RedisActionCache : ActionCacheBase
         RedisNamespace @namespace, 
         IDatabase cache,
         ActionCacheEntryOptions entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     ) : base(@namespace, entryOptions, refreshProvider)
     {
         Cache = cache;

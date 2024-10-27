@@ -20,7 +20,7 @@ public abstract class ActionCacheBase : IActionCache
     /// <summary>
     /// The refresh provider to handle cache refreshes.
     /// </summary>
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
+    protected readonly IActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// The constructor for the abstract cache base.
@@ -31,7 +31,7 @@ public abstract class ActionCacheBase : IActionCache
     public ActionCacheBase(
         Namespace @namespace, 
         ActionCacheEntryOptions entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     )
     {
         Namespace = @namespace;
@@ -52,7 +52,7 @@ public abstract class ActionCacheBase : IActionCache
     public async Task RefreshAsync()
     {
         var keys = await GetKeysAsync();
-        var refreshResults = await RefreshProvider.GetRefreshResultsAsync(Namespace.Value, keys);
+        var refreshResults = RefreshProvider.GetRefreshResults(Namespace.Value, keys);
 
         var refreshTasks = new List<Task>();
         foreach (var (key, value) in refreshResults)

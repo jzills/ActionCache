@@ -2,7 +2,6 @@ using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Utilities;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 using System.Text;
 
 namespace ActionCache.Common.Caching;

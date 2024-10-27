@@ -35,24 +35,24 @@ public class MemoryActionCache : ActionCacheBase
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource,
         ActionCacheEntryOptions entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     ) : base(@namespace, entryOptions, refreshProvider)
     {
         Cache = cache;
         CancellationTokenSource = cancellationTokenSource;
+        EntryOptions = new MemoryCacheEntryOptions 
+        { 
+            Size = 1,
+            SlidingExpiration  = base.EntryOptions.SlidingExpiration,
+            AbsoluteExpiration = base.EntryOptions.GetAbsoluteExpirationFromUtcNow() 
+        }.AddExpirationToken(new CancellationChangeToken(CancellationTokenSource.Token));
     }
 
     /// <summary>
     /// Gets the entry options for memory cache.
     /// </summary>
     /// <value>The cache entry options applied to new entries.</value>
-    public MemoryCacheEntryOptions EntryOptions => 
-        new MemoryCacheEntryOptions 
-        { 
-            Size = 1,
-            SlidingExpiration  = base.EntryOptions.SlidingExpiration,
-            AbsoluteExpiration = base.EntryOptions.GetAbsoluteExpirationFromUtcNow() 
-        }.AddExpirationToken(new CancellationChangeToken(CancellationTokenSource.Token));
+    public new MemoryCacheEntryOptions EntryOptions { get; init; }
 
     /// <summary>
     /// Asynchronously gets a value from the cache.
@@ -97,5 +97,5 @@ public class MemoryActionCache : ActionCacheBase
     /// </summary>
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>
     public override Task<IEnumerable<string>> GetKeysAsync() =>
-        Task.FromResult(Cache.GetKeys(Namespace).ToList());
+        Task.FromResult(Cache.GetKeys(Namespace, EntryOptions).Keys.AsEnumerable());
 }

@@ -31,7 +31,7 @@ public class MemoryActionCacheFactory : ActionCacheFactoryBase
         IMemoryCache memoryCache,
         IExpirationTokenSources expirationTokens,
         IOptions<ActionCacheEntryOptions> entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     ) : base(CacheType.Memory, entryOptions.Value, refreshProvider)
     {
         MemoryCache = memoryCache;

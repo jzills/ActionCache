@@ -13,7 +13,7 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     /// <summary>
     /// An instance of a refresh provider responsible for invoking cached controller actions.
     /// </summary>
-    protected readonly ActionCacheRefreshProvider RefreshProvider;
+    protected readonly IActionCacheRefreshProvider RefreshProvider;
 
     /// <summary>
     /// The base constructor.
@@ -24,7 +24,7 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     public ActionCacheFactoryBase(
         CacheType type,
         ActionCacheEntryOptions entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     )
     {
         Type = type;

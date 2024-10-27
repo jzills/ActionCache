@@ -24,7 +24,7 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
     public RedisActionCacheFactory(
         IConnectionMultiplexer connectionMultiplexer,
         IOptions<ActionCacheEntryOptions> entryOptions,
-        ActionCacheRefreshProvider refreshProvider
+        IActionCacheRefreshProvider refreshProvider
     ) : base(CacheType.Redis, entryOptions.Value, refreshProvider)
     {
         Cache = connectionMultiplexer.GetDatabase();
