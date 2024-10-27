@@ -1,5 +1,6 @@
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Utilities;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
@@ -9,7 +10,7 @@ namespace ActionCache.Common.Caching;
 /// <summary>
 /// Provides functionality to retrieve and cache action descriptor information.
 /// </summary>
-public class ActionCacheDescriptorProvider
+public class ActionCacheDescriptorProvider : IActionCacheDescriptorProvider
 {
     /// <summary>
     /// Service provider for obtaining services.
@@ -46,7 +47,7 @@ public class ActionCacheDescriptorProvider
     /// </summary>
     /// <param name="namespace">The namespace of the controller.</param>
     /// <returns>A rehydration descriptor for the specified namespace.</returns>
-    public ActionCacheDescriptor GetControllerActionMethodInfo(string @namespace)
+    public ActionCacheDescriptor GetControllerActionMethodInfo(Namespace @namespace)
     {
         var descriptors = new ActionCacheDescriptor();
         if (ActionDescriptors.TryGetControllerActionDescriptors(@namespace, out var controllerActionDescriptors))

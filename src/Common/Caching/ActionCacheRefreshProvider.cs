@@ -9,9 +9,9 @@ namespace ActionCache.Common.Caching;
 /// </summary>
 public class ActionCacheRefreshProvider : IActionCacheRefreshProvider
 {
-    protected readonly ActionCacheDescriptorProvider DescriptorProvider;
+    protected readonly IActionCacheDescriptorProvider DescriptorProvider;
 
-    public ActionCacheRefreshProvider(ActionCacheDescriptorProvider descriptorProvider)
+    public ActionCacheRefreshProvider(IActionCacheDescriptorProvider descriptorProvider)
     {
         DescriptorProvider = descriptorProvider;
     }

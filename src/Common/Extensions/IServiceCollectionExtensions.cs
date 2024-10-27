@@ -62,6 +62,6 @@ internal static class IServiceCollectionExtensions
     ) => services
             .AddControllerInfo()
             .AddScoped<IActionCacheFilterAbstractFactory, ActionCacheFilterAbstractFactory>()
-            .AddScoped<ActionCacheDescriptorProvider>()
+            .AddScoped<IActionCacheDescriptorProvider, ActionCacheDescriptorProvider>()
             .AddScoped<IActionCacheRefreshProvider, ActionCacheRefreshProvider>();
 }
