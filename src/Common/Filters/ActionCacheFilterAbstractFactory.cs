@@ -1,3 +1,4 @@
+using ActionCache.Common.Caching;
 using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Exceptions;
@@ -34,31 +35,44 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
     {
         CacheFactories = cacheFactories;
         BinderFactory = binderFactory;
-    }   
-
-    /// <inheritdoc/>
-    /// <exception cref="FilterTypeNotSupportedException"></exception>
-    public IFilterMetadata CreateInstance(string @namespace, FilterType type)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
-
-        // TODO: Allow multiple cache instances
-        var cache = GetCacheInstances(@namespace).First(); 
-        return CreateFilter(cache, type);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidCacheInstanceException"></exception> 
+    /// <exception cref="FilterTypeNotSupportedException"></exception>
+    public IFilterMetadata CreateInstance(string @namespace, FilterType type) => 
+        CreateInstance(@namespace, absoluteExpiration: null, slidingExpiration: null, type);
+
+    /// <inheritdoc/>
+    /// <exception cref="InvalidCacheInstanceException"></exception> 
     /// <exception cref="FilterTypeNotSupportedException"></exception>
     public IFilterMetadata CreateInstance(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration, FilterType type)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
 
-        // TODO: Allow multiple cache instances
-        var cache = GetCacheInstances(@namespace, absoluteExpiration, slidingExpiration).First();
-        return CreateFilter(cache, type);
+        var caches = GetCacheInstances(@namespace, absoluteExpiration, slidingExpiration);
+        return CreateHandler(caches, type);
     }
 
-    internal IFilterMetadata CreateFilter(IActionCache cache, FilterType type) => 
+    internal IFilterMetadata CreateHandler(IReadOnlyList<IActionCache> caches, FilterType type)
+    {
+        if (caches.Count == 0)
+        {
+            throw new InvalidCacheInstanceException($"No cache instances were able to be created for type \"{type}\".");
+        } 
+        else
+        {
+            var cacheHandler = new ActionCacheHandler(caches.First());
+            foreach (var cache in caches.Skip(1))
+            {
+                cacheHandler.SetNext(cache);
+            } 
+
+            return CreateFilter(cacheHandler, type);
+        }
+    }
+
+    internal IFilterMetadata CreateFilter(ActionCacheHandler cache, FilterType type) => 
         type switch
         {
             FilterType.Add      => new ActionCacheFilter(cache, BinderFactory),

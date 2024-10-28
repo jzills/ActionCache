@@ -8,7 +8,8 @@ public static partial class TestData
 {
     public static IEnumerable<IServiceProvider> GetServiceProviders() =>
         GetMemoryCacheServiceProvider().Concat(
-            GetRedisCacheServiceProvider());
+            GetRedisCacheServiceProvider()).Concat(
+                GetMemoryAndRedisCacheServiceProvider());
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
     {
@@ -38,6 +39,23 @@ public static partial class TestData
         services.AddActionCache(options => 
         {
             options.UseEntryOptions(entryOptions => { });
+            options.UseRedisCache(options => options.Configuration = "127.0.0.1:6379");
+        });
+
+        var server = new TestServer(services.BuildServiceProvider());
+
+        return [server.Services];
+    }
+
+    public static IEnumerable<IServiceProvider> GetMemoryAndRedisCacheServiceProvider()
+    {
+        var services = new ServiceCollection();
+
+        services.AddMvc();
+        services.AddActionCache(options => 
+        {
+            options.UseEntryOptions(entryOptions => { });
+            options.UseMemoryCache(options => options.SizeLimit = 1000);
             options.UseRedisCache(options => options.Configuration = "127.0.0.1:6379");
         });
 
