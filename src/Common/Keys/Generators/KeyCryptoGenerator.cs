@@ -3,22 +3,22 @@ using System.Text;
 
 namespace ActionCache.Common.Keys;
 
-internal class KeyCryptoGenerator
+public class KeyCryptoGenerator
 {
-    internal protected readonly AESCrypto AES;
+    protected readonly AESCrypto AES;
 
-    // TODO: Use the route values/action args as input to the constructor
-    // to generate deterministic encryption in order to regenerate keys
-    // for cache retrieval, etc.
-    internal KeyCryptoGenerator()
+    public KeyCryptoGenerator()
     {
-        AES = new AESCrypto("ABC123");
-    }   
+        // Not intended for security guarantees. AES is used
+        // to persist cache entry metadata to easily refresh
+        // controller actions.
+        AES = new AESCrypto(nameof(ActionCache));
+    }
 
-    internal string Encrypt(string value) => 
+    public string Encrypt(string value) => 
         Convert.ToHexString(AES.Encrypt(Encoding.UTF8.GetBytes(value)));
 
-    internal string Decrypt(string value) => 
+    public string Decrypt(string value) => 
         Encoding.UTF8.GetString(AES.Decrypt(Convert.FromHexString(value)));
 
     public class AESCrypto

@@ -13,6 +13,11 @@ public class ActionCacheKeyBuilder
     protected static readonly char KeySeparator = ':';
 
     /// <summary>
+    /// The key generator, by default, implements AES encryption to allow symmetric operations.
+    /// </summary> 
+    protected readonly KeyCryptoGenerator KeyGenerator = new();
+
+    /// <summary>
     /// A key component derived from the route data and action arguments associated with an incoming request. 
     /// </summary>
     protected readonly ActionCacheKeyComponents KeyComponents = new();
@@ -43,10 +48,5 @@ public class ActionCacheKeyBuilder
     /// Builds the final cache key.
     /// </summary>
     /// <returns>The constructed cache key.</returns>
-    public string Build()
-    {
-        var keyComponents = KeyComponents.Serialize();
-        var keyCryptoGenerator = new KeyCryptoGenerator();
-        return keyCryptoGenerator.Encrypt(keyComponents);
-    }
+    public string Build() => KeyGenerator.Encrypt(KeyComponents.Serialize());
 }

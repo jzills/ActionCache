@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using ActionCache.Attributes;
 using Api.Database;
-using Microsoft.EntityFrameworkCore;
 using Api.Models;
+using ActionCache.Attributes;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
