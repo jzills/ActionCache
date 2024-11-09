@@ -11,8 +11,9 @@
     <PackageId>ActionCache</PackageId>
     <Version>0.0.5</Version>
     <Authors>Joshua Zillwood</Authors>
-    <Description></Description>
+    <Description>A simple yet powerful data caching library that adds an extra layer of caching to your ASP.NET Core applications.</Description>
     <Company></Company>
+    <PackageIcon>Icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jzills/ActionCache</PackageProjectUrl>
@@ -22,6 +23,10 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../resources/Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup> 

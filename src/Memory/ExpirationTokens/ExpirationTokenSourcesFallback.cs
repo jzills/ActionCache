@@ -7,7 +7,9 @@ namespace ActionCache.Memory;
 /// </summary>
 public class ExpirationTokenSourcesFallback : IExpirationTokenSources
 {
-    // Tokens dictionary to store cancellationTokenSources based on keys
+    /// <summary>
+    /// Tokens dictionary to store cancellationTokenSources based on keys
+    /// </summary>
     protected ConcurrentDictionary<string, CancellationTokenSource> Tokens = new();
 
     /// <summary>
@@ -33,7 +35,7 @@ public class ExpirationTokenSourcesFallback : IExpirationTokenSources
 
             return true;
         }
-        catch (OverflowException)
+        catch (Exception)
         {
             cancellationTokenSource = default!;
             return false;

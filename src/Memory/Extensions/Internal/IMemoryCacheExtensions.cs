@@ -11,7 +11,7 @@ internal static class IMemoryCacheExtensions
         var keys = cache.GetOrCreate(@namespace, options => {
             options.Size = 1;
             return new ConcurrentDictionary<string, DateTimeOffset?>();
-        });
+        }) ?? [];
 
         var expiredEntries = keys.Where(key => DateTimeOffset.UtcNow >= key.Value);
         if (expiredEntries.Any())
@@ -23,8 +23,6 @@ internal static class IMemoryCacheExtensions
 
             cache.Set(@namespace, keys, entryOptions);
         }
-
-        ArgumentNullException.ThrowIfNull(keys, nameof(keys));
 
         return keys;
     }

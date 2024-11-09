@@ -5,6 +5,9 @@ namespace ActionCache.Memory;
 /// </summary>
 public class ExpirationTokenSourcesValidated : IExpirationTokenSources
 {
+    /// <summary>
+    /// An implementation of <see cref="IExpirationTokenSources"/>. 
+    /// </summary>
     protected readonly IExpirationTokenSources Next;
 
     /// <summary>

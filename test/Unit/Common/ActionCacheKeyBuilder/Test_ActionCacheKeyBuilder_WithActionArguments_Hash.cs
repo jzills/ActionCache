@@ -22,7 +22,7 @@ public class Test_ActionCacheKeyBuilder_WithActionArguments_Hash
             .WithActionArguments(actionArguments)
             .Build();
 
-        var decryptedKey = new KeyCryptoGenerator().Decrypt(key);
-        Assert.That(decryptedKey, Is.EqualTo($"{ActionCacheKeyComponents.RouteValuesKey}={CacheJsonSerializer.Serialize(routeValues)}&{ActionCacheKeyComponents.ActionArgumentsKey}={CacheJsonSerializer.Serialize(actionArguments)}"));
+        var decodedKey = new KeyEncoder().Decode(key);
+        Assert.That(decodedKey, Is.EqualTo($"{ActionCacheKeyComponents.RouteValuesKey}={CacheJsonSerializer.Serialize(routeValues)}&{ActionCacheKeyComponents.ActionArgumentsKey}={CacheJsonSerializer.Serialize(actionArguments)}"));
     }
 }

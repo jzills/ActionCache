@@ -1,5 +1,9 @@
+<link rel="stylesheet" href="README.css">
 
-# ActionCache
+<p class="logo-p">
+  <img src="../resources/Icon.jpg" alt="Zills">
+  <span>ActionCache</span>
+</p>
 
 [![NuGet Version](https://img.shields.io/nuget/v/ActionCache.svg)](https://www.nuget.org/packages/ActionCache/) [![NuGet Downloads](https://img.shields.io/nuget/dt/ActionCache.svg)](https://www.nuget.org/packages/ActionCache/)
 
@@ -48,7 +52,7 @@ Add an `ActionCacheAttribute` to any controller actions that should be cached. T
 
 ## Cache Key Creation
 
-Both the route values and the action arguments are serialized then AES encrypted to generate the cache key suffix. This suffix is appended to the string "ActionCache:{Namespace}".
+Both the route values and the action arguments are serialized then encoded to generate the cache key suffix. This suffix is appended to the string "ActionCache:{Namespace}".
 
 > [!NOTE]
 > Any route data from the request, i.e. the area, controller and action names are also added to the key. This is helpful for the case of automatic cache rehydration which will be part of a future release.

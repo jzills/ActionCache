@@ -13,9 +13,15 @@ public class ActionCacheOptions
     /// </summary>
     public readonly ActionCacheEntryOptions EntryOptions = new();
 
-    public Action<MemoryCacheOptions> ConfigureMemoryCacheOptions { get; set; }
+    /// <summary>
+    /// Gets or sets a delegate to configure options for <see cref="MemoryCacheOptions"/>.
+    /// </summary>
+    public Action<MemoryCacheOptions>? ConfigureMemoryCacheOptions { get; set; }
 
-    public Action<RedisCacheOptions> ConfigureRedisCacheOptions { get; set; }
+    /// <summary>
+    /// Gets or sets a delegate to configure options for <see cref="RedisCacheOptions"/>.
+    /// </summary>
+    public Action<RedisCacheOptions>? ConfigureRedisCacheOptions { get; set; }
 
     /// <summary>
     /// Gets the dictionary that indicates whether a specific cache type is enabled.

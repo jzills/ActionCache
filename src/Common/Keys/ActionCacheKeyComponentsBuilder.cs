@@ -5,20 +5,41 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ActionCache.Common.Keys;
 
+/// <summary>
+/// Builds an <see cref="ActionCacheKeyComponents"/> object by parsing and decrypting a query string value.
+/// This class is used to generate cache key components, including route values and action arguments.
+/// </summary>
 public class ActionCacheKeyComponentsBuilder
 {
+    /// <summary>
+    /// A collection of name-value pairs extracted from the query string after decryption.
+    /// </summary>
     protected readonly NameValueCollection NameValues;
-    protected readonly KeyCryptoGenerator KeyGenerator = new();
 
+    /// <summary>
+    /// A generator used to handle key decryption during the construction of cache key components.
+    /// </summary>
+    protected readonly KeyEncoder KeyEncoder = new();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActionCacheKeyComponentsBuilder"/> class.
+    /// Decrypts the given value and parses it into a <see cref="NameValueCollection"/>.
+    /// </summary>
+    /// <param name="value">The encrypted string value that contains the query string to parse.</param>
     public ActionCacheKeyComponentsBuilder(string value)
     {
-        NameValues = HttpUtility.ParseQueryString(KeyGenerator.Decrypt(value));
-    }             
+        NameValues = HttpUtility.ParseQueryString(KeyEncoder.Decode(value));
+    }
 
+    /// <summary>
+    /// Builds an <see cref="ActionCacheKeyComponents"/> object by extracting and deserializing route values and action arguments 
+    /// from the parsed query string.
+    /// </summary>
+    /// <returns>A new <see cref="ActionCacheKeyComponents"/> object populated with route values and action arguments.</returns>
     public ActionCacheKeyComponents Build() =>
         new ActionCacheKeyComponents 
         { 
             RouteValues     = NameValues.ParseValueAsJson<RouteValueDictionary>(ActionCacheKeyComponents.RouteValuesKey), 
-            ActionArguments = NameValues.ParseValueAsJson<Dictionary<string, dynamic>>(ActionCacheKeyComponents.ActionArgumentsKey)
+            ActionArguments = NameValues.ParseValueAsJson<Dictionary<string, object>>(ActionCacheKeyComponents.ActionArgumentsKey)
         };
 }

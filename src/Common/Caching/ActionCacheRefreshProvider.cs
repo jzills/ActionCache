@@ -9,8 +9,17 @@ namespace ActionCache.Common.Caching;
 /// </summary>
 public class ActionCacheRefreshProvider : IActionCacheRefreshProvider
 {
+    /// <summary>
+    /// Provides access to action cache descriptors, which are used to manage cache-related metadata for actions.
+    /// </summary>
     protected readonly IActionCacheDescriptorProvider DescriptorProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActionCacheRefreshProvider"/> class with the specified descriptor provider.
+    /// </summary>
+    /// <param name="descriptorProvider">
+    /// The <see cref="IActionCacheDescriptorProvider"/> instance used to retrieve cache descriptors for refreshing cached actions.
+    /// </param>
     public ActionCacheRefreshProvider(IActionCacheDescriptorProvider descriptorProvider)
     {
         DescriptorProvider = descriptorProvider;

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Routing.Template;
 namespace ActionCache.Filters;
 
 /// <summary>
-/// The 
+/// The abstract base class for <see cref="ActionCacheFilter"/>.
 /// </summary>
 public abstract class ActionCacheFilterBase
 {
@@ -19,6 +19,11 @@ public abstract class ActionCacheFilterBase
     /// </summary>
     protected readonly TemplateBinderFactory BinderFactory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActionCacheFilterBase"/> class with the specified cache and template binder factory.
+    /// </summary>
+    /// <param name="cache">The <see cref="IActionCache"/> instance used for caching actions.</param>
+    /// <param name="binderFactory">The <see cref="TemplateBinderFactory"/> instance used for binding route templates.</param>
     internal ActionCacheFilterBase(IActionCache cache, TemplateBinderFactory binderFactory)
     {
         Cache = cache;

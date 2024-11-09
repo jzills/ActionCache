@@ -8,6 +8,9 @@ namespace ActionCache.Memory;
 /// </summary>
 public class ExpirationTokenSources : IExpirationTokenSources
 {
+    /// <summary>
+    /// The cache used for storing expiration token sources.
+    /// </summary>
     protected readonly IMemoryCache Cache;
 
     /// <summary>
