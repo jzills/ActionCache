@@ -1,9 +1,5 @@
-<link rel="stylesheet" href="README.css">
 
-<p class="logo-p">
-  <img src="../resources/Icon.jpg" alt="Zills">
-  <span>ActionCache</span>
-</p>
+# ActionCache
 
 [![NuGet Version](https://img.shields.io/nuget/v/ActionCache.svg)](https://www.nuget.org/packages/ActionCache/) [![NuGet Downloads](https://img.shields.io/nuget/dt/ActionCache.svg)](https://www.nuget.org/packages/ActionCache/)
 
