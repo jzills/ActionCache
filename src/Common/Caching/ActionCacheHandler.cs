@@ -1,4 +1,3 @@
-
 using ActionCache.Utilities;
 
 namespace ActionCache.Common.Caching;

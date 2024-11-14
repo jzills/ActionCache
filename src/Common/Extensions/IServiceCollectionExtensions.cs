@@ -4,7 +4,6 @@ using ActionCache.Common.Filters;
 using ActionCache.Memory.Extensions;
 using ActionCache.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace ActionCache.Common.Extensions;
 

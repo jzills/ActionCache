@@ -53,14 +53,8 @@ public abstract class ActionCacheBase : IActionCache
     {
         var keys = await GetKeysAsync();
         var refreshResults = RefreshProvider.GetRefreshResults(Namespace.Value, keys);
-
-        var refreshTasks = new List<Task>();
-        foreach (var (key, value) in refreshResults)
-        {
-            refreshTasks.Add(SetAsync(key, value));
-        }
-
-        await Task.WhenAll(refreshTasks);
+        await Task.WhenAll(refreshResults.Select(result => 
+            SetAsync(result.Key, result.Value)));
     }
 
     /// <inheritdoc/>
