@@ -19,6 +19,8 @@
     <PackageProjectUrl>https://github.com/jzills/ActionCache</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jzills/ActionCache.git</RepositoryUrl> 
     <RepositoryType>git</RepositoryType>
+    <PackageTags>cache;redis;memory</PackageTags>
+    <Copyright>Copyright © Joshua Zillwood</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
