@@ -6,7 +6,7 @@ namespace ActionCache.Common.Extensions.Internal;
 /// <summary>
 /// Provides extension methods for <see cref="ActionDescriptorCollection"/>.
 /// </summary>
-public static class ActionDescriptorCollectionExtensions
+internal static class ActionDescriptorCollectionExtensions
 {
     /// <summary>
     /// Attempts to get controller action descriptors that have an ActionCache attribute in the specified namespace.
@@ -15,7 +15,7 @@ public static class ActionDescriptorCollectionExtensions
     /// <param name="namespace">The namespace to filter by.</param>
     /// <param name="descriptors">The filtered controller action descriptors that match the namespace.</param>
     /// <returns>true if any descriptors are found; otherwise, false.</returns>
-    public static bool TryGetControllerActionDescriptors(
+    internal static bool TryGetControllerActionDescriptors(
         this ActionDescriptorCollection source, 
         string @namespace, 
         out IEnumerable<ControllerActionDescriptor> descriptors

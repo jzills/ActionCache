@@ -32,6 +32,15 @@ internal static class ActionExecutingContextExtensions
         return true;
     }
 
+    /// <summary>
+    /// Adds the specified cache status to the HTTP response headers of the given action executing context.
+    /// </summary>
+    /// <param name="context">
+    /// The <see cref="ActionExecutingContext"/> containing the HTTP context where the cache status will be added.
+    /// </param>
+    /// <param name="status">
+    /// The <see cref="CacheStatus"/> to include in the response headers.
+    /// </param>
     internal static void AddCacheStatus(
         this ActionExecutingContext context, 
         CacheStatus status

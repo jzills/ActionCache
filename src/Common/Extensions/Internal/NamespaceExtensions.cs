@@ -1,9 +1,10 @@
 using System.Web;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.AspNetCore.Routing.Template;
 
-namespace ActionCache.Utilities;
+namespace ActionCache.Common.Extensions.Internal;
 
 /// <summary>
 /// Provides extension methods for the <see cref="Namespace"/> class to handle route templates

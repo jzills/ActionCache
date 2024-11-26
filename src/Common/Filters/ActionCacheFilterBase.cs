@@ -1,4 +1,4 @@
-using ActionCache.Utilities;
+using ActionCache.Common.Extensions.Internal;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Template;
 

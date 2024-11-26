@@ -10,7 +10,7 @@ internal static class StringExtensions
     /// </summary>
     /// <param name="values">The comma-separated string to split.</param>
     /// <returns>An <see cref="IEnumerable{T}"/> of strings, each representing a trimmed, non-empty segment of <paramref name="values"/>.</returns>
-    public static IEnumerable<string> SplitNamespace(this string values) =>
+    internal static IEnumerable<string> SplitNamespace(this string values) =>
         values.Split(',', 
             StringSplitOptions.TrimEntries | 
             StringSplitOptions.RemoveEmptyEntries

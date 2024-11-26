@@ -1,11 +1,11 @@
 using System.Text;
 
-namespace ActionCache.Common.Utilities;
+namespace ActionCache.Common.Extensions.Internal;
 
 /// <summary>
 /// Provides extension methods for <see cref="StringBuilder"/>.
 /// </summary>
-public static class StringBuilderExtensions
+internal static class StringBuilderExtensions
 {
     /// <summary>
     /// Appends a concatenation of the specified strings, separated by the provided separator character,
@@ -16,7 +16,7 @@ public static class StringBuilderExtensions
     /// <param name="separator">The character to use as a separator.</param>
     /// <param name="values">An array of strings, which can be null.</param>
     /// <returns>The original <see cref="StringBuilder"/> with the appended text.</returns>
-    public static StringBuilder AppendJoinNonNull(this StringBuilder builder, char separator, params string?[] values)
+    internal static StringBuilder AppendJoinNonNull(this StringBuilder builder, char separator, params string?[] values)
     {
         var nonNullValues = values.Where(value => !string.IsNullOrWhiteSpace(value));
         return builder.AppendJoin(separator, nonNullValues ?? []);

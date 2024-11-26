@@ -15,7 +15,7 @@ internal static class MethodInfoExtensions
     /// <param name="source">The source method info.</param>
     /// <param name="namespace">The namespace to check against the attribute's namespace.</param>
     /// <returns>true if an <see cref="ActionCacheAttribute"/> exists and contains the namespace; otherwise, false.</returns>
-    public static bool HasActionCacheAttribute(this MethodInfo source, string @namespace) =>
+    internal static bool HasActionCacheAttribute(this MethodInfo source, string @namespace) =>
         source.GetCustomAttribute<ActionCacheAttribute>()?
             .Namespace.Contains(@namespace) ?? false;
 
@@ -27,7 +27,7 @@ internal static class MethodInfoExtensions
     /// <param name="parameters">Parameters to use during method invocation.</param>
     /// <param name="value">The output refresh result if the method execution is successful.</param>
     /// <returns>true if the method returns an <see cref="OkObjectResult"/>; otherwise, false.</returns>
-    public static bool TryGetRefreshResult(
+    internal static bool TryGetRefreshResult(
         this MethodInfo? methodInfo, 
         object? controller, 
         object?[]? parameters, 
@@ -52,6 +52,16 @@ internal static class MethodInfoExtensions
         }
     }
 
+    /// <summary>
+    /// Retrieves the result of a completed asynchronous task, if available.
+    /// </summary>
+    /// <param name="taskResult">The <see cref="Task"/> whose result is to be retrieved.</param>
+    /// <returns>
+    /// The result of the task if it has a result property; otherwise, <c>null</c>.
+    /// </returns>
+    /// <exception cref="AggregateException">
+    /// Thrown if the task fails and its exceptions are not handled.
+    /// </exception>
     private static object? GetAsyncResult(Task taskResult)
     {
         taskResult.Wait();

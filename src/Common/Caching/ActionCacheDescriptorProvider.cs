@@ -1,5 +1,4 @@
 using ActionCache.Common.Extensions.Internal;
-using ActionCache.Common.Utilities;
 using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
