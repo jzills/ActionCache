@@ -50,7 +50,7 @@ public class ActionCacheOptionsBuilder
     /// Enables the use of SQL Server cache.
     /// </summary>
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
-    public ActionCacheOptionsBuilder UseSqlServerCache()
+    internal ActionCacheOptionsBuilder UseSqlServerCache()
     {
         Options.EnabledCaches[CacheType.SqlServer] = true;
         return this;
@@ -60,5 +60,5 @@ public class ActionCacheOptionsBuilder
     /// Builds the configured <see cref="ActionCacheOptions"/>.
     /// </summary>
     /// <returns>The configured <see cref="ActionCacheOptions"/>.</returns>
-    public ActionCacheOptions Build() => Options;
+    internal ActionCacheOptions Build() => Options;
 }

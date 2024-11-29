@@ -8,14 +8,14 @@ namespace ActionCache.Memory.Extensions;
 /// <summary>
 /// Provides extension methods for adding Action Cache memory implementation to IServiceCollection.
 /// </summary>
-public static class IServiceCollectionExtensions
+internal static class IServiceCollectionExtensions
 {
     /// <summary>
     /// Adds Action Cache memory services to the IServiceCollection.
     /// </summary>
     /// <param name="services">The IServiceCollection to add the services to.</param>
     /// <returns>The IServiceCollection with added Action Cache memory services.</returns>
-    public static IServiceCollection AddActionCacheMemory(
+    internal static IServiceCollection AddActionCacheMemory(
         this IServiceCollection services
     ) => services
             .AddActionCacheMemoryInternal()
@@ -27,7 +27,7 @@ public static class IServiceCollectionExtensions
     /// <param name="services">The IServiceCollection to add the services to.</param>
     /// <param name="configureOptions">The configuration options for the memory cache.</param>
     /// <returns>The IServiceCollection with added Action Cache memory services.</returns>
-    public static IServiceCollection AddActionCacheMemory(
+    internal static IServiceCollection AddActionCacheMemory(
         this IServiceCollection services,
         Action<MemoryCacheOptions> configureOptions
     ) => services

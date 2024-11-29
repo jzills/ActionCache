@@ -8,24 +8,15 @@ namespace ActionCache.Redis.Extensions;
 /// <summary>
 /// Extension methods for adding ActionCache with Redis to the IServiceCollection.
 /// </summary>
-public static class IServiceCollectionExtensions
+internal static class IServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds ActionCache with Redis to the IServiceCollection.
-    /// </summary>
-    /// <param name="services">The IServiceCollection to add the services to.</param>
-    /// <returns>The updated IServiceCollection.</returns>
-    // public static IServiceCollection AddActionCacheRedis(
-    //     this IServiceCollection services
-    // ) => services.AddActionCacheRedisInternal();
-
     /// <summary>
     /// Adds ActionCache with Redis to the IServiceCollection with custom configuration options.
     /// </summary>
     /// <param name="services">The IServiceCollection to add the services to.</param>
     /// <param name="configureOptions">An Action to configure the RedisCacheOptions.</param>
     /// <returns>The updated IServiceCollection.</returns>
-    public static IServiceCollection AddActionCacheRedis(
+    internal static IServiceCollection AddActionCacheRedis(
         this IServiceCollection services, 
         Action<RedisCacheOptions> configureOptions
     )

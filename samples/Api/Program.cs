@@ -1,4 +1,4 @@
-using ActionCache.Memory.Extensions;
+using ActionCache.Common.Extensions;
 using ActionCache.Redis.Extensions;
 using Api.Database;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,17 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseInMemoryDatabase(nameof(ApplicationDbContext)));
 
-builder.Services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
+builder.Services.AddActionCache(options => 
+{
+    options.UseEntryOptions(configureEntryOptions =>
+    {
+        configureEntryOptions.SlidingExpiration = TimeSpan.FromSeconds(10);
+        configureEntryOptions.AbsoluteExpiration = TimeSpan.FromSeconds(10);
+    });
+
+    options.UseRedisCache(configureRedis => 
+        configureRedis.Configuration = "127.0.0.1:6379");
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

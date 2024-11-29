@@ -10,7 +10,7 @@ namespace ActionCache.Common.Extensions;
 /// <summary>
 /// Extension methods for IServiceCollection to support ActionCache.
 /// </summary>
-internal static class IServiceCollectionExtensions
+public static class IServiceCollectionExtensions
 {
     /// <summary>
     /// Adds ActionCache services to the specified IServiceCollection.
@@ -18,7 +18,7 @@ internal static class IServiceCollectionExtensions
     /// <param name="services">The IServiceCollection to add services to.</param>
     /// <param name="configureOptions">A delegate to configure ActionCacheOptions.</param>
     /// <returns>The IServiceCollection.</returns>
-    internal static IServiceCollection AddActionCache(
+    public static IServiceCollection AddActionCache(
         this IServiceCollection services,
         Action<ActionCacheOptionsBuilder> configureOptions
     )

@@ -7,5 +7,5 @@ public class Account
     public string Code { get; set; }
     public string PhoneNumber { get; set; }  
 
-    public virtual ICollection<User> Users { get; set; }      
+    //public virtual ICollection<User> Users { get; set; }      
 }

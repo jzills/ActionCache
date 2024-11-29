@@ -124,5 +124,17 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         string @namespace,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null
-    ) => CacheFactories.Select(factory => factory.Create(@namespace, absoluteExpiration, slidingExpiration));
+    )
+    {
+        Func<IActionCacheFactory, IActionCache?> selector = 
+            (absoluteExpiration, slidingExpiration) switch
+            {
+                // If no expiration is specified, fallback to default 
+                // entry options specified during configuration.
+                (null, null) => factory => factory.Create(@namespace),
+                _            => factory => factory.Create(@namespace, absoluteExpiration, slidingExpiration)
+            };
+       
+        return CacheFactories.Select(selector);
+    }
 }

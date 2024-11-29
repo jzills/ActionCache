@@ -1,3 +1,4 @@
+using ActionCache.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiWithExpiration.Controllers;
@@ -19,14 +20,12 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [ActionCache(Namespace = "Forecasts", SlidingExpiration = 10000)]
+    public IActionResult Get() => Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
-    }
+        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+        TemperatureC = Random.Shared.Next(-20, 55),
+        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+    })
+    .ToArray());
 }
