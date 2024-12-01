@@ -1,4 +1,5 @@
 using ActionCache.Attributes;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
@@ -15,9 +16,19 @@ internal static class MethodInfoExtensions
     /// <param name="source">The source method info.</param>
     /// <param name="namespace">The namespace to check against the attribute's namespace.</param>
     /// <returns>true if an <see cref="ActionCacheAttribute"/> exists and contains the namespace; otherwise, false.</returns>
-    internal static bool HasActionCacheAttribute(this MethodInfo source, string @namespace) =>
-        source.GetCustomAttribute<ActionCacheAttribute>()?
-            .Namespace.Contains(@namespace) ?? false;
+    internal static bool HasActionCacheAttribute(this MethodInfo source, string @namespace)
+    {
+        var attribute = source.GetCustomAttribute<ActionCacheAttribute>();
+        if (attribute is not null)
+        {
+            var attributeNamespace = $"{Namespace.Assembly}:{attribute.Namespace}";
+            return attributeNamespace == @namespace;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     /// <summary>
     /// Tries to get the refresh result from the method execution using specified parameters.
@@ -35,14 +46,14 @@ internal static class MethodInfoExtensions
     )
     {
         var result = methodInfo?.Invoke(controller, parameters);
-        if (result is Task taskResult)
+        if (result is not null)
         {
-            result = GetAsyncResult(taskResult);
-        }
-        
-        if (result is OkObjectResult okObjectResult)
-        {
-            value = okObjectResult?.Value;
+            if (result is Task taskResult)
+            {
+                result = GetAsyncResult(taskResult);
+            }
+
+            value = result;
             return true;
         }
         else

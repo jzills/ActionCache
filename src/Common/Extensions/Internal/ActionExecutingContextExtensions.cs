@@ -25,7 +25,7 @@ internal static class ActionExecutingContextExtensions
 
         if (string.IsNullOrWhiteSpace(key))
         {
-            key = default!;
+            key = string.Empty;
             return false;
         }
 

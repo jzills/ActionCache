@@ -12,14 +12,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddActionCache(options => 
 {
-    options.UseEntryOptions(configureEntryOptions =>
+    options.UseEntryOptions(entryOptions =>
     {
-        configureEntryOptions.SlidingExpiration = TimeSpan.FromSeconds(10);
-        configureEntryOptions.AbsoluteExpiration = TimeSpan.FromSeconds(10);
+        entryOptions.SlidingExpiration = TimeSpan.FromMinutes(1);
+        entryOptions.AbsoluteExpiration = TimeSpan.FromMinutes(1);
     });
 
-    options.UseRedisCache(configureRedis => 
-        configureRedis.Configuration = "127.0.0.1:6379");
+    options.UseRedisCache(redisOptions => 
+        redisOptions.Configuration = "127.0.0.1:6379");
 });
 
 builder.Services.AddEndpointsApiExplorer();

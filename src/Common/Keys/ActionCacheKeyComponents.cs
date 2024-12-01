@@ -31,7 +31,7 @@ public class ActionCacheKeyComponents
     /// Gets or sets the dictionary of action arguments for the current action.
     /// These arguments provide additional context for identifying the action and are used in caching.
     /// </summary>
-    public Dictionary<string, object>? ActionArguments { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object?>? ActionArguments { get; set; } = new Dictionary<string, object?>();
     
     /// <summary>
     /// Serializes route values and action arguments as key value pairs.

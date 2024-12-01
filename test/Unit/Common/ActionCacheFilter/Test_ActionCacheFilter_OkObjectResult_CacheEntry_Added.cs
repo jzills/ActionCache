@@ -68,7 +68,9 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
             .WithRouteValues(routeData.Values)
             .Build();
 
-        var cacheResult = await cache.GetAsync<string>(key);
-        Assert.That(cacheResult!.Equals("Foo"));
+        var cacheResult = await cache.GetAsync<IActionResult>(key);
+       
+        Assert.IsInstanceOf<OkObjectResult>(cacheResult);
+        Assert.That((cacheResult as OkObjectResult)?.Value, Is.EqualTo("Foo"));
     }
 }

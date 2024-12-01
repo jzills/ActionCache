@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using ActionCache;
 using ActionCache.Common.Enums;
-using ActionCache.Redis.Extensions;
+using ActionCache.Common.Extensions;
 using Integration.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,7 +21,7 @@ public class Test_ActionCacheRefreshFilter_WithBody
             .ConfigureServices(services => 
             {
                 services.AddMvc();
-                services.AddActionCacheRedis(options => options.Configuration = "127.0.0.1:6379");
+                services.AddActionCache(options => options.UseRedisCache("127.0.0.1:6379"));
             })
             .Configure(app =>
             {

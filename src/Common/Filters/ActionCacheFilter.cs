@@ -36,19 +36,19 @@ public class ActionCacheFilter : ActionCacheFilterBase, IAsyncActionFilter
 
         if (context.TryGetKey(out var key))
         {
-            var cacheValue = await Cache.GetAsync<object>(key);
+            var cacheValue = await Cache.GetAsync<IActionResult?>(key);
             if (cacheValue is not null)
             {
                 context.AddCacheStatus(CacheStatus.Hit);
-                context.Result = new OkObjectResult(cacheValue);
+                context.Result = cacheValue;
             }
             else
             {
                 var actionExecutedContext = await next();
-                if (actionExecutedContext.TryGetOkObjectResultValue(out var value))
+                if (actionExecutedContext.Result is not null)
                 {
                     context.AddCacheStatus(CacheStatus.Add);
-                    await Cache.SetAsync(key, value);
+                    await Cache.SetAsync(key, actionExecutedContext.Result);
                 }
                 else
                 {

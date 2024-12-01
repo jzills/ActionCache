@@ -8,7 +8,7 @@ public record class Namespace(string Value)
     /// <summary>
     /// Represents the assembly name associated with the action cache.
     /// </summary>
-    protected const string Assembly = nameof(ActionCache);
+    internal const string Assembly = nameof(ActionCache);
 
     /// <summary>
     /// Gets or sets a string value containing route template parameters.

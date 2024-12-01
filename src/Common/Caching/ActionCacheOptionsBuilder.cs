@@ -47,6 +47,14 @@ public class ActionCacheOptionsBuilder
     }
 
     /// <summary>
+    /// Enables the use of the Redis cache with the specified configuration.
+    /// </summary>
+    /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
+    public ActionCacheOptionsBuilder UseRedisCache(string configuration) =>
+        UseRedisCache(configureOptions => 
+            configureOptions.Configuration = configuration);
+
+    /// <summary>
     /// Enables the use of SQL Server cache.
     /// </summary>
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
