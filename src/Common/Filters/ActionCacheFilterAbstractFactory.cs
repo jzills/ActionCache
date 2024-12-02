@@ -54,6 +54,13 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         return CreateHandler(caches, type);
     }
 
+    /// <summary>
+    /// Creates an <see cref="IFilterMetadata"/> handler for the specified caches and filter type.
+    /// </summary>
+    /// <param name="caches">A read-only list of action cache instances to handle.</param>
+    /// <param name="type">The type of filter to create.</param>
+    /// <returns>An <see cref="IFilterMetadata"/> implementation based on the specified filter type.</returns>
+    /// <exception cref="InvalidCacheInstanceException">Thrown if no cache instances are provided.</exception>
     internal IFilterMetadata CreateHandler(IReadOnlyList<IActionCache> caches, FilterType type)
     {
         if (caches.Count == 0)
@@ -72,6 +79,13 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         }
     }
 
+    /// <summary>
+    /// Creates a filter based on the specified cache handler and filter type.
+    /// </summary>
+    /// <param name="cache">The cache handler to use for the filter.</param>
+    /// <param name="type">The type of filter to create.</param>
+    /// <returns>An <see cref="IFilterMetadata"/> implementation corresponding to the filter type.</returns>
+    /// <exception cref="FilterTypeNotSupportedException">Thrown if the filter type is unsupported.</exception>
     internal IFilterMetadata CreateFilter(ActionCacheHandler cache, FilterType type) => 
         type switch
         {
@@ -81,6 +95,13 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
             _                   => throw new FilterTypeNotSupportedException(type)         
         };
 
+    /// <summary>
+    /// Retrieves cache instances for a specified namespace and optional expiration settings.
+    /// </summary>
+    /// <param name="namespace">The namespace for which to retrieve cache instances.</param>
+    /// <param name="absoluteExpiration">Optional absolute expiration time for the cache instances.</param>
+    /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
+    /// <returns>A read-only list of action cache instances.</returns>
     internal IReadOnlyList<IActionCache> GetCacheInstances(string @namespace,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null
@@ -103,6 +124,14 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         return cacheInstances.AsReadOnly();
     }
 
+    /// <summary>
+    /// Adds cache instances for a given namespace to the provided list.
+    /// </summary>
+    /// <param name="namespace">The namespace for which to add cache instances.</param>
+    /// <param name="cacheInstances">A list to which the created cache instances will be added.</param>
+    /// <param name="absoluteExpiration">Optional absolute expiration time for the cache instances.</param>
+    /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
+    /// <exception cref="InvalidCacheInstanceException">Thrown if the created instances are null or invalid.</exception>
     internal void AddCacheInstances(string @namespace, 
         in List<IActionCache> cacheInstances,
         TimeSpan? absoluteExpiration = null,
@@ -120,6 +149,13 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
         }
     }
 
+    /// <summary>
+    /// Creates cache instances for a given namespace with optional expiration settings.
+    /// </summary>
+    /// <param name="namespace">The namespace for which to create cache instances.</param>
+    /// <param name="absoluteExpiration">Optional absolute expiration time for the cache instances.</param>
+    /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
+    /// <returns>A collection of cache instances or null if creation fails.</returns>
     internal IEnumerable<IActionCache?>? CreateCacheInstances( 
         string @namespace,
         TimeSpan? absoluteExpiration = null,
