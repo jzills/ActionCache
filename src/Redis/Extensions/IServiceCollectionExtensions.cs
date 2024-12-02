@@ -27,19 +27,10 @@ internal static class IServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Configuration);
 
         return services
-            .AddActionCacheRedisInternal()
-            .AddStackExchangeRedisCache(configureOptions)
-            .AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options.Configuration));
-    }
-
-    /// <summary>
-    /// Internal method to add ActionCache with Redis services to the IServiceCollection.
-    /// </summary>
-    /// <param name="services">The IServiceCollection to add the services to.</param>
-    /// <returns>The updated IServiceCollection.</returns>
-    internal static IServiceCollection AddActionCacheRedisInternal(
-        this IServiceCollection services
-    ) => services
             .AddActionCacheCommon()
-            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>();
+            .AddScoped<IActionCacheFactory, RedisActionCacheFactory>()
+            .AddStackExchangeRedisCache(configureOptions)
+            .AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options.Configuration))
+            .AddHostedService<RedisExpiryService>();
+    }
 }
