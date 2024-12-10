@@ -12,7 +12,7 @@ public class Test_ActionCache_SetAsync
     public async Task Test(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create("Test");
+        var cache = cacheFactory.Create(nameof(Test_ActionCache_SetAsync));
 
         Assert.That(cache, Is.Not.Null);
 

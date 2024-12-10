@@ -17,7 +17,7 @@ public class AccountController : ControllerBase
     [HttpGet]
     [Route("{id}")]
     [ActionCache(Namespace = "Account:{id}")]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<IActionResult> Get(Guid id, DateTime offset)
     {
         var account = await _context.Accounts.FirstOrDefaultAsync(account => account.Id == id);
         return Ok(account);

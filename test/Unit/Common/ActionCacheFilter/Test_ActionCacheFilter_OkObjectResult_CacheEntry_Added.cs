@@ -16,6 +16,8 @@ namespace Unit.Common;
 [TestFixture]
 public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 {
+    IActionCache Cache;
+
     [Test]
     [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
     public async Task Test(IServiceProvider serviceProvider)
@@ -59,8 +61,8 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
 
         var binderFactory = serviceProvider.GetRequiredService<TemplateBinderFactory>();
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create(@namespace)!;
-        var filter = new ActionCacheFilter(cache, binderFactory);
+        Cache = cacheFactory.Create(@namespace)!;
+        var filter = new ActionCacheFilter(Cache, binderFactory);
 
         await filter.OnActionExecutionAsync(actionExecutingContext, next);
 
@@ -68,9 +70,15 @@ public class Test_ActionCacheFilter_OkObjectResult_CacheEntry_Added
             .WithRouteValues(routeData.Values)
             .Build();
 
-        var cacheResult = await cache.GetAsync<IActionResult>(key);
+        var cacheResult = await Cache.GetAsync<IActionResult>(key);
        
         Assert.IsInstanceOf<OkObjectResult>(cacheResult);
         Assert.That((cacheResult as OkObjectResult)?.Value, Is.EqualTo("Foo"));
+    }
+
+    [TearDown]
+    public async Task TearDown()
+    {
+        await Cache.RemoveAsync();
     }
 }

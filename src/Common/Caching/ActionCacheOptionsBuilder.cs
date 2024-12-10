@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.SqlServer;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 namespace ActionCache.Common;
@@ -58,9 +59,10 @@ public class ActionCacheOptionsBuilder
     /// Enables the use of SQL Server cache.
     /// </summary>
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
-    internal ActionCacheOptionsBuilder UseSqlServerCache()
+    public ActionCacheOptionsBuilder UseSqlServerCache(Action<SqlServerCacheOptions> configureOptions)
     {
         Options.EnabledCaches[CacheType.SqlServer] = true;
+        Options.ConfigureSqlServerCacheOptions = configureOptions;
         return this;
     }
 

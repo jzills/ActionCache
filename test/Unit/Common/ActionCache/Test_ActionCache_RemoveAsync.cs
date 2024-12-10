@@ -12,7 +12,7 @@ public class Test_ActionCache_RemoveAsync
     public async Task Test(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create("Test")!;
+        var cache = cacheFactory.Create(nameof(Test_ActionCache_RemoveAsync))!;
 
         await cache.SetAsync("Foo", "Bar");
         await cache.RemoveAsync("Foo");

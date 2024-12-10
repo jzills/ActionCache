@@ -23,6 +23,18 @@ public class ActionCacheEntryOptions
     public TimeSpan? SlidingExpiration { get; set; }
 
     /// <summary>
+    /// Gets or sets the duration for which the lock will remain valid once acquired.
+    /// </summary>
+    /// <value>The default is 200 milliseconds.</value>
+    public TimeSpan LockDuration { get; set; } = TimeSpan.FromMilliseconds(200);
+
+    /// <summary>
+    /// Gets or sets the maximum amount of time to wait for acquiring the lock before timing out.
+    /// </summary>
+    /// <value>The default is 200 milliseconds.</value>
+    public TimeSpan LockTimeout { get; set; } = TimeSpan.FromMilliseconds(200);
+
+    /// <summary>
     /// Calculates the absolute expiration date and time based on <see cref="AbsoluteExpiration"/>, relative to the current UTC time.
     /// </summary>
     /// <returns>A <see cref="DateTimeOffset"/> representing the absolute expiration date and time, or <c>null</c> if <see cref="AbsoluteExpiration"/> is not set.</returns>
@@ -55,4 +67,23 @@ public class ActionCacheEntryOptions
         SlidingExpiration.HasValue ?
             (long)SlidingExpiration.Value.TotalMilliseconds :
             NoExpiration;
+
+    /// <summary>
+    /// Deconstructs the expiration properties into individual components: absolute expiration, sliding expiration, and time-to-live (TTL).
+    /// </summary>
+    /// <param name="absoluteExpiration">
+    /// The absolute expiration time in milliseconds from the current UTC time.
+    /// </param>
+    /// <param name="slidingExpiration">
+    /// The sliding expiration time in milliseconds, which resets upon each access of the cached entry.
+    /// </param>
+    /// <param name="ttl">
+    /// The time-to-live (TTL) in milliseconds, representing the remaining time before the cache entry expires.
+    /// </param>
+    public void Deconstruct(out long absoluteExpiration, out long slidingExpiration, out long ttl)
+    {
+        absoluteExpiration = GetAbsoluteExpirationFromUtcNowInMilliseconds();
+        slidingExpiration = GetSlidingExpirationInMilliseconds();
+        ttl = GetAbsoluteExpirationAsTTLInMilliseconds();
+    }
 }

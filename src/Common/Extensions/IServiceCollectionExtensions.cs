@@ -3,6 +3,7 @@ using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Filters;
 using ActionCache.Memory.Extensions;
 using ActionCache.Redis.Extensions;
+using ActionCache.SqlServer.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionCache.Common.Extensions;
@@ -45,7 +46,7 @@ public static class IServiceCollectionExtensions
 
         if (options.EnabledCaches[CacheType.SqlServer])
         {
-            // Register SqlServer dependencies
+            services.AddActionCacheSqlServer(options.ConfigureSqlServerCacheOptions);
         }
 
         return services;

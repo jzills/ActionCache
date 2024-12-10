@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.SqlServer;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 namespace ActionCache.Common;
@@ -22,6 +23,11 @@ public class ActionCacheOptions
     /// Gets or sets a delegate to configure options for <see cref="RedisCacheOptions"/>.
     /// </summary>
     public Action<RedisCacheOptions>? ConfigureRedisCacheOptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets a delegate to configure options for <see cref="SqlServerCacheOptions"/>.
+    /// </summary>
+    public Action<SqlServerCacheOptions>? ConfigureSqlServerCacheOptions { get; set; }
 
     /// <summary>
     /// Gets the dictionary that indicates whether a specific cache type is enabled.

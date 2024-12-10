@@ -7,18 +7,25 @@ namespace Unit.Common;
 [TestFixture]
 public class Test_ActionCache_GetKeysAsync
 {
+    IActionCache Cache;
+
     [Test]
     [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
     public async Task Test(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
-        var cache = cacheFactory.Create("Test")!;
-        await cache.RemoveAsync();
+        Cache = cacheFactory.Create(nameof(Test_ActionCache_GetKeysAsync))!;
 
-        await cache.SetAsync("Foo", "Bar");
-        await cache.SetAsync("Biz", "Baz");
+        await Cache.SetAsync("Foo", "Bar");
+        await Cache.SetAsync("Biz", "Baz");
 
-        var result = await cache.GetKeysAsync();
+        var result = await Cache.GetKeysAsync();
         Assert.That(result.Count(), Is.EqualTo(2));
+    }
+
+    [TearDown]
+    public async Task TearDown()
+    {
+        await Cache.RemoveAsync();
     }
 }

@@ -11,36 +11,47 @@ internal static class IMemoryCacheExtensions
         var keys = cache.GetOrCreate(@namespace, options => {
             options.Size = 1;
             return new ConcurrentDictionary<string, DateTimeOffset?>();
-        }) ?? [];
+        });
 
-        var expiredEntries = keys.Where(key => DateTimeOffset.UtcNow >= key.Value);
-        if (expiredEntries.Any())
+        if (keys is null)
         {
-            foreach (var entry in expiredEntries)
+            cache.Remove(@namespace);
+        }
+        else
+        {
+            var entries = keys.Where(key => DateTimeOffset.UtcNow >= key.Value);
+            if (entries.Any())
             {
-                keys.Remove(entry.Key, out var _);
-            }
+                foreach (var entry in entries)
+                {
+                    keys.TryRemove(entry.Key, out _);
+                }
 
-            cache.Set(@namespace, keys, entryOptions);
+                cache.Set(@namespace, keys, entryOptions);
+            }
         }
 
-        return keys;
+        return keys ?? [];
     }
 
     internal static void SetKey(this IMemoryCache cache, Namespace @namespace, string key, MemoryCacheEntryOptions entryOptions)
     {
         var keys = cache.GetKeys(@namespace, entryOptions);
-        keys.TryAdd(key, entryOptions.AbsoluteExpiration);
-        cache.Set(key, keys, entryOptions);
+        if (keys.TryAdd(key, entryOptions.AbsoluteExpiration))
+        {
+            cache.Set(key, keys, entryOptions);
+        }
     }
 
     internal static void RemoveKey(this IMemoryCache cache, Namespace @namespace, string key, MemoryCacheEntryOptions entryOptions)
     {
         var keys = cache.GetKeys(@namespace, entryOptions);
-        if (keys.Count > 0)
+        if (keys.Any())
         {
-            keys.Remove(key, out var _);
-            cache.Set(@namespace, keys, entryOptions);
+            if (keys.TryRemove(key, out _))
+            {
+                cache.Set(@namespace, keys, entryOptions);
+            }
         }
     }
 }
