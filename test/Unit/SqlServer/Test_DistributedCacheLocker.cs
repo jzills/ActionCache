@@ -24,7 +24,7 @@ public class Test_DistributedCacheLocker
     [Test]
     public async Task Test_DistributedCacheLock_ShouldAcquire()
     {
-        var cacheLock = new DistributedCacheLock("Namespace");
+        var cacheLock = new DistributedCacheLock("Namespace", TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(200));
         Assert.That(cacheLock.ShouldTryAcquire(), Is.True);
     }
 }
