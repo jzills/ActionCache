@@ -63,15 +63,12 @@ Add an `ActionCacheAttribute` to any controller actions that should be cached. T
     {
     }
 
-> [!IMPORTANT]
-> The current implementation only supports action return types of `IActionResult`. Specifically, the action filter that populates the cache looks for an `OkObjectResult` returned from the controller action.
-
 ## Cache Key Creation
 
 Both the route values and the action arguments are serialized then encoded to generate the cache key suffix. This suffix is appended to the string "ActionCache:{Namespace}".
 
 > [!NOTE]
-> Any route data from the request, i.e. the area, controller and action names are also added to the key. This is helpful for the case of automatic cache rehydration which will be part of a future release.
+> Any route data from the request, i.e. the area, controller and action names as well as parameters are also added to the key. This is to support automatic cache refreshing.
 
 ## Cache Eviction
 
@@ -107,4 +104,4 @@ A namespace, i.e. a cache key, can contain route template parameters. In the cas
     }
 
 > [!NOTE]
-> This is beneficial because actions like evicting a cache or refreshing a cache can be done at the namespace level and not interfere with one another.
+> This is beneficial because actions like evicting or refreshing cache entries can be done at the namespace level.
