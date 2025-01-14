@@ -54,29 +54,11 @@ public abstract class CacheLockerBase<TLock> : ICacheLocker<TLock> where TLock :
     /// <param name="resource">The resource for which the lock is requested.</param>
     /// <param name="thenFunc">The action to be executed after the lock is acquired.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public virtual async Task WaitForLockThenAsync(string resource, Action thenFunc)
-    {
-        await WaitForLockThenAsync(resource, () => {
+    public virtual Task WaitForLockThenAsync(string resource, Action thenFunc) =>
+        WaitForLockThenAsync(resource, () => {
             thenFunc();
             return Task.CompletedTask;
         });
-        // var cacheLock = await WaitForLockAsync(resource);
-        // if (cacheLock.IsAcquired)
-        // {
-        //     try
-        //     {
-        //         thenFunc();
-        //     }
-        //     finally
-        //     {
-        //         await ReleaseLockAsync(cacheLock);
-        //     }
-        // }
-        // else
-        // {
-        //     // Handle lock acquisition failure (optional custom handling logic can be added here)
-        // }
-    }
 
     /// <summary>
     /// Asynchronously waits for a lock to be acquired, then executes a function that returns a result if the lock is acquired.
@@ -85,31 +67,8 @@ public abstract class CacheLockerBase<TLock> : ICacheLocker<TLock> where TLock :
     /// <param name="resource">The resource for which the lock is requested.</param>
     /// <param name="resultAccessor">The function that will return a result once the lock is acquired.</param>
     /// <returns>A task that represents the asynchronous operation, containing the result of the function or default value if lock is not acquired.</returns>
-    public virtual async Task<TResult?> WaitForLockThenAsync<TResult>(string resource, Func<TResult> resultAccessor)
-    {
-        return await WaitForLockThenAsync(resource, () => Task.FromResult(resultAccessor()));
-
-        // TResult? result = default;
-
-        // var cacheLock = await WaitForLockAsync(resource);
-        // if (cacheLock.IsAcquired)
-        // {
-        //     try
-        //     {
-        //         result = resultAccessor();
-        //     }
-        //     finally
-        //     {
-        //         await ReleaseLockAsync(cacheLock);
-        //     }
-        // }
-        // else
-        // {
-        //     // Handle lock acquisition failure (optional custom handling logic can be added here)
-        // }
-
-        // return result;
-    }
+    public virtual Task<TResult?> WaitForLockThenAsync<TResult>(string resource, Func<TResult> resultAccessor) =>
+        WaitForLockThenAsync(resource, () => Task.FromResult(resultAccessor()));
 
     /// <summary>
     /// Waits for the lock to be acquired on the specified resource, then executes the provided action.
