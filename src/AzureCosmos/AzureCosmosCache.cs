@@ -1,10 +1,9 @@
 using System.Net;
-using ActionCache.AzureCosmos;
+using Microsoft.Azure.Cosmos;
 using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
-using Microsoft.Azure.Cosmos;
 
 namespace ActionCache.AzureCosmos;
 
@@ -14,9 +13,14 @@ namespace ActionCache.AzureCosmos;
 public class AzureCosmosActionCache : ActionCacheBase
 {
     /// <summary>
-    /// an Azure Cosmos Db cache implementation.
+    /// An Azure Cosmos Db cache implementation.
     /// </summary>
     protected readonly Container Cache;
+
+    /// <summary>
+    /// The namespaced partition key.
+    /// </summary> 
+    protected readonly PartitionKey PartitionKey;
 
     /// <summary>
     /// Initializes a new instance of the MemoryActionCache class.
@@ -33,6 +37,7 @@ public class AzureCosmosActionCache : ActionCacheBase
     ) : base(@namespace, entryOptions, refreshProvider)
     {
         Cache = cache;
+        PartitionKey = new PartitionKey(Namespace);
     }
 
     /// <summary>
@@ -42,18 +47,18 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// <returns>The cached value or null if not found.</returns> 
     public override async Task<TValue> GetAsync<TValue>(string key)
     {
-        var response = await Cache.ReadItemAsync<AzureCosmosEntry>(
-            Namespace.Create(key), 
-            new PartitionKey(Namespace)
-        );
+        try
+        {
+            var response = await Cache.ReadItemAsync<AzureCosmosEntry>(
+                Namespace.Create(key), 
+                PartitionKey
+            );
 
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            var value = CacheJsonSerializer.Deserialize<TValue>(response.Resource.Value);
-            return value;
+            return CacheJsonSerializer.Deserialize<TValue>(response.Resource.Value);
         }
-        else
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
+            // Silence errors for entries not found on a particular key.
             return default;
         }
     }
@@ -63,44 +68,29 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// </summary>
     /// <param name="key">The cache key to set the value for.</param>
     /// <param name="value">The value to set in the cache.</param>
-    public override async Task SetAsync<TValue>(string key, TValue value)
-    {
-        var response = await Cache.UpsertItemAsync(new AzureCosmosEntry
+    public override Task SetAsync<TValue>(string key, TValue value) =>
+        Cache.UpsertItemAsync(new AzureCosmosEntry
         {
             Id = Namespace.Create(key),
             Namespace = Namespace,
             Value = CacheJsonSerializer.Serialize(value)
-        }, new PartitionKey(Namespace));
-        
-        if (response.StatusCode is not HttpStatusCode.OK)
-        {
-            // TODO: Log or throw error
-        }
-    }
+        }, PartitionKey);
 
     /// <summary>
     /// Asynchronously removes a value from the cache.
     /// </summary>
     /// <param name="key">The key of the cache entry to remove.</param>
-    public override async Task RemoveAsync(string key)
-    {
-        var response = await Cache.DeleteItemAsync<AzureCosmosEntry>(
+    public override Task RemoveAsync(string key) => 
+        Cache.DeleteItemAsync<AzureCosmosEntry>(
             Namespace.Create(key), 
-            new PartitionKey(Namespace)
+            PartitionKey
         );
-
-        if (response.StatusCode is not HttpStatusCode.NoContent)
-        {
-            // TODO: Retry attempts to make cache consistent
-        }
-    }
 
     /// <summary>
     /// Asynchronously removes all values from the cache.
     /// </summary>
     public override Task RemoveAsync() =>
-        Cache.DeleteAllItemsByPartitionKeyStreamAsync(
-            new PartitionKey(Namespace));
+        Cache.DeleteAllItemsByPartitionKeyStreamAsync(PartitionKey);
 
     /// <summary>
     /// Retrieves all keys associated with this cache.
@@ -108,15 +98,14 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>
     public override Task<IEnumerable<string>> GetKeysAsync()
     {
-        var requestOptions = new QueryRequestOptions
-        {
-            PartitionKey = new PartitionKey(Namespace)
-        };
+        var result = Cache.GetItemLinqQueryable<AzureCosmosEntry>(
+            requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = PartitionKey
+            });
 
-        var result = Cache.GetItemLinqQueryable<AzureCosmosEntry>(requestOptions: requestOptions)
+        return Task.FromResult(result
             .Select(element => element.Id)
-            .AsEnumerable();
-
-        return Task.FromResult(result);
+            .AsEnumerable());
     }
 }

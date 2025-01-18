@@ -105,9 +105,9 @@ public class RedisActionCache : ActionCacheBase
         {
             await Cache.HashSetAsync(Namespace.Create(key), 
             [
-                new HashEntry(RedisHashEntries.Value, redisValue),
-                new HashEntry(RedisHashEntries.AbsoluteExpiration, absoluteExpiration),
-                new HashEntry(RedisHashEntries.SlidingExpiration, slidingExpiration)
+                new HashEntry(RedisHashEntry.Value, redisValue),
+                new HashEntry(RedisHashEntry.AbsoluteExpiration, absoluteExpiration),
+                new HashEntry(RedisHashEntry.SlidingExpiration, slidingExpiration)
             ]);
 
             if (EntryOptions.SlidingExpiration.HasValue || EntryOptions.AbsoluteExpiration.HasValue)

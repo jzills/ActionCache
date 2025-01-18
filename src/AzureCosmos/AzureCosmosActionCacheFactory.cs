@@ -1,6 +1,5 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
-using ActionCache.Memory;
 using ActionCache.Utilities;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
@@ -18,7 +17,7 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
     /// <summary>
     /// An Azure Cosmos Db client implementation.
     /// </summary>
-    protected readonly CosmosClient CosmosClient;
+    protected readonly Container Cache;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AzureCosmosActionCacheFactory"/> class.
@@ -32,20 +31,12 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
         IActionCacheRefreshProvider refreshProvider
     ) : base(CacheType.AzureCosmos, entryOptions.Value, refreshProvider)
     {
-        CosmosClient = cosmosClient;
+        Cache = cosmosClient.GetContainer(DatabaseId, Namespace.Assembly);
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace)
-    {
-        var cache = CosmosClient.GetDatabase(DatabaseId).CreateContainerIfNotExistsAsync(new ContainerProperties
-        {
-            Id = Namespace.Assembly,
-            PartitionKeyPath = "/namespace"
-        }).Result;
-
-        return new AzureCosmosActionCache(@namespace, cache, EntryOptions, RefreshProvider);
-    }
+    public override IActionCache? Create(string @namespace) =>
+        new AzureCosmosActionCache(@namespace, Cache, EntryOptions, RefreshProvider);
 
     /// <inheritdoc/>
     public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
@@ -56,7 +47,6 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
             SlidingExpiration = slidingExpiration
         };
 
-        var cache = CosmosClient.GetContainer(DatabaseId, Namespace.Assembly);
-        return new AzureCosmosActionCache(@namespace, cache, entryOptions, RefreshProvider);
+        return new AzureCosmosActionCache(@namespace, Cache, entryOptions, RefreshProvider);
     }
 }
