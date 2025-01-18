@@ -16,6 +16,8 @@ public class DistributedCacheLocker : CacheLockerBase<DistributedCacheLock>
     /// Initializes a new instance of the <see cref="DistributedCacheLocker"/> class.
     /// </summary>
     /// <param name="cache">The distributed cache instance to be used for managing locks.</param>
+    /// <param name="lockDuration">The duration of a acquired lock.</param>
+    /// <param name="lockTimeout">The timeout period before assuming a lock acquisition failure.</param>  
     public DistributedCacheLocker(IDistributedCache cache, TimeSpan lockDuration, TimeSpan lockTimeout) 
         : base(lockDuration, lockTimeout)
     {
