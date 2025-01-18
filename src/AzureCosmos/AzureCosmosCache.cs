@@ -6,7 +6,7 @@ using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
 using Microsoft.Azure.Cosmos;
 
-namespace ActionCache.Memory;
+namespace ActionCache.AzureCosmos;
 
 /// <summary>
 /// Represents an Azure Cosmos Db action cache implementation.
