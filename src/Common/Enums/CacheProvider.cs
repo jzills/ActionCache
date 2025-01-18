@@ -18,5 +18,10 @@ public enum CacheType
     /// <summary>
     /// SQL Server-based caching.
     /// </summary>
-    SqlServer
+    SqlServer,
+
+    /// <summary>
+    /// Azure Cosmos-based caching.
+    /// </summary>
+    AzureCosmos
 }

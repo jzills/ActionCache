@@ -1,3 +1,4 @@
+using ActionCache.AzureCosmos;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.SqlServer;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -63,6 +64,17 @@ public class ActionCacheOptionsBuilder
     {
         Options.EnabledCaches[CacheType.SqlServer] = true;
         Options.ConfigureSqlServerCacheOptions = configureOptions;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables the use of SQL Server cache.
+    /// </summary>
+    /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
+    public ActionCacheOptionsBuilder UseAzureCosmosCache(Action<AzureCosmosCacheOptions> configureOptions)
+    {
+        Options.EnabledCaches[CacheType.AzureCosmos] = true;
+        Options.ConfigureAzureCosmosCacheOptions = configureOptions;
         return this;
     }
 

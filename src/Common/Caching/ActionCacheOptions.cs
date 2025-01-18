@@ -1,3 +1,4 @@
+using ActionCache.AzureCosmos;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.SqlServer;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -30,13 +31,19 @@ public class ActionCacheOptions
     public Action<SqlServerCacheOptions>? ConfigureSqlServerCacheOptions { get; set; }
 
     /// <summary>
+    /// Gets or sets a delegate to configure options for <see cref="AzureCosmosCacheOptions"/>.
+    /// </summary>
+    public Action<AzureCosmosCacheOptions>? ConfigureAzureCosmosCacheOptions { get; set; }
+
+    /// <summary>
     /// Gets the dictionary that indicates whether a specific cache type is enabled.
     /// </summary>
     public readonly IDictionary<CacheType, bool> EnabledCaches = 
         new Dictionary<CacheType, bool>
         {
-            [CacheType.Redis]     = false,
-            [CacheType.Memory]    = false,
-            [CacheType.SqlServer] = false
+            [CacheType.Redis]       = false,
+            [CacheType.Memory]      = false,
+            [CacheType.SqlServer]   = false,
+            [CacheType.AzureCosmos] = false
         };
 }

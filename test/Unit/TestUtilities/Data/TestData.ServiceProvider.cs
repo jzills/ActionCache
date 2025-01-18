@@ -1,5 +1,6 @@
 using ActionCache.Common.Extensions;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Unit.TestUtiltiies.Data;
@@ -62,6 +63,32 @@ public static partial class TestData
                 options.SchemaName = "dbo";
                 options.TableName = "DistributedCache";
             });
+        });
+
+        var server = new TestServer(services.BuildServiceProvider());
+
+        return [server.Services];
+    }
+
+    public static IEnumerable<IServiceProvider> GetAzureCosmosServiceProvider()
+    {
+        var services = new ServiceCollection();
+
+        var basePath = Directory.GetCurrentDirectory();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(basePath) 
+            .AddJsonFile("appsettings.json")
+            .Build(); 
+
+        var connectionString = configuration.GetValue<string>("CosmosDb:ConnectionString");
+
+        services.AddMvc();
+        services.AddActionCache(options => 
+        {
+            options.UseEntryOptions(entryOptions => { });
+            options.UseAzureCosmosCache(options => 
+                options.ConnectionString = 
+                    configuration.GetValue<string>("CosmosDb:ConnectionString"));
         });
 
         var server = new TestServer(services.BuildServiceProvider());

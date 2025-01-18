@@ -1,3 +1,4 @@
+using ActionCache.AzureCosmos.Extensions;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Common.Filters;
@@ -47,6 +48,11 @@ public static class IServiceCollectionExtensions
         if (options.EnabledCaches[CacheType.SqlServer])
         {
             services.AddActionCacheSqlServer(options.ConfigureSqlServerCacheOptions);
+        }
+
+        if (options.EnabledCaches[CacheType.AzureCosmos])
+        {
+            services.AddActionCacheAzureCosmos(options.ConfigureAzureCosmosCacheOptions);
         }
 
         return services;
