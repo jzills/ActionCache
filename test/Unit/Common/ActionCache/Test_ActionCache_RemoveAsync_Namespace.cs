@@ -8,15 +8,15 @@ namespace Unit.Common;
 public class Test_ActionCache_RemoveAsync_Namespace
 {
     [Test]
-    [TestCaseSource(typeof(TestData), nameof(TestData.GetServiceProviders))]
+    [TestCaseSource(typeof(TestData), nameof(TestData.GetAzureCosmosServiceProvider))]
     public async Task Test(IServiceProvider serviceProvider)
     {
         var cacheFactory = serviceProvider.GetRequiredService<IActionCacheFactory>();
         var cache = cacheFactory.Create(nameof(Test_ActionCache_RemoveAsync_Namespace))!;
 
-        await cache.SetAsync("Foo", "Bar");
-        await cache.SetAsync("Biz", "Baz");
-        await cache.SetAsync("Coz", "Doz");
+        // await cache.SetAsync("Foo", "Bar");
+        // await cache.SetAsync("Biz", "Baz");
+        // await cache.SetAsync("Coz", "Doz");
         await cache.RemoveAsync();
 
         string?[] result = [

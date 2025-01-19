@@ -4,6 +4,7 @@ using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace ActionCache.AzureCosmos;
 
@@ -89,8 +90,39 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// <summary>
     /// Asynchronously removes all values from the cache.
     /// </summary>
-    public override Task RemoveAsync() =>
-        Cache.DeleteAllItemsByPartitionKeyStreamAsync(PartitionKey);
+    public override async Task RemoveAsync()
+    {
+        var response = await Cache.DeleteAllItemsByPartitionKeyStreamAsync(PartitionKey);
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var feedIterator = Cache.GetItemLinqQueryable<AzureCosmosEntry>()
+                .Where(item => item.Namespace == (string)Namespace)
+                .Select(item => item.Id)
+                .ToFeedIterator();
+
+            var itemIds = new List<string>();
+            while (feedIterator.HasMoreResults)
+            {
+                var iteratorResponse = await feedIterator.ReadNextAsync();
+                itemIds.AddRange(iteratorResponse.Resource.Select(item => item));
+            }
+
+            if (itemIds.Any())
+            {
+                var batch = Cache.CreateTransactionalBatch(PartitionKey);
+                foreach (var itemId in itemIds)
+                {
+                    batch.DeleteItem(itemId);
+                }
+
+                var batchResponse = await batch.ExecuteAsync();
+                if (!batchResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception(batchResponse.ErrorMessage);
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// Retrieves all keys associated with this cache.
