@@ -4,7 +4,7 @@ using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
-using Microsoft.Azure.Cosmos.Linq;
+using ActionCache.AzureCosmos.Extensions;
 
 namespace ActionCache.AzureCosmos;
 
@@ -95,18 +95,7 @@ public class AzureCosmosActionCache : ActionCacheBase
         var response = await Cache.DeleteAllItemsByPartitionKeyStreamAsync(PartitionKey);
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
-            var feedIterator = Cache.GetItemLinqQueryable<AzureCosmosEntry>()
-                .Where(item => item.Namespace == (string)Namespace)
-                .Select(item => item.Id)
-                .ToFeedIterator();
-
-            var itemIds = new List<string>();
-            while (feedIterator.HasMoreResults)
-            {
-                var iteratorResponse = await feedIterator.ReadNextAsync();
-                itemIds.AddRange(iteratorResponse.Resource.Select(item => item));
-            }
-
+            var itemIds = await Cache.GetItemIdsAsync(Namespace);
             if (itemIds.Any())
             {
                 var batch = Cache.CreateTransactionalBatch(PartitionKey);
@@ -128,16 +117,5 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// Retrieves all keys associated with this cache.
     /// </summary>
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>
-    public override Task<IEnumerable<string>> GetKeysAsync()
-    {
-        var result = Cache.GetItemLinqQueryable<AzureCosmosEntry>(
-            requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = PartitionKey
-            });
-
-        return Task.FromResult(result
-            .Select(element => element.Id)
-            .AsEnumerable());
-    }
+    public override Task<IEnumerable<string>> GetKeysAsync() => Cache.GetItemIdsAsync(Namespace);
 }
