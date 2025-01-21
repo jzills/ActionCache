@@ -87,12 +87,8 @@ public class RedisActionCache : ActionCacheBase
     {
         RedisValue redisValue = CacheJsonSerializer.Serialize(value);
 
-        var absoluteExpiration = EntryOptions.GetAbsoluteExpirationFromUtcNowInMilliseconds();
-        var slidingExpiration = EntryOptions.GetSlidingExpirationInMilliseconds();
-        var ttl = slidingExpiration > 0 ?
-            slidingExpiration :
-            EntryOptions.GetAbsoluteExpirationAsTTLInMilliseconds();
-
+        var (absoluteExpiration, slidingExpiration, ttl) = EntryOptions;
+        
         if (Assembly.TryGetResourceAsText(LuaResources.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
@@ -180,6 +176,6 @@ public class RedisActionCache : ActionCacheBase
         );
 
         var entries = await Cache.SortedSetRangeByRankAsync(Namespace);
-        return (IEnumerable<string>)entries.Select(value => (string?)value);
+        return entries.Select(value => (string)value!);
     }
 }

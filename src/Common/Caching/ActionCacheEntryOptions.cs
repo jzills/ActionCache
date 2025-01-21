@@ -84,6 +84,6 @@ public class ActionCacheEntryOptions
     {
         absoluteExpiration = GetAbsoluteExpirationFromUtcNowInMilliseconds();
         slidingExpiration = GetSlidingExpirationInMilliseconds();
-        ttl = GetAbsoluteExpirationAsTTLInMilliseconds();
+        ttl = slidingExpiration > NoExpiration ? slidingExpiration : GetAbsoluteExpirationAsTTLInMilliseconds();
     }
 }
