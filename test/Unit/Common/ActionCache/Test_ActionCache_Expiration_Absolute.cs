@@ -5,7 +5,7 @@ using Unit.TestUtiltiies.Data;
 namespace Unit.Common;
 
 [TestFixture]
-public class Test_ActionCache_Expiration
+public class Test_ActionCache_Expiration_Absolute
 {
     IActionCache Cache;
     
