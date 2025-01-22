@@ -1,6 +1,12 @@
+using System.Net;
+using ActionCache.AzureCosmos.Exceptions;
+using ActionCache.Common;
+using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions;
+using ActionCache.Utilities;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace ActionCache.AzureCosmos.Extensions;
 
@@ -25,12 +31,38 @@ internal static class IServiceCollectionExtensions
 
         if (string.IsNullOrEmpty(options.ConnectionString))
         {
-            throw new ArgumentNullException("The connection string cannot be null for \"Azure Cosmos Db\".");
+            throw new MissingConnectionStringException();
+        }
+
+        if (string.IsNullOrEmpty(options.DatabaseId))
+        {
+            throw new MissingDatabaseIdException();
         }
 
         return services
             .AddActionCacheCommon()
-            .AddScoped<IActionCacheFactory, AzureCosmosActionCacheFactory>()
+            .AddScoped<IActionCacheFactory, AzureCosmosActionCacheFactory>(serviceProvider => 
+            {
+                var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
+                var entryOptions = serviceProvider.GetRequiredService<IOptions<ActionCacheEntryOptions>>();
+                var refreshProvider = serviceProvider.GetRequiredService<IActionCacheRefreshProvider>();
+
+                var response = cosmosClient.CreateDatabaseIfNotExistsAsync(options.DatabaseId).GetAwaiter().GetResult();
+                if (response.StatusCode == HttpStatusCode.OK || 
+                    response.StatusCode == HttpStatusCode.Created
+                )
+                {
+                    return new AzureCosmosActionCacheFactory(
+                        response.Database.GetContainer(Namespace.Assembly),
+                        entryOptions,
+                        refreshProvider
+                    );
+                }
+                else
+                {
+                    throw new AzureCosmosDatabaseNotFoundOrCreated(response);
+                }
+            })
             .AddSingleton(serviceProvider => 
                 new CosmosClient(
                     options.ConnectionString, 

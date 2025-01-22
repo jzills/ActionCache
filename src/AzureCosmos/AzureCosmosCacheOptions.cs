@@ -19,4 +19,9 @@ public class AzureCosmosCacheOptions
     /// Gets or sets the options for configuring the Cosmos client.
     /// </summary>
     public CosmosClientOptions? CosmosClientOptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the database identifier for the Azure Cosmos cache.
+    /// </summary>
+    public string? DatabaseId { get; set; }
 }
