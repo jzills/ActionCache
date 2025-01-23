@@ -35,22 +35,22 @@ public static class IServiceCollectionExtensions
             configureOptions.AbsoluteExpiration = options.EntryOptions.AbsoluteExpiration;
         });
 
-        if (options.EnabledCaches[CacheType.Memory])
+        if (options.ConfigureMemoryCacheOptions is not null)
         {
             services.AddActionCacheMemory(options.ConfigureMemoryCacheOptions);
         }
 
-        if (options.EnabledCaches[CacheType.Redis])
+        if (options.ConfigureRedisCacheOptions is not null)
         {
             services.AddActionCacheRedis(options.ConfigureRedisCacheOptions);
         }
 
-        if (options.EnabledCaches[CacheType.SqlServer])
+        if (options.ConfigureSqlServerCacheOptions is not null)
         {
             services.AddActionCacheSqlServer(options.ConfigureSqlServerCacheOptions);
         }
 
-        if (options.EnabledCaches[CacheType.AzureCosmos])
+        if (options.ConfigureAzureCosmosCacheOptions is not null)
         {
             services.AddActionCacheAzureCosmos(options.ConfigureAzureCosmosCacheOptions);
         }

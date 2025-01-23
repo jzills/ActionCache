@@ -8,11 +8,11 @@ namespace Unit.TestUtiltiies.Data;
 public static partial class TestData
 {
     public static IEnumerable<IServiceProvider> GetServiceProviders() =>
-        GetAzureCosmosServiceProvider();
-        // GetMemoryCacheServiceProvider().Concat(
-        //     GetRedisCacheServiceProvider()).Concat(
-        //         GetSqlServerServiceProvider());//.Concat(
-        //             //GetAzureCosmosServiceProvider());
+        //GetAzureCosmosServiceProvider();
+        GetMemoryCacheServiceProvider().Concat(
+            GetRedisCacheServiceProvider()).Concat(
+                GetSqlServerServiceProvider());//.Concat(
+                    //GetAzureCosmosServiceProvider());
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
     {

@@ -32,7 +32,6 @@ public class ActionCacheOptionsBuilder
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
     public ActionCacheOptionsBuilder UseMemoryCache(Action<MemoryCacheOptions> configureOptions)
     {
-        Options.EnabledCaches[CacheType.Memory] = true;
         Options.ConfigureMemoryCacheOptions = configureOptions;
         return this;
     }
@@ -43,7 +42,6 @@ public class ActionCacheOptionsBuilder
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
     public ActionCacheOptionsBuilder UseRedisCache(Action<RedisCacheOptions> configureOptions)
     {
-        Options.EnabledCaches[CacheType.Redis] = true;
         Options.ConfigureRedisCacheOptions = configureOptions;
         return this;
     }
@@ -62,7 +60,6 @@ public class ActionCacheOptionsBuilder
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
     public ActionCacheOptionsBuilder UseSqlServerCache(Action<SqlServerCacheOptions> configureOptions)
     {
-        Options.EnabledCaches[CacheType.SqlServer] = true;
         Options.ConfigureSqlServerCacheOptions = configureOptions;
         return this;
     }
@@ -73,7 +70,6 @@ public class ActionCacheOptionsBuilder
     /// <returns>Returns this instance of <see cref="ActionCacheOptionsBuilder"/>.</returns>
     public ActionCacheOptionsBuilder UseAzureCosmosCache(Action<AzureCosmosCacheOptions> configureOptions)
     {
-        Options.EnabledCaches[CacheType.AzureCosmos] = true;
         Options.ConfigureAzureCosmosCacheOptions = configureOptions;
         return this;
     }

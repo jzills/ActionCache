@@ -18,24 +18,16 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     /// <summary>
     /// The base constructor.
     /// </summary>
-    /// <param name="type">The type of cache.</param>
     /// <param name="entryOptions">The global entry options.</param>
     /// <param name="refreshProvider">The refresh provider.</param>
     public ActionCacheFactoryBase(
-        CacheType type,
         ActionCacheEntryOptions entryOptions,
         IActionCacheRefreshProvider refreshProvider
     )
     {
-        Type = type;
         EntryOptions = entryOptions;
         RefreshProvider = refreshProvider;
     }
-
-    /// <summary>
-    /// Gets the type of cache.
-    /// </summary>
-    public readonly CacheType Type;
 
     /// <summary>
     /// Creates an action cache for the specified namespace.

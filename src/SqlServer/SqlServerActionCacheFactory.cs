@@ -25,7 +25,7 @@ public class SqlServerActionCacheFactory : ActionCacheFactoryBase
         IDistributedCache sqlServerCache,
         IOptions<ActionCacheEntryOptions> entryOptions,
         IActionCacheRefreshProvider refreshProvider
-    ) : base(CacheType.SqlServer, entryOptions.Value, refreshProvider)
+    ) : base(entryOptions.Value, refreshProvider)
     {
         SqlServerCache = sqlServerCache;
     }

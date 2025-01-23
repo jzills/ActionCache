@@ -25,7 +25,7 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
         Container cache,
         IOptions<ActionCacheEntryOptions> entryOptions,
         IActionCacheRefreshProvider refreshProvider
-    ) : base(CacheType.AzureCosmos, entryOptions.Value, refreshProvider)
+    ) : base(entryOptions.Value, refreshProvider)
     {
         Cache = cache;
     }
