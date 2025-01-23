@@ -1,12 +1,7 @@
-using System.Net;
 using ActionCache.AzureCosmos.Exceptions;
-using ActionCache.Common;
-using ActionCache.Common.Caching;
 using ActionCache.Common.Extensions;
-using ActionCache.Utilities;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace ActionCache.AzureCosmos.Extensions;
 
@@ -41,28 +36,13 @@ internal static class IServiceCollectionExtensions
 
         return services
             .AddActionCacheCommon()
+            .AddScoped<AzureCosmosActionCacheProvider>()
             .AddScoped<IActionCacheFactory, AzureCosmosActionCacheFactory>(serviceProvider => 
-            {
-                var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
-                var entryOptions = serviceProvider.GetRequiredService<IOptions<ActionCacheEntryOptions>>();
-                var refreshProvider = serviceProvider.GetRequiredService<IActionCacheRefreshProvider>();
-
-                var response = cosmosClient.CreateDatabaseIfNotExistsAsync(options.DatabaseId).GetAwaiter().GetResult();
-                if (response.StatusCode == HttpStatusCode.OK || 
-                    response.StatusCode == HttpStatusCode.Created
-                )
-                {
-                    return new AzureCosmosActionCacheFactory(
-                        response.Database.GetContainer(Namespace.Assembly),
-                        entryOptions,
-                        refreshProvider
-                    );
-                }
-                else
-                {
-                    throw new AzureCosmosDatabaseNotFoundOrCreated(response);
-                }
-            })
+                serviceProvider.GetRequiredService<AzureCosmosActionCacheProvider>()
+                    .CreateAsync(options.DatabaseId)
+                    .GetAwaiter()
+                    .GetResult()
+            )
             .AddSingleton(serviceProvider => 
                 new CosmosClient(
                     options.ConnectionString, 

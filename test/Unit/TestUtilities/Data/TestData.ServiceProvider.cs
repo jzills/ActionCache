@@ -8,10 +8,11 @@ namespace Unit.TestUtiltiies.Data;
 public static partial class TestData
 {
     public static IEnumerable<IServiceProvider> GetServiceProviders() =>
-        GetMemoryCacheServiceProvider().Concat(
-            GetRedisCacheServiceProvider()).Concat(
-                GetSqlServerServiceProvider());//.Concat(
-                    //GetAzureCosmosServiceProvider());
+        GetAzureCosmosServiceProvider();
+        // GetMemoryCacheServiceProvider().Concat(
+        //     GetRedisCacheServiceProvider()).Concat(
+        //         GetSqlServerServiceProvider());//.Concat(
+        //             //GetAzureCosmosServiceProvider());
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
     {
@@ -83,12 +84,15 @@ public static partial class TestData
         var connectionString = configuration.GetValue<string>("CosmosDb:ConnectionString");
 
         services.AddMvc();
-        services.AddActionCache(options => 
+        services.AddActionCache(options =>
         {
             options.UseEntryOptions(entryOptions => { });
-            options.UseAzureCosmosCache(options => 
-                options.ConnectionString = 
-                    configuration.GetValue<string>("CosmosDb:ConnectionString"));
+            options.UseAzureCosmosCache(options =>
+            {
+                options.DatabaseId = "MySampleDatabase";
+                options.ConnectionString =
+                    configuration.GetValue<string>("CosmosDb:ConnectionString");
+            });
         });
 
         var server = new TestServer(services.BuildServiceProvider());
