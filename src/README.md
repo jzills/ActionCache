@@ -7,6 +7,7 @@
     * [Register with MemoryCache](#register-with-imemorycache)
     * [Register with Redis](#register-with-redis)
     * [Register with SqlServer](#register-with-sqlserver)
+    * [Register with Azure Cosmos](#register-with-azure-cosmos)
     * [Register Multiple Cache Stores](#register-multiple-cache-stores)
     * [Basic Usage](#basic-usage)
     * [Cache Key Creation](#cache-key-creation)
@@ -39,6 +40,15 @@ Use the `AddActionCache` extension method to register `SqlServerCache` as a cach
     builder.Services.AddActionCache(options => 
     {
         options.UseSqlServerCache(...);
+    });
+
+## Register with Azure Cosmos
+
+Use the `AddActionCache` extension method to register `CosmosClient` as a cache store. The configuration for `AzureCosmosCacheOptions` is exposed as a parameter to `UseAzureCosmosCache`.
+
+    builder.Services.AddActionCache(options => 
+    {
+        options.UseAzureCosmosCache(...);
     });
 
 ## Register Multiple Cache Stores
