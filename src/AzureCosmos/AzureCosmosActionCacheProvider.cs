@@ -65,7 +65,11 @@ public class AzureCosmosActionCacheProvider
         if (IsSuccessStatusCode(databaseResponse.StatusCode))
         {
             var containerResponse = await databaseResponse.Database
-                .CreateContainerIfNotExistsAsync(new ContainerProperties { Id = Namespace.Assembly });
+                .CreateContainerIfNotExistsAsync(new ContainerProperties 
+                { 
+                    Id = Namespace.Assembly,
+                    PartitionKeyPath = "/namespace" 
+                });
 
             if (IsSuccessStatusCode(containerResponse.StatusCode))
             {
