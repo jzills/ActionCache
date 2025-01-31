@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>ActionCache</PackageId>
-    <Version>0.0.7</Version>
+    <Version>0.0.8</Version>
     <Authors>Joshua Zillwood</Authors>
     <Description>A simple yet powerful data caching library that adds an extra layer of caching to your ASP.NET Core applications.</Description>
     <Company></Company>

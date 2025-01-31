@@ -48,8 +48,19 @@ Use the `AddActionCache` extension method to register `CosmosClient` as a cache 
 
     builder.Services.AddActionCache(options => 
     {
-        options.UseAzureCosmosCache(...);
+        options.UseAzureCosmosCache(options =>
+        {
+            options.DatabaseId = "MyDatabase";
+            options.ConnectionString =
+                configuration.GetValue<string>("CosmosDb:ConnectionString");
+        });
     });
+
+> [!NOTE]
+> Both a *DatabaseId* and *ConnectionString* are required. The only requirement within Azure is to create an Azure Cosmos DB account and use that primary connection string in the above configuration. A database and container will be created automatically if they don't already exist.
+
+> [!CAUTION]
+> Expirations are currently not supported for Azure Cosmos DB. They will be implemented in a future release.
 
 ## Register Multiple Cache Stores
 
