@@ -68,7 +68,8 @@ public class AzureCosmosActionCacheProvider
                 .CreateContainerIfNotExistsAsync(new ContainerProperties 
                 { 
                     Id = Namespace.Assembly,
-                    PartitionKeyPath = "/namespace" 
+                    PartitionKeyPath = "/namespace",
+                    DefaultTimeToLive = -1
                 });
 
             if (IsSuccessStatusCode(containerResponse.StatusCode))

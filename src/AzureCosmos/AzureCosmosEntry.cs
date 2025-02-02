@@ -28,4 +28,25 @@ public class AzureCosmosEntry
     [JsonPropertyName("value")]
     [JsonProperty(PropertyName = "value")]  
     public required string Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the absolute expiration associated with the entry.
+    /// </summary>
+    [JsonPropertyName("absoluteExpiration")]
+    [JsonProperty(PropertyName = "absoluteExpiration")]  
+    public long AbsoluteExpiration { get; set; }
+
+    /// <summary>
+    /// Gets or sets the sliding expiration associated with the entry.
+    /// </summary>
+    [JsonPropertyName("slidingExpiration")]
+    [JsonProperty(PropertyName = "slidingExpiration")]  
+    public long SlidingExpiration { get; set; }
+
+    /// <summary>
+    /// Gets or sets the TTL associated with the entry.
+    /// </summary>
+    [JsonPropertyName("ttl")]
+    [JsonProperty(PropertyName = "ttl")]  
+    public long TTL { get; set; }
 }

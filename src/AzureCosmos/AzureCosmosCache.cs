@@ -55,6 +55,31 @@ public class AzureCosmosActionCache : ActionCacheBase
                 PartitionKey
             );
 
+            var absoluteExpirationUnix = response.Resource.AbsoluteExpiration;
+            if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+            {
+                var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
+                if (DateTimeOffset.UtcNow >= absoluteExpiration)
+                {
+                    await Cache.DeleteItemAsync<AzureCosmosEntry>(
+                        Namespace.Create(key), 
+                        PartitionKey
+                    );
+
+                    return default;
+                }
+            }
+            
+            var slidingExpiration = response.Resource.SlidingExpiration;
+            if (slidingExpiration > ActionCacheEntryOptions.NoExpiration)
+            {
+                await Cache.ReplaceItemAsync(
+                    response.Resource, 
+                    response.Resource.Id, 
+                    PartitionKey
+                );
+            }
+
             return CacheJsonSerializer.Deserialize<TValue>(response.Resource.Value);
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -69,13 +94,20 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// </summary>
     /// <param name="key">The cache key to set the value for.</param>
     /// <param name="value">The value to set in the cache.</param>
-    public override Task SetAsync<TValue>(string key, TValue value) =>
-        Cache.UpsertItemAsync(new AzureCosmosEntry
+    public override Task SetAsync<TValue>(string key, TValue value)
+    {
+        var (absoluteExpiration, slidingExpiration, ttl) = EntryOptions;
+
+        return Cache.UpsertItemAsync(new AzureCosmosEntry
         {
             Id = Namespace.Create(key),
             Namespace = Namespace,
-            Value = CacheJsonSerializer.Serialize(value)
+            Value = CacheJsonSerializer.Serialize(value),
+            AbsoluteExpiration = absoluteExpiration,
+            SlidingExpiration = slidingExpiration,
+            TTL = ttl == ActionCacheEntryOptions.NoExpiration ? -1 : ttl / 1000 // The deconstructed TTL is in milliseconds, we need to convert it to seconds.
         }, PartitionKey);
+    }
 
     /// <summary>
     /// Asynchronously removes a value from the cache.
