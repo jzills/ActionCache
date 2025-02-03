@@ -11,10 +11,7 @@ public class NullCacheLocker : CacheLockerBase<NullCacheLock>
     /// <summary>
     /// Initializes a new instance of the <see cref="NullCacheLocker"/> class.
     /// </summary>
-    /// <param name="lockDuration">The duration for which the lock is considered valid.</param>
-    /// <param name="lockTimeout">The maximum time to wait for acquiring a lock.</param>
-    public NullCacheLocker(TimeSpan lockDuration, TimeSpan lockTimeout) 
-        : base(lockDuration, lockTimeout)
+    public NullCacheLocker() : base(TimeSpan.Zero, TimeSpan.Zero)
     {
     }
 

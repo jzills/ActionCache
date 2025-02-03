@@ -1,5 +1,7 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
+using ActionCache.Common.Concurrency;
+using ActionCache.Common.Concurrency.Locks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
@@ -25,24 +27,40 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
         Container cache,
         IOptions<ActionCacheEntryOptions> entryOptions,
         IActionCacheRefreshProvider refreshProvider
-    ) : base(entryOptions.Value, refreshProvider)
+    ) : base(entryOptions, refreshProvider)
     {
         Cache = cache;
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace) =>
-        new AzureCosmosActionCache(@namespace, Cache, EntryOptions, RefreshProvider);
+    public override IActionCache? Create(string @namespace)
+    {
+        var context = new ActionCacheContext<NullCacheLock>
+        {
+            Namespace = @namespace,
+            EntryOptions = EntryOptions,
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new NullCacheLocker()
+        };
+
+        return new AzureCosmosActionCache(Cache, context);
+    }
 
     /// <inheritdoc/>
     public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
     {
-        var entryOptions = new ActionCacheEntryOptions
+        var context = new ActionCacheContext<NullCacheLock>
         {
-            AbsoluteExpiration = absoluteExpiration,
-            SlidingExpiration = slidingExpiration
+            Namespace = @namespace,
+            EntryOptions = new ActionCacheEntryOptions
+            {
+                AbsoluteExpiration = absoluteExpiration,
+                SlidingExpiration = slidingExpiration
+            },
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new NullCacheLocker()
         };
 
-        return new AzureCosmosActionCache(@namespace, Cache, entryOptions, RefreshProvider);
+        return new AzureCosmosActionCache(Cache, context);
     }
 }

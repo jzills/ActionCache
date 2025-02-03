@@ -1,3 +1,4 @@
+using ActionCache.Common.Concurrency;
 using ActionCache.Utilities;
 
 namespace ActionCache.Common.Caching;
@@ -5,7 +6,7 @@ namespace ActionCache.Common.Caching;
 /// <summary>
 /// An abstract class implementation of <see cref="IActionCache"/> 
 /// </summary>
-public abstract class ActionCacheBase : IActionCache
+public abstract class ActionCacheBase<TLock> : IActionCache where TLock : CacheLock
 {
     /// <summary>
     /// The namespace used for cache entries.
@@ -22,21 +23,20 @@ public abstract class ActionCacheBase : IActionCache
     /// </summary>
     protected readonly IActionCacheRefreshProvider RefreshProvider;
 
+    protected readonly ICacheLocker<TLock> CacheLocker;
+
     /// <summary>
     /// The constructor for the abstract cache base.
     /// </summary>
     /// <param name="namespace">The namespace to use for caching.</param>
     /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
     /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param> 
-    public ActionCacheBase(
-        Namespace @namespace, 
-        ActionCacheEntryOptions entryOptions,
-        IActionCacheRefreshProvider refreshProvider
-    )
+    public ActionCacheBase(ActionCacheContext<TLock> context)
     {
-        Namespace = @namespace;
-        EntryOptions = entryOptions;
-        RefreshProvider = refreshProvider;
+        Namespace = context.Namespace;
+        EntryOptions = context.EntryOptions;
+        RefreshProvider = context.RefreshProvider;
+        CacheLocker = context.CacheLocker;
     }
 
     /// <inheritdoc/>

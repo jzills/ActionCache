@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace ActionCache.Common.Caching;
 
 /// <summary>
@@ -18,14 +20,14 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     /// <summary>
     /// The base constructor.
     /// </summary>
-    /// <param name="entryOptions">The global entry options.</param>
+    /// <param name="entryOptionsAccessor">entryOptionsAccessor global entry options accessor.</param>
     /// <param name="refreshProvider">The refresh provider.</param>
     public ActionCacheFactoryBase(
-        ActionCacheEntryOptions entryOptions,
+        IOptions<ActionCacheEntryOptions> entryOptionsAccessor,
         IActionCacheRefreshProvider refreshProvider
     )
     {
-        EntryOptions = entryOptions;
+        EntryOptions = entryOptionsAccessor.Value;
         RefreshProvider = refreshProvider;
     }
 

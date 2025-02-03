@@ -4,7 +4,7 @@ namespace ActionCache.Common.Concurrency;
 /// Represents a mechanism for acquiring and releasing distributed locks in a caching system.
 /// </summary>
 /// <typeparam name="T">The type of lock managed by the locker, which must inherit from <see cref="CacheLock"/>.</typeparam>
-public interface ICacheLocker<T> where T : CacheLock
+public interface ICacheLocker<T> : ICacheLockerHandler where T : CacheLock
 {
     /// <summary>
     /// Attempts to acquire a lock on a specified resource asynchronously.

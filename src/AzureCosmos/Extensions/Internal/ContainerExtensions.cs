@@ -20,17 +20,16 @@ internal static class ContainerExtensions
     /// (Namespace), and returns a feed iterator for the result set, which can be used to
     /// asynchronously retrieve the IDs of the matching items.
     /// </remarks>
-    internal static FeedIterator<string> GetItemIdFeedIterator<T>(this Container container, Namespace @namespace) 
+    internal static FeedIterator<T> GetItemFeedIterator<T>(this Container container, Namespace @namespace) 
         where T : AzureCosmosEntry =>
             container.GetItemLinqQueryable<T>()
                 .Where(item => item.Namespace == (string)@namespace)
-                .Select(item => item.Id)
                 .ToFeedIterator();
 
-    internal static async Task<IEnumerable<string>> GetItemIdsAsync(this Container container, Namespace @namespace)
+    internal static async Task<IEnumerable<AzureCosmosEntry>> GetItemsAsync(this Container container, Namespace @namespace)
     {
-        var itemIds = new List<string>();
-        var feedIterator = container.GetItemIdFeedIterator<AzureCosmosEntry>(@namespace);
+        var itemIds = new List<AzureCosmosEntry>();
+        var feedIterator = container.GetItemFeedIterator<AzureCosmosEntry>(@namespace);
         while (feedIterator.HasMoreResults)
         {
             var response = await feedIterator.ReadNextAsync();

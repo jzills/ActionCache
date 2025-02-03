@@ -1,4 +1,3 @@
-using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Concurrency;
 using ActionCache.Memory.Extensions.Internal;
@@ -11,7 +10,7 @@ namespace ActionCache.Memory;
 /// <summary>
 /// Represents a memory action cache implementation.
 /// </summary>
-public class MemoryActionCache : ActionCacheBase
+public class MemoryActionCache : ActionCacheBase<SemaphoreSlimLock>
 {
     /// <summary>
     /// A memory cache implementation.
@@ -21,48 +20,35 @@ public class MemoryActionCache : ActionCacheBase
     /// <summary>
     /// A source of tokens used to combine cache entries for actions like namespace eviction.
     /// </summary>
-    protected readonly CancellationTokenSource CancellationTokenSource;
-
-    /// <summary>
-    /// Provides a thread-safe locking mechanism for synchronizing access to resources using <see cref="SemaphoreSlim"/>.
-    /// </summary>
-    protected readonly SemaphoreSlimLocker CacheLocker;
+    protected CancellationTokenSource CancellationTokenSource;
 
     /// <summary>
     /// Initializes a new instance of the MemoryActionCache class.
     /// </summary>
-    /// <param name="namespace">The namespace for cache isolation.</param>
     /// <param name="cache">The memory cache instance.</param>
     /// <param name="cancellationTokenSource">The source for cancellation tokens used to expire cache entries.</param>
-    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
-    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param>
+    /// <param name="context">The contextual information.</param>
     public MemoryActionCache(
-        Namespace @namespace,
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource,
-        ActionCacheEntryOptions entryOptions,
-        IActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, entryOptions, refreshProvider)
+        ActionCacheContext<SemaphoreSlimLock> context
+    ) : base(context)
     {
         Cache = cache;
         CancellationTokenSource = cancellationTokenSource;
-        EntryOptions = new MemoryCacheEntryOptions 
-        { 
-            Size = 1,
-            SlidingExpiration  = base.EntryOptions.SlidingExpiration,
-            AbsoluteExpiration = base.EntryOptions.GetAbsoluteExpirationFromUtcNow() 
-        }.AddExpirationToken(new CancellationChangeToken(CancellationTokenSource.Token));
-        CacheLocker = new SemaphoreSlimLocker(
-            base.EntryOptions.LockDuration, 
-            base.EntryOptions.LockTimeout
-        );
     }
 
     /// <summary>
-    /// Gets the entry options for memory cache.
+    /// Creates the entry options for memory cache.
     /// </summary>
     /// <value>The cache entry options applied to new entries.</value>
-    public new MemoryCacheEntryOptions EntryOptions { get; init; }
+    private MemoryCacheEntryOptions CreateEntryOptions() =>
+        new MemoryCacheEntryOptions
+        {
+            Size = 1,
+            SlidingExpiration = EntryOptions.SlidingExpiration,
+            AbsoluteExpiration = EntryOptions.GetAbsoluteExpirationFromUtcNow()
+        }.AddExpirationToken(new CancellationChangeToken(CancellationTokenSource.Token));
 
     /// <summary>
     /// Asynchronously gets a value from the cache.
@@ -77,30 +63,36 @@ public class MemoryActionCache : ActionCacheBase
     /// </summary>
     /// <param name="key">The cache key to set the value for.</param>
     /// <param name="value">The value to set in the cache.</param>
-    public override async Task SetAsync<TValue>(string key, TValue value)
+    public override Task SetAsync<TValue>(string key, TValue value)
     {
-        Cache.Set(Namespace.Create(key), value, EntryOptions);
+        var entryOptions = CreateEntryOptions();
+        Cache.Set(Namespace.Create(key), value, entryOptions);
 
-        await CacheLocker.WaitForLockThenAsync(Namespace,
-            () => Cache.SetKey(Namespace, key, EntryOptions));
+        return CacheLocker.WaitForLockThenAsync(Namespace,
+            () => Cache.SetKey(Namespace, key, entryOptions));
     }
 
     /// <summary>
     /// Asynchronously removes a value from the cache.
     /// </summary>
     /// <param name="key">The key of the cache entry to remove.</param>
-    public override async Task RemoveAsync(string key)
+    public override Task RemoveAsync(string key)
     {
         Cache.Remove(Namespace.Create(key));
 
-        await CacheLocker.WaitForLockThenAsync(Namespace, 
-            () => Cache.RemoveKey(Namespace, key, EntryOptions));
+        return CacheLocker.WaitForLockThenAsync(Namespace, 
+            () => Cache.RemoveKey(Namespace, key, CreateEntryOptions()));
     }
 
     /// <summary>
     /// Asynchronously removes all values from the cache.
     /// </summary>
-    public override Task RemoveAsync() => CancellationTokenSource.CancelAsync();
+    public override async Task RemoveAsync()
+    {
+        await CancellationTokenSource.CancelAsync();
+        CancellationTokenSource.Dispose();
+        CancellationTokenSource = new CancellationTokenSource();
+    }
 
     /// <summary>
     /// Retrieves all keys associated with this cache.
@@ -109,7 +101,7 @@ public class MemoryActionCache : ActionCacheBase
     public override async Task<IEnumerable<string>> GetKeysAsync()
     {
         var keysWithAbsoluteExpiration = await CacheLocker.WaitForLockThenAsync(Namespace,
-            () => Cache.GetKeys(Namespace, EntryOptions));
+            () => Cache.GetKeys(Namespace, CreateEntryOptions()));
 
         return keysWithAbsoluteExpiration?.Keys.AsEnumerable() ?? [];
     }

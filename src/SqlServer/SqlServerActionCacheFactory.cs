@@ -1,5 +1,6 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
+using ActionCache.Common.Concurrency;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
@@ -13,36 +14,60 @@ public class SqlServerActionCacheFactory : ActionCacheFactoryBase
     /// <summary>
     /// A SqlServer cache implementation.
     /// </summary>
-    protected readonly IDistributedCache SqlServerCache;
+    protected readonly IDistributedCache Cache;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SqlServerActionCacheFactory"/> class.
     /// </summary>
-    /// <param name="sqlServerCache">The SqlServer cache to use.</param>
+    /// <param name="cache">The SqlServer cache to use.</param>
     /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param>
     /// <param name="refreshProvider">The refresh provider responsible for invoking cached controller actions.</param> 
     public SqlServerActionCacheFactory(
-        IDistributedCache sqlServerCache,
+        IDistributedCache cache,
         IOptions<ActionCacheEntryOptions> entryOptions,
         IActionCacheRefreshProvider refreshProvider
-    ) : base(entryOptions.Value, refreshProvider)
+    ) : base(entryOptions, refreshProvider)
     {
-        SqlServerCache = sqlServerCache;
+        Cache = cache;
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace) =>
-        new SqlServerActionCache(@namespace, SqlServerCache, EntryOptions, RefreshProvider);
+    public override IActionCache? Create(string @namespace)
+    {
+        var context = new ActionCacheContext<DistributedCacheLock>
+        {
+            Namespace = @namespace,
+            EntryOptions = EntryOptions,
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new DistributedCacheLocker(
+                Cache,
+                EntryOptions.LockDuration,
+                EntryOptions.LockTimeout
+            )
+        };
+
+        return new SqlServerActionCache(Cache, context);
+    }
 
     /// <inheritdoc/>
     public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
     {
-        var entryOptions = new ActionCacheEntryOptions
+        var context = new ActionCacheContext<DistributedCacheLock>
         {
-            AbsoluteExpiration = absoluteExpiration,
-            SlidingExpiration = slidingExpiration
+            Namespace = @namespace,
+            EntryOptions = new ActionCacheEntryOptions
+            {
+                AbsoluteExpiration = absoluteExpiration,
+                SlidingExpiration = slidingExpiration
+            },
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new DistributedCacheLocker(
+                Cache, 
+                EntryOptions.LockDuration, 
+                EntryOptions.LockTimeout
+            )
         };
         
-        return new SqlServerActionCache(@namespace, SqlServerCache, entryOptions, RefreshProvider);
+        return new SqlServerActionCache(Cache, context);
     }
 }

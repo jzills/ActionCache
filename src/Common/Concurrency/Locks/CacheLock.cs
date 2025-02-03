@@ -6,7 +6,7 @@ namespace ActionCache.Common.Concurrency;
 public abstract class CacheLock
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="DistributedCacheLock"/> class with a specified resource.
+    /// Initializes a new instance of the <see cref="CacheLock"/> class with a specified resource.
     /// </summary>
     /// <param name="resource">The unique resource identifier to lock.</param>
     public CacheLock(string resource)

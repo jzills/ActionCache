@@ -1,4 +1,3 @@
-using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Concurrency;
 using ActionCache.Common.Serialization;
@@ -11,7 +10,7 @@ namespace ActionCache.SqlServer;
 /// <summary>
 /// A cache implementation for SQL Server-based action caching with distributed locking support.
 /// </summary>
-public class SqlServerActionCache : ActionCacheBase
+public class SqlServerActionCache : ActionCacheBase<DistributedCacheLock>
 {
     /// <summary>
     /// The distributed cache used for storing and retrieving cache entries.
@@ -19,41 +18,25 @@ public class SqlServerActionCache : ActionCacheBase
     protected readonly IDistributedCache Cache;
 
     /// <summary>
-    /// The distributed cache locker used to handle distributed locking for cache operations.
-    /// </summary>
-    protected readonly DistributedCacheLocker CacheLocker;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="SqlServerActionCache"/> class.
     /// </summary>
-    /// <param name="namespace">The namespace for the cache.</param>
     /// <param name="cache">The distributed cache to be used.</param>
-    /// <param name="entryOptions">The cache entry options.</param>
-    /// <param name="refreshProvider">The cache refresh provider.</param>
-    public SqlServerActionCache(
-        Namespace @namespace,
-        IDistributedCache cache,
-        ActionCacheEntryOptions entryOptions,
-        IActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, entryOptions, refreshProvider)
-    {
-        Cache = cache;
-        EntryOptions = new DistributedCacheEntryOptions 
-        { 
-            SlidingExpiration  = base.EntryOptions.SlidingExpiration,
-            AbsoluteExpiration = base.EntryOptions.GetAbsoluteExpirationFromUtcNow() 
-        };
-
-        CacheLocker = new DistributedCacheLocker(Cache,
-            base.EntryOptions.LockDuration,
-            base.EntryOptions.LockTimeout
-        );
-    }
+    public SqlServerActionCache(IDistributedCache cache, ActionCacheContext<DistributedCacheLock> context) 
+        : base(context) => Cache = cache;
 
     /// <summary>
     /// Gets or sets the cache entry options that control the expiration and sliding expiration of cache items.
     /// </summary>
-    public new DistributedCacheEntryOptions EntryOptions { get; init; }
+    /// <summary>
+    /// Creates the entry options for memory cache.
+    /// </summary>
+    /// <value>The cache entry options applied to new entries.</value>
+    private DistributedCacheEntryOptions CreateEntryOptions() =>
+        new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = EntryOptions.SlidingExpiration,
+            AbsoluteExpiration = EntryOptions.GetAbsoluteExpirationFromUtcNow()
+        };
 
     /// <summary>
     /// Asynchronously gets a value from the cache.
@@ -82,10 +65,11 @@ public class SqlServerActionCache : ActionCacheBase
     /// <param name="value">The value to set in the cache.</param>
     public override async Task SetAsync<TValue>(string key, TValue value)
     {
-        await Cache.SetStringAsync(Namespace.Create(key), CacheJsonSerializer.Serialize(value), EntryOptions);
+        var entryOptions = CreateEntryOptions();
+        await Cache.SetStringAsync(Namespace.Create(key), CacheJsonSerializer.Serialize(value), entryOptions);
         
         await CacheLocker.WaitForLockThenAsync(Namespace, 
-            () => Cache.SetKeyAsync(Namespace, key, EntryOptions));
+            () => Cache.SetKeyAsync(Namespace, key, entryOptions));
     }
 
     /// <summary>
@@ -97,7 +81,7 @@ public class SqlServerActionCache : ActionCacheBase
         await Cache.RemoveAsync(Namespace.Create(key));
 
         await CacheLocker.WaitForLockThenAsync(Namespace,
-            () => Cache.RemoveKeyAsync(Namespace, key, EntryOptions));
+            () => Cache.RemoveKeyAsync(Namespace, key, CreateEntryOptions()));
     }
 
     /// <summary>
@@ -118,7 +102,7 @@ public class SqlServerActionCache : ActionCacheBase
     public override async Task<IEnumerable<string>> GetKeysAsync()
     {
         var keysWithAbsoluteExpiration = await CacheLocker.WaitForLockThenAsync(Namespace,
-            () => Cache.GetKeysAsync(Namespace, EntryOptions));
+            () => Cache.GetKeysAsync(Namespace, CreateEntryOptions()));
 
         return keysWithAbsoluteExpiration?.Keys.AsEnumerable() ?? [];
     }

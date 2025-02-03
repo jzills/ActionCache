@@ -1,5 +1,7 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
+using ActionCache.Common.Concurrency;
+using ActionCache.Common.Concurrency.Locks;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -25,27 +27,40 @@ public class RedisActionCacheFactory : ActionCacheFactoryBase
         IConnectionMultiplexer connectionMultiplexer,
         IOptions<ActionCacheEntryOptions> entryOptions,
         IActionCacheRefreshProvider refreshProvider
-    ) : base(entryOptions.Value, refreshProvider)
+    ) : base(entryOptions, refreshProvider)
     {
         Cache = connectionMultiplexer.GetDatabase();
     }
     
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace) => 
-        new RedisActionCache(@namespace, Cache, EntryOptions, RefreshProvider);
-
-    /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace, 
-        TimeSpan? absoluteExpiration = null, 
-        TimeSpan? slidingExpiration = null
-    )
+    public override IActionCache? Create(string @namespace)
     {
-        var entryOptions = new ActionCacheEntryOptions
+        var context = new ActionCacheContext<NullCacheLock>
         {
-            AbsoluteExpiration = absoluteExpiration,
-            SlidingExpiration = slidingExpiration
+            Namespace = @namespace,
+            EntryOptions = EntryOptions,
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new NullCacheLocker()
         };
 
-        return new RedisActionCache(@namespace, Cache, entryOptions, RefreshProvider);
+        return new RedisActionCache(Cache, context);
+    }
+
+    /// <inheritdoc/>
+    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
+    {
+        var context = new ActionCacheContext<NullCacheLock>
+        {
+            Namespace = @namespace,
+            EntryOptions = new ActionCacheEntryOptions
+            {
+                AbsoluteExpiration = absoluteExpiration,
+                SlidingExpiration = slidingExpiration
+            },
+            RefreshProvider = RefreshProvider,
+            CacheLocker = new NullCacheLocker()
+        };
+
+        return new RedisActionCache(Cache, context);
     }
 }

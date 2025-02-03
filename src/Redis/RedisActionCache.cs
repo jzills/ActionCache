@@ -1,5 +1,6 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
+using ActionCache.Common.Concurrency.Locks;
 using ActionCache.Common.Serialization;
 using ActionCache.Redis.Extensions;
 using ActionCache.Redis.Extensions.Internal;
@@ -11,7 +12,7 @@ namespace ActionCache.Redis;
 /// <summary>
 /// Represents a Redis implementation of the IActionCache interface.
 /// </summary>
-public class RedisActionCache : ActionCacheBase
+public class RedisActionCache : ActionCacheBase<NullCacheLock>
 {
     /// <summary>
     /// An IDatabase representation of a Redis cache.
@@ -21,21 +22,14 @@ public class RedisActionCache : ActionCacheBase
     /// <summary>
     /// The namespace used for cache entries.
     /// </summary>
-    protected new RedisNamespace Namespace => (RedisNamespace)base.Namespace;
+    //protected new RedisNamespace Namespace => (RedisNamespace)base.Namespace;
 
     /// <summary>
     /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
     /// </summary>
-    /// <param name="namespace">The RedisNamespace to use for caching.</param>
     /// <param name="cache">The IDatabase to use for caching.</param>
-    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
-    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param> 
-    public RedisActionCache(
-        RedisNamespace @namespace, 
-        IDatabase cache,
-        ActionCacheEntryOptions entryOptions,
-        IActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, entryOptions, refreshProvider)
+    /// <param name="context">The contextual information.</param> 
+    public RedisActionCache(IDatabase cache, ActionCacheContext<NullCacheLock> context) : base(context)
     {
         Cache = cache;
     }
@@ -53,14 +47,14 @@ public class RedisActionCache : ActionCacheBase
     {
         if (Assembly.TryGetResourceAsText(LuaResources.Remove, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [Namespace, key], flags: CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [(string)Namespace, key], flags: CommandFlags.FireAndForget);
         }
         else
         {
             var isSuccessful = await Cache.KeyDeleteAsync(Namespace.Create(key));
             if (isSuccessful)
             {
-                await Cache.SortedSetRemoveAsync(Namespace, key);
+                await Cache.SortedSetRemoveAsync((string)Namespace, key);
             }
         }
     }
@@ -72,7 +66,7 @@ public class RedisActionCache : ActionCacheBase
     {
         if (Assembly.TryGetResourceAsText(LuaResources.RemoveNamespace, out var script))
         {
-            await Cache.ScriptEvaluateAsync(script, [Namespace], flags: CommandFlags.FireAndForget);
+            await Cache.ScriptEvaluateAsync(script, [(string)Namespace], flags: CommandFlags.FireAndForget);
         }
     }
 
@@ -92,7 +86,7 @@ public class RedisActionCache : ActionCacheBase
         if (Assembly.TryGetResourceAsText(LuaResources.SetHash, out var script))
         {
             await Cache.ScriptEvaluateAsync(script, 
-                [Namespace, (RedisKey)key], 
+                [(string)Namespace, (RedisKey)key], 
                 [redisValue, absoluteExpiration, slidingExpiration, ttl], 
                 CommandFlags.FireAndForget
             );
@@ -111,7 +105,7 @@ public class RedisActionCache : ActionCacheBase
                 await Cache.KeyExpireAsync(Namespace.Create(key), expiry: TimeSpan.FromMilliseconds(ttl));
             }
 
-            await Cache.SortedSetAddAsync(Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
+            await Cache.SortedSetAddAsync((string)Namespace, key, absoluteExpiration, CommandFlags.FireAndForget);
         }
     }
 
@@ -130,7 +124,7 @@ public class RedisActionCache : ActionCacheBase
         var hashEntries = await Cache.HashGetAllAsync(namespaceKey);
         if (hashEntries is null || hashEntries.Length == 0)
         {
-            await Cache.SortedSetRemoveAsync(Namespace, key);
+            await Cache.SortedSetRemoveAsync((string)Namespace, key);
             return default;
         }
 
@@ -141,7 +135,7 @@ public class RedisActionCache : ActionCacheBase
             if (DateTimeOffset.UtcNow >= absoluteExpiration)
             {
                 await Cache.KeyDeleteAsync(namespaceKey);
-                await Cache.SortedSetRemoveAsync(Namespace, key);
+                await Cache.SortedSetRemoveAsync((string)Namespace, key);
                 return default;
             }
         }
@@ -169,13 +163,13 @@ public class RedisActionCache : ActionCacheBase
     public override async Task<IEnumerable<string>> GetKeysAsync()
     {
         await Cache.SortedSetRemoveRangeByScoreAsync(
-            Namespace, 
+            (string)Namespace, 
             ActionCacheEntryOptions.NoExpiration,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 
             Exclude.Start
         );
 
-        var entries = await Cache.SortedSetRangeByRankAsync(Namespace);
+        var entries = await Cache.SortedSetRangeByRankAsync((string)Namespace);
         return entries.Select(value => (string)value!);
     }
 }

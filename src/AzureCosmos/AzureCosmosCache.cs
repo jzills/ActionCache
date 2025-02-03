@@ -5,13 +5,14 @@ using ActionCache.Common.Caching;
 using ActionCache.Common.Serialization;
 using ActionCache.Utilities;
 using ActionCache.AzureCosmos.Extensions;
+using ActionCache.Common.Concurrency.Locks;
 
 namespace ActionCache.AzureCosmos;
 
 /// <summary>
 /// Represents an Azure Cosmos Db action cache implementation.
 /// </summary>
-public class AzureCosmosActionCache : ActionCacheBase
+public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
 {
     /// <summary>
     /// An Azure Cosmos Db cache implementation.
@@ -26,16 +27,9 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// <summary>
     /// Initializes a new instance of the MemoryActionCache class.
     /// </summary>
-    /// <param name="namespace">The namespace for cache isolation.</param>
     /// <param name="cache">The Azure Cosmos Db container instance.</param>
-    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
-    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param>
-    public AzureCosmosActionCache(
-        Namespace @namespace,
-        Container cache,
-        ActionCacheEntryOptions entryOptions,
-        IActionCacheRefreshProvider refreshProvider
-    ) : base(@namespace, entryOptions, refreshProvider)
+    /// <param name="context">The contextual information.</param> 
+    public AzureCosmosActionCache(Container cache, ActionCacheContext<NullCacheLock> context) : base(context)
     {
         Cache = cache;
         PartitionKey = new PartitionKey(Namespace);
@@ -127,13 +121,13 @@ public class AzureCosmosActionCache : ActionCacheBase
         var response = await Cache.DeleteAllItemsByPartitionKeyStreamAsync(PartitionKey);
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
-            var itemIds = await Cache.GetItemIdsAsync(Namespace);
-            if (itemIds.Any())
+            var items = await Cache.GetItemsAsync(Namespace);
+            if (items.Any())
             {
                 var batch = Cache.CreateTransactionalBatch(PartitionKey);
-                foreach (var itemId in itemIds)
+                foreach (var item in items)
                 {
-                    batch.DeleteItem(itemId);
+                    batch.DeleteItem(item.Id);
                 }
 
                 var batchResponse = await batch.ExecuteAsync();
@@ -149,5 +143,41 @@ public class AzureCosmosActionCache : ActionCacheBase
     /// Retrieves all keys associated with this cache.
     /// </summary>
     /// <returns>An enumerable of strings representing current cache entry keys.</returns>
-    public override Task<IEnumerable<string>> GetKeysAsync() => Cache.GetItemIdsAsync(Namespace);
+    public override async Task<IEnumerable<string>> GetKeysAsync()
+    {
+        var items = await Cache.GetItemsAsync(Namespace);
+        if (items.Any())
+        {
+            var itemsKeys = new List<string>();
+            var itemsToExpire = new List<Task<ItemResponse<AzureCosmosEntry>>>();
+            foreach (var item in items)
+            {
+                var absoluteExpirationUnix = item.AbsoluteExpiration;
+                if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+                {
+                    var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
+                    if (DateTimeOffset.UtcNow >= absoluteExpiration)
+                    {
+                        itemsToExpire.Add(Cache.DeleteItemAsync<AzureCosmosEntry>(item.Id, PartitionKey));
+                    }
+                    else
+                    {
+                        itemsKeys.Add(item.Id);
+                    }
+                }
+                else
+                {
+                    itemsKeys.Add(item.Id);
+                }
+            }
+
+            await Task.WhenAll(itemsToExpire);
+            
+            return itemsKeys;
+        }
+        else
+        {
+            return [];
+        }
+    }
 }
