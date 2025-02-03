@@ -1,5 +1,8 @@
 namespace ActionCache.Common.Concurrency;
 
+/// <summary>
+/// Represents a mechanism for acquiring and releasing distributed locks then handling some action in a caching system.
+/// </summary>
 public interface ICacheLockerHandler
 {
     /// <summary>

@@ -23,14 +23,15 @@ public abstract class ActionCacheBase<TLock> : IActionCache where TLock : CacheL
     /// </summary>
     protected readonly IActionCacheRefreshProvider RefreshProvider;
 
+    /// <summary>
+    /// The cache locker handling operations with race conditions.
+    /// </summary>
     protected readonly ICacheLocker<TLock> CacheLocker;
 
     /// <summary>
-    /// The constructor for the abstract cache base.
+    /// Initializes a new instance of the <see cref="ActionCacheBase{TLock}"/> class.
     /// </summary>
-    /// <param name="namespace">The namespace to use for caching.</param>
-    /// <param name="entryOptions">The global entry options used for creation when expiration times are not supplied.</param> 
-    /// <param name="refreshProvider">The refresh provider to handle cache refreshes.</param> 
+    /// <param name="context">The context containing necessary dependencies for cache operations.</param>
     public ActionCacheBase(ActionCacheContext<TLock> context)
     {
         Namespace = context.Namespace;
