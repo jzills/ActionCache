@@ -10,12 +10,12 @@ using ActionCache.Common.Concurrency.Locks;
 namespace ActionCache.AzureCosmos;
 
 /// <summary>
-/// Represents an Azure Cosmos Db action cache implementation.
+/// Represents an Azure Cosmos DB action cache implementation.
 /// </summary>
 public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
 {
     /// <summary>
-    /// An Azure Cosmos Db cache implementation.
+    /// An Azure Cosmos DB cache container.
     /// </summary>
     protected readonly Container Cache;
 
@@ -25,10 +25,10 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
     protected readonly PartitionKey PartitionKey;
 
     /// <summary>
-    /// Initializes a new instance of the MemoryActionCache class.
+    /// Initializes a new instance of the <see cref="AzureCosmosActionCache"/> class.
     /// </summary>
-    /// <param name="cache">The Azure Cosmos Db container instance.</param>
-    /// <param name="context">The contextual information.</param> 
+    /// <param name="cache">The Azure Cosmos DB container instance.</param>
+    /// <param name="context">The cache context.</param> 
     public AzureCosmosActionCache(Container cache, ActionCacheContext<NullCacheLock> context) : base(context)
     {
         Cache = cache;
@@ -60,7 +60,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
                         PartitionKey
                     );
 
-                    return default;
+                    return default!;
                 }
             }
             
@@ -74,12 +74,12 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
                 );
             }
 
-            return CacheJsonSerializer.Deserialize<TValue>(response.Resource.Value);
+            return CacheJsonSerializer.Deserialize<TValue>(response.Resource.Value)!;
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             // Silence errors for entries not found on a particular key.
-            return default;
+            return default!;
         }
     }
 

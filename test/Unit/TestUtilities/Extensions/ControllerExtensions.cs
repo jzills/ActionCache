@@ -22,7 +22,7 @@ public static class ControllerExtensions
         }
 
         var methodInfo = methodCall.Method;
-        if (methodInfo == null)
+        if (methodInfo is null)
         {
             throw new InvalidOperationException($"Method not found on controller.");
         }

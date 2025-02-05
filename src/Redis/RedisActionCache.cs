@@ -20,15 +20,10 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
     protected readonly IDatabase Cache;
 
     /// <summary>
-    /// The namespace used for cache entries.
-    /// </summary>
-    //protected new RedisNamespace Namespace => (RedisNamespace)base.Namespace;
-
-    /// <summary>
-    /// Initializes a new instance of the RedisActionCache class with the specified RedisNamespace and IDatabase.
+    /// Initializes a new instance of the <see cref="RedisActionCache"/> class.
     /// </summary>
     /// <param name="cache">The IDatabase to use for caching.</param>
-    /// <param name="context">The contextual information.</param> 
+    /// <param name="context">The cache context.</param>  
     public RedisActionCache(IDatabase cache, ActionCacheContext<NullCacheLock> context) : base(context)
     {
         Cache = cache;
@@ -70,8 +65,6 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
         }
     }
 
-#pragma warning disable CS8765
-
     /// <summary>
     /// Sets a cached item with the specified key and value.
     /// </summary>
@@ -109,10 +102,6 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
         }
     }
 
-#pragma warning restore CS8765
-
-#pragma warning disable CS8609, CS8603
-
     /// <summary>
     /// Gets a cached item of type TValue with the specified key.
     /// </summary>
@@ -125,7 +114,7 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
         if (hashEntries is null || hashEntries.Length == 0)
         {
             await Cache.SortedSetRemoveAsync((string)Namespace, key);
-            return default;
+            return default!;
         }
 
         var absoluteExpirationUnix = hashEntries.GetAbsoluteExpiration();
@@ -136,7 +125,7 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
             {
                 await Cache.KeyDeleteAsync(namespaceKey);
                 await Cache.SortedSetRemoveAsync((string)Namespace, key);
-                return default;
+                return default!;
             }
         }
         
@@ -149,15 +138,13 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
         var jsonValue = (string?)hashEntries.GetRedisValue();
         if (string.IsNullOrWhiteSpace(jsonValue))
         {
-            return default;
+            return default!;
         }
         else
         {
-            return CacheJsonSerializer.Deserialize<TValue>(jsonValue);
+            return CacheJsonSerializer.Deserialize<TValue>(jsonValue)!;
         }
     }
-
-#pragma warning restore CS8609, CS8603
 
     /// <inheritdoc/>
     public override async Task<IEnumerable<string>> GetKeysAsync()

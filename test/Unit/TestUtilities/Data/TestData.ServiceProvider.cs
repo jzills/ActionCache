@@ -10,7 +10,8 @@ public static partial class TestData
     public static IEnumerable<IServiceProvider> GetServiceProviders() =>
         GetMemoryCacheServiceProvider().Concat(
             GetRedisCacheServiceProvider()).Concat(
-                GetSqlServerServiceProvider());//.Concat(
+                GetSqlServerServiceProvider()).Concat(
+                    GetMultipleCacheServiceProvider());//.Concat(
                     //GetAzureCosmosServiceProvider());
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
@@ -99,7 +100,7 @@ public static partial class TestData
         return [server.Services];
     }
 
-    public static IEnumerable<IServiceProvider> GetMemoryAndRedisCacheServiceProvider()
+    public static IEnumerable<IServiceProvider> GetMultipleCacheServiceProvider()
     {
         var services = new ServiceCollection();
 
@@ -109,6 +110,12 @@ public static partial class TestData
             options.UseEntryOptions(entryOptions => { });
             options.UseMemoryCache(options => options.SizeLimit = 1000);
             options.UseRedisCache(options => options.Configuration = "127.0.0.1:6379");
+            options.UseSqlServerCache(options =>
+            {
+                options.ConnectionString = "Server=localhost;Database=ActionCache;User Id=sa;Password=Password1;Encrypt=True;TrustServerCertificate=True;";
+                options.SchemaName = "dbo";
+                options.TableName = "DistributedCache";
+            });
         });
 
         var server = new TestServer(services.BuildServiceProvider());

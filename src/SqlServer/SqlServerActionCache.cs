@@ -21,6 +21,7 @@ public class SqlServerActionCache : ActionCacheBase<DistributedCacheLock>
     /// Initializes a new instance of the <see cref="SqlServerActionCache"/> class.
     /// </summary>
     /// <param name="cache">The distributed cache to be used.</param>
+    /// <param name="context">The cache context.</param>  
     public SqlServerActionCache(IDistributedCache cache, ActionCacheContext<DistributedCacheLock> context) 
         : base(context) => Cache = cache;
 
@@ -49,11 +50,11 @@ public class SqlServerActionCache : ActionCacheBase<DistributedCacheLock>
         var json = await Cache.GetStringAsync(Namespace.Create(key));
         if (string.IsNullOrWhiteSpace(json))
         {
-            return await Task.FromResult<TValue>(default);
+            return await Task.FromResult<TValue>(default!);
         }
         else
         {
-            return CacheJsonSerializer.Deserialize<TValue>(json);
+            return CacheJsonSerializer.Deserialize<TValue>(json)!;
         }
     }
 

@@ -23,11 +23,11 @@ public class MemoryActionCache : ActionCacheBase<SemaphoreSlimLock>
     protected CancellationTokenSource CancellationTokenSource;
 
     /// <summary>
-    /// Initializes a new instance of the MemoryActionCache class.
+    /// Initializes a new instance of the <see cref="MemoryActionCache"/> class.
     /// </summary>
     /// <param name="cache">The memory cache instance.</param>
     /// <param name="cancellationTokenSource">The source for cancellation tokens used to expire cache entries.</param>
-    /// <param name="context">The contextual information.</param>
+    /// <param name="context">The cache context.</param>  
     public MemoryActionCache(
         IMemoryCache cache,
         CancellationTokenSource cancellationTokenSource,

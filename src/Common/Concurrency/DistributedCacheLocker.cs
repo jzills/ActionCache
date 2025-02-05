@@ -29,7 +29,7 @@ public class DistributedCacheLocker : CacheLockerBase<DistributedCacheLock>
     {
         var cacheLock = new DistributedCacheLock(resource, LockDuration, LockTimeout);
         var existingCacheLock = await Cache.GetStringAsync(cacheLock.Key);
-        if (existingCacheLock == null)
+        if (existingCacheLock is null)
         {
             await Cache.SetStringAsync(cacheLock.Key, cacheLock.Value, new DistributedCacheEntryOptions
             {
