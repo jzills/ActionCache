@@ -1,3 +1,4 @@
+using ActionCache.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace ActionCache.Common.Caching;
@@ -36,7 +37,7 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     /// </summary>
     /// <param name="namespace">The namespace for the cache.</param>
     /// <returns>A new action cache if successful, otherwise null.</returns>
-    public abstract IActionCache? Create(string @namespace);
+    public abstract IActionCache? Create(Namespace @namespace);
 
     /// <summary>
     /// Creates an action cache for the specified namespace.
@@ -45,5 +46,5 @@ public abstract class ActionCacheFactoryBase : IActionCacheFactory
     /// <param name="absoluteExpiration">The absolute expiration used for entries on this cache.</param>
     /// <param name="slidingExpiration">The sliding expiration used for entries on this cache.</param>
     /// /// <returns>A new action cache if successful, otherwise null.</returns>
-    public abstract IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration);
+    public abstract IActionCache? Create(Namespace @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration);
 }

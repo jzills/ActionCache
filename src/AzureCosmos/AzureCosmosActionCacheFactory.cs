@@ -2,6 +2,7 @@ using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Concurrency;
 using ActionCache.Common.Concurrency.Locks;
+using ActionCache.Utilities;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
@@ -33,7 +34,7 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace)
+    public override IActionCache? Create(Namespace @namespace)
     {
         var context = new ActionCacheContext<NullCacheLock>
         {
@@ -47,7 +48,7 @@ public class AzureCosmosActionCacheFactory : ActionCacheFactoryBase
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
+    public override IActionCache? Create(Namespace @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
     {
         var context = new ActionCacheContext<NullCacheLock>
         {

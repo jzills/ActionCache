@@ -1,6 +1,7 @@
 using ActionCache.Common;
 using ActionCache.Common.Caching;
 using ActionCache.Common.Concurrency;
+using ActionCache.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
@@ -40,7 +41,7 @@ public class MemoryActionCacheFactory : ActionCacheFactoryBase
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace)
+    public override IActionCache? Create(Namespace @namespace)
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {
@@ -64,7 +65,7 @@ public class MemoryActionCacheFactory : ActionCacheFactoryBase
     }
 
     /// <inheritdoc/>
-    public override IActionCache? Create(string @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
+    public override IActionCache? Create(Namespace @namespace, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null)
     {
         if (ExpirationTokens.TryGetOrAdd(@namespace, out var expirationTokenSource))
         {

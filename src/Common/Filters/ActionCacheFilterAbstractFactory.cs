@@ -3,6 +3,7 @@ using ActionCache.Common.Enums;
 using ActionCache.Common.Extensions.Internal;
 using ActionCache.Exceptions;
 using ActionCache.Filters;
+using ActionCache.Utilities;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing.Template;
 
@@ -40,13 +41,13 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
     /// <inheritdoc/>
     /// <exception cref="InvalidCacheInstanceException"></exception> 
     /// <exception cref="FilterTypeNotSupportedException"></exception>
-    public IFilterMetadata CreateInstance(string @namespace, FilterType type) => 
+    public IFilterMetadata CreateInstance(Namespace @namespace, FilterType type) => 
         CreateInstance(@namespace, absoluteExpiration: null, slidingExpiration: null, type);
 
     /// <inheritdoc/>
     /// <exception cref="InvalidCacheInstanceException"></exception> 
     /// <exception cref="FilterTypeNotSupportedException"></exception>
-    public IFilterMetadata CreateInstance(string @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration, FilterType type)
+    public IFilterMetadata CreateInstance(Namespace @namespace, TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration, FilterType type)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace, nameof(@namespace));
 
@@ -102,16 +103,16 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
     /// <param name="absoluteExpiration">Optional absolute expiration time for the cache instances.</param>
     /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
     /// <returns>A read-only list of action cache instances.</returns>
-    internal IReadOnlyList<IActionCache> GetCacheInstances(string @namespace,
+    internal IReadOnlyList<IActionCache> GetCacheInstances(Namespace @namespace,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null
     )
     {
         List<IActionCache> cacheInstances = [];
 
-        if (@namespace.Contains(","))
+        if (((string)@namespace).Contains(","))
         {
-            foreach (var value in @namespace.SplitNamespace())
+            foreach (var value in ((string)@namespace).SplitNamespace())
             {
                 AddCacheInstances(value, cacheInstances, absoluteExpiration, slidingExpiration);
             }
@@ -132,7 +133,7 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
     /// <param name="absoluteExpiration">Optional absolute expiration time for the cache instances.</param>
     /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
     /// <exception cref="InvalidCacheInstanceException">Thrown if the created instances are null or invalid.</exception>
-    internal void AddCacheInstances(string @namespace, 
+    internal void AddCacheInstances(Namespace @namespace, 
         in List<IActionCache> cacheInstances,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null
@@ -157,7 +158,7 @@ public class ActionCacheFilterAbstractFactory : IActionCacheFilterAbstractFactor
     /// <param name="slidingExpiration">Optional sliding expiration time for the cache instances.</param>
     /// <returns>A collection of cache instances or null if creation fails.</returns>
     internal IEnumerable<IActionCache?>? CreateCacheInstances( 
-        string @namespace,
+        Namespace @namespace,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null
     )

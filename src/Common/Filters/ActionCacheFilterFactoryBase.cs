@@ -40,12 +40,14 @@ public abstract class ActionCacheFilterFactoryBase : Attribute, IFilterFactory
         TimeSpan? slidingExpiration = null 
     )
     {
-        if (absoluteExpiration == TimeSpan.FromMilliseconds(ActionCacheEntryOptions.NoExpiration))
+        var noExpiration = TimeSpan.FromMilliseconds(ActionCacheEntryOptions.NoExpiration);
+        
+        if (absoluteExpiration == noExpiration)
         {
             absoluteExpiration = null;
         }
 
-        if (slidingExpiration == TimeSpan.FromMilliseconds(ActionCacheEntryOptions.NoExpiration))
+        if (slidingExpiration == noExpiration)
         {
             slidingExpiration = null;
         }

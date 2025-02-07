@@ -11,8 +11,8 @@ public static partial class TestData
         GetMemoryCacheServiceProvider().Concat(
             GetRedisCacheServiceProvider()).Concat(
                 GetSqlServerServiceProvider()).Concat(
-                    GetMultipleCacheServiceProvider());//.Concat(
-                    //GetAzureCosmosServiceProvider());
+                    GetMultipleCacheServiceProvider()).Concat(
+                        GetAzureCosmosServiceProvider());
 
     public static IEnumerable<IServiceProvider> GetMemoryCacheServiceProvider()
     {
