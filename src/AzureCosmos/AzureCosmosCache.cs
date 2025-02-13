@@ -95,6 +95,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
         return Cache.UpsertItemAsync(new AzureCosmosEntry
         {
             Id = Namespace.Create(key),
+            Key = key,
             Namespace = Namespace,
             Value = CacheJsonSerializer.Serialize(value),
             AbsoluteExpiration = absoluteExpiration,
@@ -107,11 +108,20 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
     /// Asynchronously removes a value from the cache.
     /// </summary>
     /// <param name="key">The key of the cache entry to remove.</param>
-    public override Task RemoveAsync(string key) => 
-        Cache.DeleteItemAsync<AzureCosmosEntry>(
-            Namespace.Create(key), 
-            PartitionKey
-        );
+    public override async Task RemoveAsync(string key)
+    {
+        try
+        {
+            await Cache.DeleteItemAsync<AzureCosmosEntry>(
+                Namespace.Create(key),
+                PartitionKey
+            );
+        }
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Silence errors for entries not found on a particular key.
+        }
+    }
 
     /// <summary>
     /// Asynchronously removes all values from the cache.
@@ -124,17 +134,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
             var items = await Cache.GetItemsAsync(Namespace);
             if (items.Any())
             {
-                var batch = Cache.CreateTransactionalBatch(PartitionKey);
-                foreach (var item in items)
-                {
-                    batch.DeleteItem(item.Id);
-                }
-
-                var batchResponse = await batch.ExecuteAsync();
-                if (!batchResponse.IsSuccessStatusCode)
-                {
-                    throw new Exception(batchResponse.ErrorMessage);
-                }
+                await Task.WhenAll(items.Select(item => RemoveAsync(item.Key)));
             }
         }
     }
@@ -149,7 +149,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
         if (items.Any())
         {
             var itemsKeys = new List<string>();
-            var itemsToExpire = new List<Task<ItemResponse<AzureCosmosEntry>>>();
+            var itemsToExpire = new List<Task>();
             foreach (var item in items)
             {
                 var absoluteExpirationUnix = item.AbsoluteExpiration;
@@ -158,7 +158,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
                     var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
                     if (DateTimeOffset.UtcNow >= absoluteExpiration)
                     {
-                        itemsToExpire.Add(Cache.DeleteItemAsync<AzureCosmosEntry>(item.Id, PartitionKey));
+                        itemsToExpire.Add(RemoveAsync(item.Key));
                     }
                     else
                     {

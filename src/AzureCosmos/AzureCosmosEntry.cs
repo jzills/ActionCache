@@ -16,6 +16,13 @@ public class AzureCosmosEntry
     public required string Id { get; set; }
 
     /// <summary>
+    /// Gets or sets the key for the entry.
+    /// </summary>
+    [JsonPropertyName("key")]
+    [JsonProperty(PropertyName = "key")] 
+    public required string Key { get; set; }
+
+    /// <summary>
     /// Gets or sets the namespace associated with the entry.
     /// </summary>
     [JsonPropertyName("namespace")]
