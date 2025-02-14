@@ -49,23 +49,17 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
                 PartitionKey
             );
 
-            var absoluteExpirationUnix = response.Resource.AbsoluteExpiration;
-            if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+            if (ActionCacheEntryOptions.HasExpiredAbsoluteExpiration(response.Resource.AbsoluteExpiration))
             {
-                var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
-                if (DateTimeOffset.UtcNow >= absoluteExpiration)
-                {
-                    await Cache.DeleteItemAsync<AzureCosmosEntry>(
-                        Namespace.Create(key), 
-                        PartitionKey
-                    );
+                await Cache.DeleteItemAsync<AzureCosmosEntry>(
+                    Namespace.Create(key), 
+                    PartitionKey
+                );
 
-                    return default!;
-                }
+                return default!;
             }
-            
-            var slidingExpiration = response.Resource.SlidingExpiration;
-            if (slidingExpiration > ActionCacheEntryOptions.NoExpiration)
+         
+            if (ActionCacheEntryOptions.HasExpiredSlidingExpiration(response.Resource.SlidingExpiration))
             {
                 await Cache.ReplaceItemAsync(
                     response.Resource, 
@@ -152,18 +146,9 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
             var itemsToExpire = new List<Task>();
             foreach (var item in items)
             {
-                var absoluteExpirationUnix = item.AbsoluteExpiration;
-                if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+                if (ActionCacheEntryOptions.HasExpiredAbsoluteExpiration(item.AbsoluteExpiration))
                 {
-                    var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
-                    if (DateTimeOffset.UtcNow >= absoluteExpiration)
-                    {
-                        itemsToExpire.Add(RemoveAsync(item.Key));
-                    }
-                    else
-                    {
-                        itemsKeys.Add(item.Id);
-                    }
+                    itemsToExpire.Add(RemoveAsync(item.Key));
                 }
                 else
                 {

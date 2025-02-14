@@ -117,22 +117,16 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
             return default!;
         }
 
-        var absoluteExpirationUnix = hashEntries.GetAbsoluteExpiration();
-        if (absoluteExpirationUnix > ActionCacheEntryOptions.NoExpiration)
+        if (ActionCacheEntryOptions.HasExpiredAbsoluteExpiration(hashEntries.GetAbsoluteExpiration()))
         {
-            var absoluteExpiration = DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
-            if (DateTimeOffset.UtcNow >= absoluteExpiration)
-            {
-                await Cache.KeyDeleteAsync(namespaceKey);
-                await Cache.SortedSetRemoveAsync((string)Namespace, key);
-                return default!;
-            }
+            await Cache.KeyDeleteAsync(namespaceKey);
+            await Cache.SortedSetRemoveAsync((string)Namespace, key);
+            return default!;
         }
         
-        var slidingExpiration = hashEntries.GetSlidingExpiration();
-        if (slidingExpiration > ActionCacheEntryOptions.NoExpiration)
+        if (ActionCacheEntryOptions.HasExpiredSlidingExpiration(hashEntries.GetSlidingExpiration()))
         {
-            await Cache.KeyExpireAsync(namespaceKey, TimeSpan.FromMilliseconds(slidingExpiration), CommandFlags.FireAndForget);
+            await Cache.KeyExpireAsync(namespaceKey, TimeSpan.FromMilliseconds(hashEntries.GetSlidingExpiration()), CommandFlags.FireAndForget);
         }
 
         var jsonValue = (string?)hashEntries.GetRedisValue();

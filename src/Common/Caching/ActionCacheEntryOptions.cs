@@ -69,6 +69,37 @@ public class ActionCacheEntryOptions
             NoExpiration;
 
     /// <summary>
+    /// Determines if the absolute expiration time has passed based on the provided Unix timestamp.
+    /// </summary>
+    /// <param name="absoluteExpirationUnix">The Unix timestamp (in milliseconds) representing the absolute expiration time.</param>
+    /// <returns>
+    /// <c>true</c> if the absolute expiration time has passed; otherwise, <c>false</c>.
+    /// If <paramref name="absoluteExpirationUnix"/> is less than or equal to <see cref="NoExpiration"/>, expiration is not enforced.
+    /// </returns>
+    public static bool HasExpiredAbsoluteExpiration(long absoluteExpirationUnix) =>
+        HasExpirationValue(absoluteExpirationUnix) &&
+        DateTimeOffset.UtcNow >= DateTimeOffset.FromUnixTimeMilliseconds(absoluteExpirationUnix);
+
+    /// <summary>
+    /// Determines if the sliding expiration has passed based on the provided sliding expiration value.
+    /// </summary>
+    /// <param name="slidingExpiration">The sliding expiration value, which represents the time in milliseconds.</param>
+    /// <returns>
+    /// <c>true</c> if the sliding expiration time has passed; otherwise, <c>false</c>.
+    /// If <paramref name="slidingExpiration"/> is less than or equal to <see cref="NoExpiration"/>, expiration is not enforced.
+    /// </returns>
+    public static bool HasExpiredSlidingExpiration(long slidingExpiration) => HasExpirationValue(slidingExpiration);
+
+    /// <summary>
+    /// Determines if the provided expiration value is valid (greater than the <see cref="NoExpiration"/> value).
+    /// </summary>
+    /// <param name="value">The expiration value to check.</param>
+    /// <returns>
+    /// <c>true</c> if the expiration value is greater than <see cref="NoExpiration"/>; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool HasExpirationValue(long value) => value > NoExpiration;
+
+    /// <summary>
     /// Deconstructs the expiration properties into individual components: absolute expiration, sliding expiration, and time-to-live (TTL).
     /// </summary>
     /// <param name="absoluteExpiration">
@@ -84,6 +115,6 @@ public class ActionCacheEntryOptions
     {
         absoluteExpiration = GetAbsoluteExpirationFromUtcNowInMilliseconds();
         slidingExpiration = GetSlidingExpirationInMilliseconds();
-        ttl = slidingExpiration > NoExpiration ? slidingExpiration : GetAbsoluteExpirationAsTTLInMilliseconds();
+        ttl = HasExpirationValue(slidingExpiration) ? slidingExpiration : GetAbsoluteExpirationAsTTLInMilliseconds();
     }
 }
