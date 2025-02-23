@@ -63,6 +63,11 @@ public class RedisActionCache : ActionCacheBase<NullCacheLock>
         {
             await Cache.ScriptEvaluateAsync(script, [(string)Namespace], flags: CommandFlags.FireAndForget);
         }
+        else
+        {
+            var keys = await GetKeysAsync();
+            await Task.WhenAll(keys.Select(RemoveAsync));
+        }
     }
 
     /// <summary>
