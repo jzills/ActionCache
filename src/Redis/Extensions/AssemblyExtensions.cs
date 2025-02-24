@@ -8,6 +8,9 @@ namespace ActionCache.Redis.Extensions;
 /// </summary>
 internal static class AssemblyExtensions
 {
+    /// <summary>
+    /// Assembly cache to store embedded resources. 
+    /// </summary> 
     private static ConcurrentDictionary<string, string> _cache = new();
 
     /// <summary>
@@ -49,6 +52,15 @@ internal static class AssemblyExtensions
         return resourceName ?? string.Empty;
     }
 
+    /// <summary>
+    /// Attempts to read an embedded resource stream from the specified assembly.
+    /// </summary>
+    /// <param name="source">The assembly containing the embedded resource.</param>
+    /// <param name="name">The name of the resource to read.</param>
+    /// <param name="resource">
+    /// When this method returns, contains the content of the resource as a string if successful; otherwise, null.
+    /// </param>
+    /// <returns><c>true</c> if the resource was successfully read; otherwise, <c>false</c>.</returns>
     private static bool TryReadResourceStream(this Assembly source, string name, out string resource)
     {
         try

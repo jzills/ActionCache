@@ -26,7 +26,13 @@ internal static class ContainerExtensions
                 .Where(item => item.Namespace == (string)@namespace)
                 .ToFeedIterator();
 
-    internal static async Task<IEnumerable<AzureCosmosEntry>> GetItemsAsync(this Container container, Namespace @namespace)
+    /// <summary>
+    /// Retrieves a collection of <see cref="AzureCosmosEntry"/> items asynchronously from the specified Cosmos DB container.
+    /// </summary>
+    /// <param name="container">The Cosmos DB container from which to retrieve items.</param>
+    /// <param name="namespace">The namespace used to filter the items.</param>
+    /// <returns>A task that represents the asynchronous operation, containing an <see cref="IEnumerable{T}"/> of <see cref="AzureCosmosEntry"/>.</returns>
+    internal static async Task<IReadOnlyCollection<AzureCosmosEntry>> GetItemsAsync(this Container container, Namespace @namespace)
     {
         var itemIds = new List<AzureCosmosEntry>();
         var feedIterator = container.GetItemFeedIterator<AzureCosmosEntry>(@namespace);
