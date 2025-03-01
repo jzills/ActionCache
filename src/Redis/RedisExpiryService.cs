@@ -12,7 +12,7 @@ public class RedisExpiryService : BackgroundService
     /// <summary>
     /// Regular expression used to parse keys into their component parts.
     /// </summary>
-    protected readonly Regex KeyExpression = new Regex("^(.*):([^:]+)$");
+    protected static readonly Regex KeyExpression = new Regex("^(.*):([^:]+)$");
 
     /// <summary>
     /// The Redis database instance used for cache operations.
