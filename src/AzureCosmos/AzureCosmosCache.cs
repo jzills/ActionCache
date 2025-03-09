@@ -45,25 +45,25 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
         try
         {
             var response = await Cache.ReadItemAsync<AzureCosmosEntry>(
-                Namespace.Create(key), 
+                Namespace.Create(key),
                 PartitionKey
             );
 
             if (ActionCacheEntryOptions.HasExpiredAbsoluteExpiration(response.Resource.AbsoluteExpiration))
             {
                 await Cache.DeleteItemAsync<AzureCosmosEntry>(
-                    Namespace.Create(key), 
+                    Namespace.Create(key),
                     PartitionKey
                 );
 
                 return default!;
             }
-         
+
             if (ActionCacheEntryOptions.HasExpiredSlidingExpiration(response.Resource.SlidingExpiration))
             {
                 await Cache.ReplaceItemAsync(
-                    response.Resource, 
-                    response.Resource.Id, 
+                    response.Resource,
+                    response.Resource.Id,
                     PartitionKey
                 );
             }
@@ -142,8 +142,8 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
         var items = await Cache.GetItemsAsync(Namespace);
         if (items.Any())
         {
-            var itemsKeys = new List<string>();
-            var itemsToExpire = new List<Task>();
+            var itemsKeys = new List<string>(items.Count);
+            var itemsToExpire = new List<Task>(items.Count);
             foreach (var item in items)
             {
                 if (ActionCacheEntryOptions.HasExpiredAbsoluteExpiration(item.AbsoluteExpiration))
@@ -157,7 +157,7 @@ public class AzureCosmosActionCache : ActionCacheBase<NullCacheLock>
             }
 
             await Task.WhenAll(itemsToExpire);
-            
+
             return itemsKeys;
         }
         else
