@@ -19,7 +19,6 @@ public class Test_ActionCacheEvictionEndpointFilter
         var builder = new WebHostBuilder()
             .ConfigureServices(services => 
             {
-                services.AddMvc(); // Required dependency ActionCacheDescriptorProvider -> Fix this to use EndpointDataSource ??
                 services.AddRouting();
                 services.AddActionCache(options => options.UseMemoryCache(cacheOptions => { }));
             })

@@ -67,7 +67,10 @@ public static class IServiceCollectionExtensions
         this IServiceCollection services
     ) => services
             .AddControllerInfo()
+            .AddSingleton<ActionCacheDescriptorProviderFactory>()
             .AddScoped<IActionCacheFilterAbstractFactory, ActionCacheFilterAbstractFactory>()
-            .AddScoped<IActionCacheDescriptorProvider, ActionCacheDescriptorProvider>()
-            .AddScoped<IActionCacheRefreshProvider, ActionCacheRefreshProvider>();
+            .AddScoped<IActionCacheRefreshProvider, ActionCacheRefreshProvider>()
+            .AddScoped(serviceProvider => serviceProvider
+                .GetRequiredService<ActionCacheDescriptorProviderFactory>()
+                .Create());
 }
